@@ -1,0 +1,12 @@
+#*********************************************************#
+#                                                         #
+#     README for check_rhev3 plugin for Icinga/Nagios     #
+#                                                         #
+#*********************************************************#
+
+What is BPView?
+====================
+
+BPView is the short name for Business Process View. This Tool
+for Nagios and Icinga is used to display a combination of Checks
+in a Business Process.
