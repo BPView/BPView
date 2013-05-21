@@ -1,0 +1,14 @@
+refresh:
+  interval: 300
+
+logging:
+  logfile: /var/log/bpview/bpview.log
+  level: notice
+
+auth:
+  provider: ldap
+  
+bpview:
+  src_dir: /var/www/html/
+  
+template: default
