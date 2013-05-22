@@ -30,7 +30,8 @@ use YAML::Tiny;
 use Log::Log4perl qw(:easy);
 
 
-use vars qw($Config $logger);
+
+use vars qw(%Config $logger);
 
 Log::Log4perl::init( $Config{logging}{logfile} );
 my $logger = Log::Log4perl::get_logger();
