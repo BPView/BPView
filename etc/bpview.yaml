@@ -12,3 +12,16 @@ bpview:
   src_dir: /var/www/html/
   
 template: default
+
+
+############################################################
+# Provider
+# Source: Connect via IDO or mk_livestatus or custom module
+#   type: Database backend (DBD connection)
+############################################################
+
+provider:
+  source: ido
+  type: postgresql
+
+
