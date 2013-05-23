@@ -22,26 +22,74 @@
 # along with BPView.  
 # If not, see <http://www.gnu.org/licenses/>.
 
+
+=head1 NAME
+
+  BPView::ReadConfig - Initialize the config parameter
+
+=head1 SYNOPSIS
+
+  use BPView::ReadConfig;
+my $ReadConfig = BPView::ReadConfig->new("FILENAME");
+
+=head1 DESCRIPTION
+
+
+=head1 METHODS
+
+
+=cut
+
+
+package BPView::ReadConfig;
+use YAML::Tiny;
+
 use strict;
 use warnings;
 
-use Template;
-
-use Log::Log4perl qw(:easy);
-
-
-
-use vars qw(%Config $logger);
-
-Log::Log4perl::init( $Config{logging}{logfile} );
-my $logger = Log::Log4perl::get_logger();
-$logger->level($Config{logging}{level});
+$yaml = YAML::Tiny->read( 'bpview.config.yaml' )
 
 
 
 
 
 
+sub new {
+	my $class = shift;
+	bless [ @_ ], $class;
+}
 
 
-exit 0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+use YAML;
+use Data::Dumper;
+
+# step 1: open file
+#open my $fh, '<', './haha.yml';
+
+
+my @config = YAML::LoadFile('./haha.yml');
+#print Dumper(@config), "\n";
+
+
+print $BPViewConfig[0]{"rootproperty"};
+
+BPViewConfig
+
