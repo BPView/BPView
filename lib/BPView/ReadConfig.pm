@@ -42,54 +42,20 @@ my $ReadConfig = BPView::ReadConfig->new("FILENAME");
 
 
 package BPView::ReadConfig;
-use YAML::Tiny;
+use YAML;
 
 use strict;
 use warnings;
 
-$yaml = YAML::Tiny->read( 'bpview.config.yaml' )
 
 
+my %ParamBPView;
 
+my @yamlFile = YAML::LoadFile('./haha.yml');
 
-
-
-sub new {
-	my $class = shift;
-	bless [ @_ ], $class;
+for my $rowHr ( @yamlFile ) {
+	%ParamBPView = %$rowHr;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-use YAML;
-use Data::Dumper;
-
-# step 1: open file
-#open my $fh, '<', './haha.yml';
-
-
-my @config = YAML::LoadFile('./haha.yml');
-#print Dumper(@config), "\n";
-
-
-print $BPViewConfig[0]{"rootproperty"};
-
-BPViewConfig
+print $ParamBPView{"rootproperty"} ."\n";
 
