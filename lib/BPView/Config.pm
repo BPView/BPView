@@ -45,7 +45,7 @@ package BPView::Config;
 
 use strict;
 use warnings;
-use YAML::Tiny;
+use YAML::Syck;
 use Carp;
 use File::Spec;
 use Data::Dumper;
@@ -64,16 +64,16 @@ sub read {
   my %return;
   
   # read and parse YAML config file
-  # exit on error
-  my $yaml = YAML::Tiny->new;
-  $yaml = YAML::Tiny->read($file);
-  croak "Read Config: $file" . YAML::Tiny->errstr() if YAML::Tiny->errstr();
+#  croak "Read Config: $file" . YAML::Tiny->errstr() if YAML::Tiny->errstr();
+  chomp $file;
+  $YAML::Syck::ImplicitTyping = 1;
+  my $yaml = LoadFile($file);
   
   my @tmp = split /\//, $file;
   $tmp[-1] =~ s/\.yaml$//;
   # push into hash with first element name = config file name (without file ending)
   # e.g. bpview.yaml => $conf{'bpview'}
-  $return{ $tmp[-1] } = $yaml->[0];
+  $return{ $tmp[-1] } = $yaml;
   
   return \%return;
 }
