@@ -73,7 +73,11 @@ sub read {
   $tmp[-1] =~ s/\.yaml$//;
   # push into hash with first element name = config file name (without file ending)
   # e.g. bpview.yaml => $conf{'bpview'}
-  $return{ $tmp[-1] } = $yaml;
+  if ($file =~ /\/views\//){
+    $return{ 'views' }{ $tmp[-1] } = $yaml; 	
+  }else{
+    $return{ $tmp[-1] } = $yaml;
+  }
   
   return \%return;
 }
@@ -100,7 +104,11 @@ sub readdir {
     my %ret = %{ BPView::Config->read( $files[$i] ) };
     # push into hash with first element name = config file name (without file ending)
     # e.g. bpview.yaml => $conf{'bpview'}
-    $conf{ $tmp[-1] } =  $ret{ $tmp[-1] };
+    if ($files[$i] =~ /\/views\//){
+      $conf{'views'}{ $tmp[-1] } =  $ret{ 'views' }{ $tmp[-1] };
+    }else{
+      $conf{ $tmp[-1] } =  $ret{ $tmp[-1] };
+    }
   }
   
   return \%conf;
