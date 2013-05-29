@@ -26,21 +26,34 @@ use strict;
 use warnings;
 
 use Template;
+use Data::Dumper;
+use CGI qw(param);
+use CGI::Carp qw(fatalsToBrowser);
 
-use Log::Log4perl qw(:easy);
+#use Log::Log4perl qw(:easy);
+
+use lib "../lib";
+use BPView::Config;
+
+# HTML code
+print "Content-type: text/html\n\n";
+
+# open config files
+my $config = BPView::Config->new;
+   $config = BPView::Config->readdir("../etc");
+
+print Dumper $config;
 
 
 
-use vars qw(%Config $logger);
-
-Log::Log4perl::init( $Config{logging}{logfile} );
-my $logger = Log::Log4perl::get_logger();
-$logger->level($Config{logging}{level});
 
 
 
-
-
+#use vars qw(%Config $logger);
+#
+#Log::Log4perl::init( $Config{logging}{logfile} );
+#my $logger = Log::Log4perl::get_logger();
+#$logger->level($Config{logging}{level});
 
 
 
