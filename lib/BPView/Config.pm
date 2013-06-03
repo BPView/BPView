@@ -70,7 +70,7 @@ sub read {
   my $yaml = LoadFile($file);
   
   my @tmp = split /\//, $file;
-  $tmp[-1] =~ s/\.yaml$//;
+  $tmp[-1] =~ s/\.yml$//;
   # push into hash with first element name = config file name (without file ending)
   # e.g. bpview.yaml => $conf{'bpview'}
   $return{ $tmp[-1] } = $yaml;
@@ -88,7 +88,7 @@ sub readdir {
   my %conf;
   
   # get list of config files
-  opendir (CONFDIR, $dir);
+  opendir (CONFDIR, $dir) or croak ("Read Config: Can't open directory $dir: $!");
   
   while (my $file = readdir (CONFDIR)){
   	# use absolute path instead of relative
@@ -98,7 +98,7 @@ sub readdir {
   	next if -d $file;
   	chomp $file;
     my @tmp = split /\//, $file;
-    $tmp[-1] =~ s/\.yaml$//;
+    $tmp[-1] =~ s/\.yml$//;
     # get content of files
     my %ret = %{ BPView::Config->read( $file ) };
     # push into hash with first element name = config file name (without file ending)

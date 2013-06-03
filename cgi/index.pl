@@ -29,19 +29,45 @@ use Template;
 use Data::Dumper;
 use CGI qw(param);
 use CGI::Carp qw(fatalsToBrowser);
+use CGI::Session;
 
-#use Log::Log4perl qw(:easy);
-
+# load custom Perl modules
 use lib "../lib";
 use BPView::Config;
+
+# global variables
+my $session_cache	= 3600;		# 1 hour
+my $config;
+my $views;
 
 # HTML code
 print "Content-type: text/html\n\n";
 
-# open config files
-my $config = BPView::Config->new;
-   $config = BPView::Config->readdir("../etc");
-my $views  = BPView::Config->readdir("../etc/views");
+# CGI sessions
+my $post	= CGI->new;
+my $sid     = $post->cookie("CGISESSID") || undef;
+my $session = new CGI::Session(undef, $sid, {Directory=>File::Spec->tmpdir});
+   $session->expire('config', $session_cache);
+   $session->expire('views', $session_cache);
+my $cookie  = $post->cookie(CGISESSID => $session->id);
+#print $post->header( -cookie=>$cookie );
+
+# open config files if not cached
+#my $config = BPView::Config->new;
+if (! $session->param('config')){
+  $config = BPView::Config->readdir("../etc");
+  $session->param('config', $config);
+}else{
+  $config = $session->param('config');
+}
+
+if (! $session->param('views')){
+  $views = BPView::Config->readdir("../etc/views");
+  $session->param('views', $views)
+}else{
+  $views = $session->param('views');
+}
+
 # TODO:
 #             BPView::Config->parse;
 
