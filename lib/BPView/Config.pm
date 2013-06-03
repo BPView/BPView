@@ -73,11 +73,7 @@ sub read {
   $tmp[-1] =~ s/\.yaml$//;
   # push into hash with first element name = config file name (without file ending)
   # e.g. bpview.yaml => $conf{'bpview'}
-  if ($file =~ /\/views\//){
-    $return{ 'views' }{ $tmp[-1] } = $yaml; 	
-  }else{
-    $return{ $tmp[-1] } = $yaml;
-  }
+  $return{ $tmp[-1] } = $yaml;
   
   return \%return;
 }
@@ -92,24 +88,25 @@ sub readdir {
   my %conf;
   
   # get list of config files
-  push my @files, `find $dir -type f -name "*.yaml"`;
+  opendir (CONFDIR, $dir);
   
-  for (my $i=0;$i<=$#files;$i++){
+  while (my $file = readdir (CONFDIR)){
   	# use absolute path instead of relative
-  	$files[$i] = File::Spec->rel2abs($files[$i]);
-  	chomp $files[$i];
-    my @tmp = split /\//, $files[$i];
+  	next if $file =~ /\.\./;
+  	$file = File::Spec->rel2abs($dir . "/" . $file);
+  	# skip directories
+  	next if -d $file;
+  	chomp $file;
+    my @tmp = split /\//, $file;
     $tmp[-1] =~ s/\.yaml$//;
     # get content of files
-    my %ret = %{ BPView::Config->read( $files[$i] ) };
+    my %ret = %{ BPView::Config->read( $file ) };
     # push into hash with first element name = config file name (without file ending)
     # e.g. bpview.yaml => $conf{'bpview'}
-    if ($files[$i] =~ /\/views\//){
-      $conf{'views'}{ $tmp[-1] } =  $ret{ 'views' }{ $tmp[-1] };
-    }else{
-      $conf{ $tmp[-1] } =  $ret{ $tmp[-1] };
-    }
+    $conf{ $tmp[-1] } =  $ret{ $tmp[-1] };
   }
+  
+  closedir (CONFDIR);
   
   return \%conf;
   

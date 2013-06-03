@@ -41,9 +41,14 @@ print "Content-type: text/html\n\n";
 # open config files
 my $config = BPView::Config->new;
    $config = BPView::Config->readdir("../etc");
+my $views  = BPView::Config->readdir("../etc/views");
+# TODO:
+#             BPView::Config->parse;
 
+print "<pre>";
 print Dumper $config;
-
+print Dumper $views;
+print "</pre>";
 
 
 
