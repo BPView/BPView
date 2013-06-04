@@ -34,6 +34,7 @@ use CGI::Session;
 # load custom Perl modules
 use lib "../lib";
 use BPView::Config;
+use BPView::Web;
 
 # global variables
 my $session_cache	= 3600;		# 1 hour
@@ -71,12 +72,15 @@ if (! $session->param('views')){
 # TODO:
 #             BPView::Config->parse;
 
-print "<pre>";
-print Dumper $config;
-print Dumper $views;
-print "</pre>";
-
-
+# display web page
+my $page = BPView::Web->new(
+ 	src_dir		=> $config->{ 'bpview' }{ 'bpview' }{ 'src_dir' },
+ 	data_dir	=> $config->{ 'bpview' }{ 'bpview' }{ 'data_dir' },
+ 	site_url	=> $config->{ 'bpview' }{ 'bpview' }{ 'site_url' },
+ 	template	=> $config->{ 'bpview' }{ 'bpview' }{ 'template' },
+);
+#   $page->login();
+   $page->display_page( "main" );
 
 
 
