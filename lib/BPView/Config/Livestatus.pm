@@ -1,4 +1,5 @@
-[%#
+#!/usr/bin/perl -w
+#
 # COPYRIGHT:
 #
 # This software is Copyright (c) 2013 by ovido
@@ -20,31 +21,55 @@
 # You should have received a copy of the GNU General Public License
 # along with BPView.  
 # If not, see <http://www.gnu.org/licenses/>.
-%]
 
-<html>
-  <head>
-    <title>BPView</title>
-    
-    <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/bpview.css">
-    <script src="[% site_url %]/share/javascript/jquery-1.10.1.js"></script>
-    <script src="[% site_url %]/share/javascript/bpview.js"></script>
-    
-  </head>
-  <body>
+
+=head1 NAME
+
+  BPView::Config - Initialize the config parameter
+
+=head1 SYNOPSIS
+
+  use BPView::Config;
+  my $ReadConfig = BPView::Config->read("FILENAME");
+
+=head1 DESCRIPTION
+
+
+=head1 METHODS
+
+
+=cut
+
+
+package BPView::Config::Livestatus;
+use strict;
+use warnings;
+use Carp;
+use Data::Dumper;
+
+
+# create an empty BPView::Config::Livestatus object
+sub new {
+  my $class = shift;
+  my $self = {};
   
-    <table class="mainTable">
-      <tr class="topRow">
-        <td><img src="[% site_url %]/share/images/[% templ %]/logo.png" alt="Logo" /></td>
-        <td><h1>Business Process View</h1></td>
-        <td>Hello Username</td>
-      </tr>
-      <tr class="serviceRow">
-        <td colspan="3">
-          <select name="dashboards" id="dashboards" size="1">
-          [% FOR db = dashboards %]
-            <option>[% db %]</option>
-          [% END %]
-          </select>
-        </td>
-      </tr>
+  bless $self, $class;
+  
+  return $self;
+}
+
+
+sub verify {
+  
+  my $conf	= shift;
+  
+  if (! %{ $conf->{ 'socket' } }){
+  	croak "Missing socket for mk-livestatus!";
+  }
+  
+  return 0;
+  
+}
+
+
+1;

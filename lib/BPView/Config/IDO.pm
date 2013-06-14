@@ -25,12 +25,12 @@
 
 =head1 NAME
 
-  BPView::ReadConfig - Initialize the config parameter
+  BPView::Config - Initialize the config parameter
 
 =head1 SYNOPSIS
 
-  use BPView::ReadConfig;
-my $ReadConfig = BPView::ReadConfig->new("FILENAME");
+  use BPView::Config;
+  my $ReadConfig = BPView::Config->read("FILENAME");
 
 =head1 DESCRIPTION
 
@@ -41,55 +41,35 @@ my $ReadConfig = BPView::ReadConfig->new("FILENAME");
 =cut
 
 
-package BPView::ReadConfig;
-use YAML::Tiny;
-
+package BPView::Config::IDO;
 use strict;
 use warnings;
-
-$yaml = YAML::Tiny->read( 'bpview.config.yaml' )
-
+use Carp;
 
 
-
-
-
+# create an empty BPView::Config::IDO object
 sub new {
-	my $class = shift;
-	bless [ @_ ], $class;
+  my $class = shift;
+  my $self = {};
+  
+  bless $self, $class;
+  
+  return $self;
 }
 
 
+sub verify {
+  
+  my $self	= shift;
+  my $conf	= shift;
+  
+  if (! $conf->{ 'host' }){
+  	croak "Missing host for ido!";
+  }
+  
+  return 0;
+  
+}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-use YAML;
-use Data::Dumper;
-
-# step 1: open file
-#open my $fh, '<', './haha.yml';
-
-
-my @config = YAML::LoadFile('./haha.yml');
-#print Dumper(@config), "\n";
-
-
-print $BPViewConfig[0]{"rootproperty"};
-
-BPViewConfig
-
+1;

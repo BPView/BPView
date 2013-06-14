@@ -41,7 +41,8 @@ sub new {
   	"data_dir"			=> undef,		# static html directory
   	"site_url"			=> "/bpview",	# site url
   	"template"			=> "default",	# template to use
-#  	"page"				=> "main",	# page to display 
+  	"page"				=> "main",		# page to display
+  	"dashboards"		=> undef,		# dashboards for main page 
   };
   
   for my $key (keys %options){
@@ -56,12 +57,8 @@ sub new {
   croak "Missing src_dir!\n" if (! defined $self->{ 'src_dir' });
   croak "Missing data_dir!\n" if (! defined $self->{ 'data_dir' });
   
-  if (! -d $self->{ 'src_dir' }){
-  	croak "No such directory: src_dir " . $self->{ 'src_dir' } ."!\n";
-  }
-  if (! -d $self->{ 'data_dir' }){
-  	croak "No such directory: data_dir " . $self->{ 'data_dir' } ."!\n";
-  }
+  checkDir( $self->{ 'src_dir' } );
+  checkDir( $self->{ 'data_dir' } );
   
   bless $self, $class;
   
@@ -71,19 +68,31 @@ sub new {
 
 
 # display web page
-sub display_page {
+sub displayPage {
 	
-  my $self			= shift;
-  my $page			= shift;
+  my $self		= shift;
+  my %options	= @_;
+  
+  for my $key (keys %options){
+  	if (exists $self->{ $key }){
+  	  $self->{ $key } = $options{ $key };
+  	}else{
+  	  croak "Unknown option: $key";
+  	}
+  }
 	
   # page to display ( login | main | detail )
-  my $tt_template	= $self->{ 'src_dir' } . "/global/" . $page . ".tt";
+  my $tt_template	= $self->{ 'src_dir' } . "/global/" . $self->{ 'page' } . ".tt";
   my $tt_vars		= { 
   	'templ' 		=> $self->{ 'template' },
   	'src_dir'		=> $self->{ 'src_dir' },
   	'data_dir'		=> $self->{ 'data_dir' },
   	'site_url'		=> $self->{ 'site_url' }, 
   };
+  
+  if (defined $self->{ 'dashboards' }){
+  	$tt_vars->{ 'dashboards' } = $self->{ 'dashboards' };
+  }
   
   # create new template
   my $template = Template->new({
@@ -94,6 +103,18 @@ sub display_page {
   
   # display page with template
   $template->process($tt_template, $tt_vars) || croak "Template process failed: " . $template->error();
+  
+}
+
+
+# check if directory exists
+sub checkDir {
+	
+  my $dir = shift;
+  
+  if (! -d $dir){
+  	croak "No such directory: $dir!\n";
+  }
   
 }
 

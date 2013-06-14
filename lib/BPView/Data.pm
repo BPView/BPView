@@ -1,4 +1,5 @@
-[%#
+#!/usr/bin/perl -w
+#
 # COPYRIGHT:
 #
 # This software is Copyright (c) 2013 by ovido
@@ -20,31 +21,53 @@
 # You should have received a copy of the GNU General Public License
 # along with BPView.  
 # If not, see <http://www.gnu.org/licenses/>.
-%]
 
-<html>
-  <head>
-    <title>BPView</title>
-    
-    <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/bpview.css">
-    <script src="[% site_url %]/share/javascript/jquery-1.10.1.js"></script>
-    <script src="[% site_url %]/share/javascript/bpview.js"></script>
-    
-  </head>
-  <body>
+
+=head1 NAME
+
+  BPView::Config - Initialize the config parameter
+
+=head1 SYNOPSIS
+
+  use BPView::Config;
+  my $ReadConfig = BPView::Config->read("FILENAME");
+
+=head1 DESCRIPTION
+
+
+=head1 METHODS
+
+
+=cut
+
+
+package BPView::Data;
+
+use strict;
+use warnings;
+use YAML::Syck;
+use Carp;
+use File::Spec;
+use Data::Dumper;
+
+
+# create an empty BPView::Data object
+sub new {
+  my $class = shift;
+  my $self = {};
   
-    <table class="mainTable">
-      <tr class="topRow">
-        <td><img src="[% site_url %]/share/images/[% templ %]/logo.png" alt="Logo" /></td>
-        <td><h1>Business Process View</h1></td>
-        <td>Hello Username</td>
-      </tr>
-      <tr class="serviceRow">
-        <td colspan="3">
-          <select name="dashboards" id="dashboards" size="1">
-          [% FOR db = dashboards %]
-            <option>[% db %]</option>
-          [% END %]
-          </select>
-        </td>
-      </tr>
+  bless $self, $class;
+  
+  return $self;
+}
+
+
+#  use JSON::PP;
+#  my $json_data = JSON::PP->new->pretty;
+#  my $mydata = {
+#  	"hans"	=> "mueller",
+#  	"sepp"	=> "bauer"
+#  };
+#    print $json_data->encode($mydata);
+
+1;

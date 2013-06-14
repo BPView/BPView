@@ -50,11 +50,19 @@ use Carp;
 use File::Spec;
 use Data::Dumper;
 
+use lib "../";
+use BPView::Config::Livestatus;
+use BPView::Config::IDO;
+
 
 # create an empty BPView::Config object
 sub new {
   my $class = shift;
-  bless [ @_ ], $class;
+  my $self = {};
+  
+  bless $self, $class;
+  
+  return $self;
 }
 	
 
@@ -79,7 +87,7 @@ sub read {
 }
 
 
-sub readdir {
+sub readDir {
   my $class = ref $_[0] ? ref shift : shift;
   my $dir = shift or croak ("Missing directory to read!");
   
@@ -109,6 +117,57 @@ sub readdir {
   closedir (CONFDIR);
   
   return \%conf;
+  
+}
+
+
+sub getDashboards {
+	
+  my $self 	= shift;
+  my $views = shift;
+  my $dashboards = [];
+  
+  # go through view hash
+  foreach my $conffile (keys %{ $views} ){
+  	foreach my $dashboard (keys %{ $views->{ $conffile } }){
+  	  push @{ $dashboards }, $dashboard;
+  	}
+  }
+  
+  return $dashboards;
+  
+}
+
+
+sub getProvider {
+	
+  my $self	= shift;
+  my $conf	= shift;
+  my $provider = undef;
+  
+  if (! $conf->{ 'provider' }{ 'source' }){
+  	croak "Provider not found in config!\n";
+  }else{
+  	$provider = $conf->{ 'provider' }{ 'source' };
+  }
+  
+  # verify provider details
+  if (! $conf->{ $provider }){
+  	croak "Provider $provider not found in config!\n";
+  } 
+  
+  if ($provider eq "ido"){
+  	my $ido = BPView::Config::IDO->new( %{ $conf->{ $provider } } );
+  	   $ido->verify();
+  	croak "Validating ido config failed!" unless $? eq 0;
+  }elsif( $provider eq "mk-livestatus"){
+    BPView::Config::Livestatus->verify( %{ $conf->{ $provider } });  	
+    croak "Validating mk-livestatus config failed!" unless $? eq 0;
+  }else{
+  	croak "Unsupported provider $provider\n!";
+  }
+  
+  return $provider;
   
 }
 

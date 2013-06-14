@@ -26,8 +26,9 @@
 
       <tr class="mainRow">
         <td colspan="3">
-          <h3>Produktion</h3>
-            <h4>Test 1</h4>
+          <div id="bps">
+          <div id="environment">Produktion</div>
+            <div id="product">Test 1</div>
               <div class="groupTiles">
                 <div class="tile">Test 1.1</div>
                 <div class="tile">Test 1.2</div>
@@ -50,6 +51,7 @@
             <li>Test 1</li>
             <li>Test 2</li>
           </ul>
+          </div>
         </td>
       </tr>
 
