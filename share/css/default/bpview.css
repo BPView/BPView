@@ -1,11 +1,25 @@
 
+.environment {
+  font-weight: bold;
+  font-style: underline;
+  font-size: 30px;
+  padding-top: 30px;
+}
+
+.groups {
+  font-weight: bold;
+  font-size: 18px;
+  padding-top: 20px;
+}
+
 .groupTiles {
-  padding: 10px;
+  padding: 6px;
   margin: 5px;
   border-radius: 5px;
   border: 1px solid black;
   overflow: hidden;
   display: table;
+  width: 98%;
 }
 
 .tile {
@@ -14,12 +28,36 @@
   padding: 10px;
   margin: 5px;
   border-radius: 5px;
-  background-color: lightgreen;
   border: 1px solid black;
   float: left;
   vertical-align: middle;
   text-align: center;
   font-weight: bold;
+}
+
+/* Status OK */
+.state0 {
+  background-color: lightgreen;
+}
+
+/* Status WARNING */
+.state1 {
+  background-color: yellow;
+}
+
+/* Status CRITICAL */
+.state2 {
+  background-color: red;
+}
+
+/* State UNKNOWN */
+.state3 {
+  background-color: orange;
+}
+
+/* State Not-Monitored */
+.state99 {
+  background-color: lightgrey;
 }
 
 .mainTable {
@@ -35,6 +73,10 @@
 .serviceRow {
   height: 20px;
   text-align: right;
+}
+
+.mainRow {
+  vertical-align: top;
 }
 
 .bottomRow {

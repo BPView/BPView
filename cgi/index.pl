@@ -25,17 +25,32 @@
 use strict;
 use warnings;
 
-use Template;
-use Data::Dumper;
+#use Template;
 use CGI qw(param);
 use CGI::Carp qw(fatalsToBrowser);
 use CGI::Session;
 
+# temp!!!
+#use JSON::PP;
+
+# for debugging only
+use Data::Dumper;
+
+# define default paths required to read config files
+my ($lib_path, $cfg_path);
+BEGIN {
+  $lib_path = "../lib";		# path to BPView lib directory
+  $cfg_path = "../etc";		# path to BPView etc directory
+}
+
+
 # load custom Perl modules
-use lib "../lib";
+#use lib "../lib";
+use lib "$lib_path";
 use BPView::Config;
 use BPView::Data;
 use BPView::Web;
+
 
 # global variables
 my $session_cache	= 3600;		# 1 hour
@@ -44,7 +59,7 @@ my $views;
 my $dashboards;
 
 # HTML code
-print "Content-type: text/html\n\n";
+print "Content-type: text/html\n\n" unless defined param;
 
 # CGI sessions
 my $post	= CGI->new;
@@ -56,17 +71,28 @@ my $session = new CGI::Session(undef, $sid, {Directory=>File::Spec->tmpdir});
 my $cookie  = $post->cookie(CGISESSID => $session->id);
 #print $post->header( -cookie=>$cookie );
 
+
 # open config files if not cached
 my $conf = BPView::Config->new;
 if (! $session->param('config')){
-  $config = $conf->readDir("../etc");
+  
+  # open config file directory and push configs into hash
+  $config = $conf->read_dir( $cfg_path );
+  # validate config
+  exit 1 unless ( $conf->validate($config) == 0);
+  # cache config
   $session->param('config', $config);
+  
 }else{
+
+  # use cached config
   $config = $session->param('config');
+  
 }
 
 if (! $session->param('views')){
-  $views = $conf->readDir("../etc/views");
+  $views = $conf->read_dir( $cfg_path . "/views");
+  # TODO: validate views config!
   $dashboards = $conf->getDashboards($views);
   
   $session->param('views', $views);
@@ -80,52 +106,48 @@ if (! $session->param('views')){
 # process URL
 if (defined param){
 	
-	
+  # JSON Header
+  print "Content-type: application/json charset=iso-8859-1\n\n";
   my $json = undef;
   
-#  print Dumper $config;
-
-  if (defined param("data")){
-#  	print "Param: " . param("data") . "<br>\n";
-#    # how to handle config here???
-#    print "Content-type: application/json charset=iso-8859-1\n\n";
-    
-#    # get data connection to use
-#    my $data_provider = $conf->getProvider( %{ $config->{ 'datasource' } });
-#    
-#    # get data
-#    $json = BPView::Data->new(
-#		$data_provider,
-#    	views		=> $views,
-#    	dashboard	=> param("data"),
-#    );	
-
+  if (defined param("dashboard")){
+  	
+    # get dasgboard data
+    my $dashboard = BPView::Data->new();
+    $json = $dashboard->get_status(
+    	 views		=> $views->{ param("dashboard") }{ 'views' },
+    	 provider	=> $config->{ 'provider' }{ 'source' },
+    	 provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
+       );	
+       
+#    $json = JSON::PP->new->pretty;
+#    $json = $json->sort_by(sub { $JSON::PP::a cmp $JSON::PP::b })->encode($views->{ param("dashboard" )});
+       
   }else{
+  	
   	print "Unknown paramater!\n";
   	exit 1;
+  	
   }
   
-# print $json;
- exit 0;
+  print $json;
+  exit 0;
   
 }
-
-# TODO:
-#             BPView::Config->parse;
 
 #print "Content-type: text/html\n\n";
 
 # display web page
 my $page = BPView::Web->new(
- 	src_dir		=> $config->{ 'bpview' }{ 'bpview' }{ 'src_dir' },
- 	data_dir	=> $config->{ 'bpview' }{ 'bpview' }{ 'data_dir' },
- 	site_url	=> $config->{ 'bpview' }{ 'bpview' }{ 'site_url' },
- 	template	=> $config->{ 'bpview' }{ 'bpview' }{ 'template' },
+ 	src_dir		=> $config->{ 'bpview' }{ 'src_dir' },
+ 	data_dir	=> $config->{ 'bpview' }{ 'data_dir' },
+ 	site_url	=> $config->{ 'bpview' }{ 'site_url' },
+ 	template	=> $config->{ 'bpview' }{ 'template' },
 );
 #   $page->login();
    $page->displayPage(
-    page		=> "main",
-    dashboards	=> $dashboards,
+     page		=> "main",
+     dashboards	=> $dashboards,
 );
 
 

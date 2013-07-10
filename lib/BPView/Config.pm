@@ -48,26 +48,34 @@ use warnings;
 use YAML::Syck;
 use Carp;
 use File::Spec;
+
+# for debugging only
 use Data::Dumper;
 
+
+# load custom modules
 use lib "../";
+
 use BPView::Config::Livestatus;
 use BPView::Config::IDO;
 
 
 # create an empty BPView::Config object
 sub new {
-  my $class = shift;
-  my $self = {};
+  my $invocant	= shift;
+  my $class 	= ref($invocant) || $invocant;
+  my $self 		= {
+	"verbose"	=> 0,	# enable verbose output
+  };
   
   bless $self, $class;
-  
   return $self;
 }
 	
 
-sub read {
-  my $class = ref $_[0] ? ref shift : shift;
+# read config files
+sub read_config {
+  my $self = shift;
   my $file = shift or croak ("Missing file to read!");
   my %return;
   
@@ -77,19 +85,20 @@ sub read {
   $YAML::Syck::ImplicitTyping = 1;
   my $yaml = LoadFile($file);
   
-  my @tmp = split /\//, $file;
-  $tmp[-1] =~ s/\.yml$//;
-  # push into hash with first element name = config file name (without file ending)
-  # e.g. bpview.yaml => $conf{'bpview'}
-  $return{ $tmp[-1] } = $yaml;
-  
-  return \%return;
+#  my @tmp = split /\//, $file;
+#  $tmp[-1] =~ s/\.yml$//;
+#  # push into hash with first element name = config file name (without file ending)
+#  # e.g. bpview.yaml => $conf{'bpview'}
+#  $return{ $tmp[-1] } = $yaml;
+#  
+#  return \%return;
+  return $yaml;
 }
 
 
-sub readDir {
-  my $class = ref $_[0] ? ref shift : shift;
-  my $dir = shift or croak ("Missing directory to read!");
+sub read_dir {
+  my $self	= shift;
+  my $dir	= shift or croak ("Missing directory to read!");
   
   croak ("Read Config: Input parameter $dir isn't a directory!") if ! -d $dir;
   
@@ -104,20 +113,61 @@ sub readDir {
   	$file = File::Spec->rel2abs($dir . "/" . $file);
   	# skip directories
   	next if -d $file;
+  	next unless $file =~ /\.yml$/;
   	chomp $file;
-    my @tmp = split /\//, $file;
-    $tmp[-1] =~ s/\.yml$//;
+#    my @tmp = split /\//, $file;
+#    $tmp[-1] =~ s/\.yml$//;
     # get content of files
-    my %ret = %{ BPView::Config->read( $file ) };
+#    my %ret = %{ BPView::Config->read_config( $file ) };
+    my $tmp = BPView::Config->read_config( $file );
+    # push values into config hash
+    foreach my $key (keys %{ $tmp }){
+      $conf{ $key } = $tmp->{ $key };
+    }
     # push into hash with first element name = config file name (without file ending)
     # e.g. bpview.yaml => $conf{'bpview'}
-    $conf{ $tmp[-1] } =  $ret{ $tmp[-1] };
+#    $conf{ $tmp[-1] } =  $ret{ $tmp[-1] };
   }
   
   closedir (CONFDIR);
   
   return \%conf;
   
+}
+
+
+# validate configuration file
+sub validate {
+  my $self		= shift;
+  my $config	= shift or croak ("BPView::Config->validate: Missing config!");
+  
+  # go through config values
+  # parameters given?
+  push @{ $self->{'errors'} }, "src_dir missing!"  unless $config->{'bpview'}{'src_dir'};
+  push @{ $self->{'errors'} }, "data_dir missing!" unless $config->{'bpview'}{'data_dir'};
+  push @{ $self->{'errors'} }, "site_url missing!" unless $config->{'bpview'}{'site_url'};
+  push @{ $self->{'errors'} }, "provider missing!" unless $config->{'provider'}{'source'};
+  
+  # check if directories exist
+  $self->_check_dir( "src_dir", $config->{'bpview'}{'src_dir'} );
+  $self->_check_dir( "data_dir", $config->{'bpview'}{'data_dir'} );
+  $self->_check_dir( "template", "$config->{'bpview'}{'src_dir'}/$config->{'bpview'}{'template'}" );
+  $self->_check_provider( "provider", $config->{'provider'}{'source'}, $config->{ $config->{'provider'}{'source'} } );
+  
+  # print errors to webpage
+  if ($self->{'errors'}){
+   print "<p>";
+   print "Configuration validation failed: <br />";
+   
+   for (my $x=0;$x< scalar @{ $self->{'errors'} };$x++){
+     print $self->{'errors'}->[$x] . "<br />";
+   }
+   
+   print "</p>";
+   return 1;
+  }
+  
+  return 0;
 }
 
 
@@ -128,47 +178,109 @@ sub getDashboards {
   my $dashboards = [];
   
   # go through view hash
-  foreach my $conffile (keys %{ $views} ){
-  	foreach my $dashboard (keys %{ $views->{ $conffile } }){
-  	  push @{ $dashboards }, $dashboard;
-  	}
+#  foreach my $conffile (keys %{ $views} ){
+#  	foreach my $dashboard (keys %{ $views->{ $conffile } }){
+#  	  push @{ $dashboards }, $dashboard;
+#  	}
+  foreach my $dashboard (keys %{ $views }){
+   push @{ $dashboards }, $dashboard;
   }
+#  }
   
   return $dashboards;
   
 }
 
 
-sub getProvider {
+## old!!!
+#sub getProvider {
+#	
+#  my $self	= shift;
+#  my $conf	= shift;
+#  my $provider = undef;
+#  
+#  if (! $conf->{ 'provider' }{ 'source' }){
+#  	croak "Provider not found in config!\n";
+#  }else{
+#  	$provider = $conf->{ 'provider' }{ 'source' };
+#  }
+#  
+#  # verify provider details
+#  if (! $conf->{ $provider }){
+#  	croak "Provider $provider not found in config!\n";
+#  } 
+#  
+#  if ($provider eq "ido"){
+#  	my $ido = BPView::Config::IDO->new( %{ $conf->{ $provider } } );
+#  	   $ido->verify();
+#  	croak "Validating ido config failed!" unless $? eq 0;
+#  }elsif( $provider eq "mk-livestatus"){
+#    BPView::Config::Livestatus->verify( %{ $conf->{ $provider } });  	
+#    croak "Validating mk-livestatus config failed!" unless $? eq 0;
+#  }else{
+#  	croak "Unsupported provider $provider\n!";
+#  }
+#  
+#  return $provider;
+#  
+#}
+
+
+# internal methods
+##################
+
+# check if directory exists
+sub _check_dir {
 	
   my $self	= shift;
   my $conf	= shift;
-  my $provider = undef;
+  my $dir	= shift or croak ("_check_dir: Missing directory!");
   
-  if (! $conf->{ 'provider' }{ 'source' }){
-  	croak "Provider not found in config!\n";
-  }else{
-  	$provider = $conf->{ 'provider' }{ 'source' };
+  if (! -d $dir){
+   push @{ $self->{'errors'} }, "$conf: $dir - No such directory!";
   }
   
-  # verify provider details
-  if (! $conf->{ $provider }){
-  	croak "Provider $provider not found in config!\n";
-  } 
+}
+
+
+# check for datasource provider
+sub _check_provider {
+  my $self	= shift;
+  my $conf	= shift;
+  my $provider	= shift or croak ("Missing provider!");
+  my $config	= shift or croak ("Missing config!");
   
-  if ($provider eq "ido"){
-  	my $ido = BPView::Config::IDO->new( %{ $conf->{ $provider } } );
-  	   $ido->verify();
-  	croak "Validating ido config failed!" unless $? eq 0;
-  }elsif( $provider eq "mk-livestatus"){
-    BPView::Config::Livestatus->verify( %{ $conf->{ $provider } });  	
-    croak "Validating mk-livestatus config failed!" unless $? eq 0;
+  # check provider
+  if ($provider ne "ido" && $provider ne "mk-livestatus"){
+  	
+  	# unsupported provider
+    push @{ $self->{'errors'} }, "$conf: $provider not supported!";
+    
   }else{
-  	croak "Unsupported provider $provider\n!";
+    
+    # IDOutils
+    if ($provider eq "ido"){
+      push @{ $self->{'errors'} }, "ido: Missing host!" unless $config->{'host'};
+      push @{ $self->{'errors'} }, "ido: Missing database!" unless $config->{'database'};
+      push @{ $self->{'errors'} }, "ido: Missing username!" unless $config->{'username'};
+      push @{ $self->{'errors'} }, "ido: Missing password!" unless $config->{'password'};
+      push @{ $self->{'errors'} }, "ido: Missing prefix!" unless $config->{'prefix'};
+      # Support PostgreSQL, too!
+      push @{ $self->{'errors'} }, "ido: Unsupported database type: $config->{'type'}!" unless $config->{'type'} eq "mysql";
+     
+   }elsif ($provider eq "mk-livestatus"){
+   	 
+     # mk-livestatus 
+     # requires socket or server
+     if (! $config->{ $provider }{'socket'} && ! $config->{'server'}){
+       push @{ $self->{'errors'} }, "mk-livestatus: Missing server or socket!";
+     }else{
+       if ($config->{'server'}){
+         push @{ $self->{'errors'} }, "mk-livestatus: Missing port!" unless $config->{ $provider }{'port'};
+       }
+     }
+   }
   }
-  
-  return $provider;
-  
 }
 
 

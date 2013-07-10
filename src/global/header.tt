@@ -27,6 +27,7 @@
     <title>BPView</title>
     
     <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/bpview.css">
+    
     <script src="[% site_url %]/share/javascript/jquery-1.10.1.js"></script>
     <script src="[% site_url %]/share/javascript/bpview.js"></script>
     

@@ -27,13 +27,16 @@ package BPView::Web;
 use strict;
 use warnings;
 use Template;
-use Carp;
-use Data::Dumper;
+use CGI::Carp qw(fatalsToBrowser);
+
+# for debugging only
+#use Data::Dumper;
 
 
 # create an BPView::Web object
 sub new {
-  my $class 	= shift;
+  my $invocant 	= shift;
+  my $class 	= ref($invocant) || $invocant;
   my %options	= @_;
   
   my $self = {
@@ -57,10 +60,11 @@ sub new {
   croak "Missing src_dir!\n" if (! defined $self->{ 'src_dir' });
   croak "Missing data_dir!\n" if (! defined $self->{ 'data_dir' });
   
-  checkDir( $self->{ 'src_dir' } );
-  checkDir( $self->{ 'data_dir' } );
-  
   bless $self, $class;
+  
+  # check if directories exist
+  $self->_check_dir( $self->{ 'src_dir' } );
+  $self->_check_dir( $self->{ 'data_dir' } );
   
   return $self;
   
@@ -97,7 +101,9 @@ sub displayPage {
   # create new template
   my $template = Template->new({
   	ABSOLUTE		=> 1,
-  	INCLUDE_PATH	=> [$self->{ 'src_dir' } . "/global"],
+  	# user template path is included first to be able to overwride global templates
+  	INCLUDE_PATH	=> [ $self->{ 'src_dir' } . "/" . $self->{ 'template' },
+  						 $self->{ 'src_dir' } . "/global"],
   	PRE_PROCESS		=> 'config',
   });
   
@@ -107,17 +113,20 @@ sub displayPage {
 }
 
 
+# internal methods
+##################
+
 # check if directory exists
-sub checkDir {
+sub _check_dir {
 	
-  my $dir = shift;
+  my $self	= shift;
+  my $dir	= shift or croak ("Missing directory!");
   
   if (! -d $dir){
-  	croak "No such directory: $dir!\n";
+   push @{ $self->{'errors'} }, "$dir - No such directory!";
   }
   
 }
-
 
 
 1;
