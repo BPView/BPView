@@ -25,16 +25,13 @@
 use strict;
 use warnings;
 
-#use Template;
 use CGI qw(param);
 use CGI::Carp qw(fatalsToBrowser);
 use CGI::Session;
 
-# temp!!!
-#use JSON::PP;
 
 # for debugging only
-use Data::Dumper;
+#use Data::Dumper;
 
 # define default paths required to read config files
 my ($lib_path, $cfg_path);
@@ -45,7 +42,6 @@ BEGIN {
 
 
 # load custom Perl modules
-#use lib "../lib";
 use lib "$lib_path";
 use BPView::Config;
 use BPView::Data;
@@ -57,6 +53,7 @@ my $session_cache	= 3600;		# 1 hour
 my $config;
 my $views;
 my $dashboards;
+
 
 # HTML code
 print "Content-type: text/html\n\n" unless defined param;
@@ -120,9 +117,6 @@ if (defined param){
     	 provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
        );	
        
-#    $json = JSON::PP->new->pretty;
-#    $json = $json->sort_by(sub { $JSON::PP::a cmp $JSON::PP::b })->encode($views->{ param("dashboard" )});
-       
   }else{
   	
   	print "Unknown paramater!\n";
@@ -149,14 +143,6 @@ my $page = BPView::Web->new(
      page		=> "main",
      dashboards	=> $dashboards,
 );
-
-
-
-#use vars qw(%Config $logger);
-#
-#Log::Log4perl::init( $Config{logging}{logfile} );
-#my $logger = Log::Log4perl::get_logger();
-#$logger->level($Config{logging}{level});
 
 
 exit 0;
