@@ -1,0 +1,24 @@
+ovido:
+  permissions:
+    - users: hans
+    - users: sepp
+    - groups: testgroup
+
+  views:
+    production:
+      mail:
+        lb:
+        zarafa:
+      web:
+        lb:
+        otrs:
+        webserver:
+    Produktion:
+      Handel:
+        Topic with Umlauts öäuÖÄÜß -&gt; oau!:
+# ERROR handling!!!
+#    qa:
+#      mail:
+#      web:
+#    testing:
+#      mail:
