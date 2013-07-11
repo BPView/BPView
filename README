@@ -1,6 +1,8 @@
 #*********************************************************#
 #                                                         #
-#     README for check_rhev3 plugin for Icinga/Nagios     #
+#     README for BPView                                   #
+#       a Web-Frontend and Configuration Tool to display  #
+#       Business Processes with Icinga and Nagios         #
 #                                                         #
 #*********************************************************#
 
