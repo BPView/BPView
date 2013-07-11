@@ -23,24 +23,6 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 
-=head1 NAME
-
-  BPView::Config - Initialize the config parameter
-
-=head1 SYNOPSIS
-
-  use BPView::Config;
-  my $ReadConfig = BPView::Config->read("FILENAME");
-
-=head1 DESCRIPTION
-
-
-=head1 METHODS
-
-
-=cut
-
-
 package BPView::Config;
 
 use strict;
@@ -50,53 +32,110 @@ use Carp;
 use File::Spec;
 
 # for debugging only
-use Data::Dumper;
+#use Data::Dumper;
 
 
-# load custom modules
-use lib "../";
 
-use BPView::Config::Livestatus;
-use BPView::Config::IDO;
+=head1 NAME
+
+  BPView::Config - Open and validate config files
+
+=head1 SYNOPSIS
+
+  use BPView::Config;
+  my $conf = BPView::Config->new;
+  my $config = $conf->read_dir( $cfg_dir );
+  $conf->validate($config);
+
+=head1 DESCRIPTION
+
+This module searches, opens and validates BPView-YAML config files.
+
+=head1 CONSTRUCTOR
+
+=head2 new ( [ARGS] )
+
+Creates an BPView::Config object.
+
+=cut
 
 
-# create an empty BPView::Config object
 sub new {
+	
   my $invocant	= shift;
   my $class 	= ref($invocant) || $invocant;
+  
   my $self 		= {
 	"verbose"	=> 0,	# enable verbose output
   };
   
   bless $self, $class;
   return $self;
+  
 }
 	
 
-# read config files
+#----------------------------------------------------------------
+
+=head1 METHODS	
+
+=head2 read_config
+
+ read_config ($file)
+
+Opens a specified file and reads its content into Hashref.
+Returns Hashref.
+
+  my $file = 'test.yml';
+  my $config = $conf->read_config($file);
+
+$VAR1 = {
+          'refresh' => {
+                         'interval' => 300
+                       }
+        };
+
+=cut
+
 sub read_config {
+	
   my $self = shift;
   my $file = shift or croak ("Missing file to read!");
   my %return;
   
   # read and parse YAML config file
-#  croak "Read Config: $file" . YAML::Tiny->errstr() if YAML::Tiny->errstr();
   chomp $file;
   $YAML::Syck::ImplicitTyping = 1;
   my $yaml = LoadFile($file);
   
-#  my @tmp = split /\//, $file;
-#  $tmp[-1] =~ s/\.yml$//;
-#  # push into hash with first element name = config file name (without file ending)
-#  # e.g. bpview.yaml => $conf{'bpview'}
-#  $return{ $tmp[-1] } = $yaml;
-#  
-#  return \%return;
   return $yaml;
+  
 }
 
 
+#----------------------------------------------------------------
+
+=head2 read_dir
+
+ read_dir ($directory)
+
+Searches for files with ending ".yml" in specified directories and calls read_config to
+reads its content into Hash.
+Returns Hash.
+
+  my $directory = '/etc/bpview';
+  my $config = $conf->read_dir($directory);
+
+$VAR1 = {
+          'refresh' => {
+                         'interval' => 300
+                       }
+        };
+
+=cut
+
 sub read_dir {
+	
   my $self	= shift;
   my $dir	= shift or croak ("Missing directory to read!");
   
@@ -108,25 +147,24 @@ sub read_dir {
   opendir (CONFDIR, $dir) or croak ("Read Config: Can't open directory $dir: $!");
   
   while (my $file = readdir (CONFDIR)){
-  	# use absolute path instead of relative
+  	
   	next if $file =~ /\.\./;
+  	
+  	# use absolute path instead of relative
   	$file = File::Spec->rel2abs($dir . "/" . $file);
-  	# skip directories
+  	
+  	# skip directories and non *.yml files
   	next if -d $file;
   	next unless $file =~ /\.yml$/;
   	chomp $file;
-#    my @tmp = split /\//, $file;
-#    $tmp[-1] =~ s/\.yml$//;
+  	
     # get content of files
-#    my %ret = %{ BPView::Config->read_config( $file ) };
     my $tmp = BPView::Config->read_config( $file );
+    
     # push values into config hash
     foreach my $key (keys %{ $tmp }){
       $conf{ $key } = $tmp->{ $key };
     }
-    # push into hash with first element name = config file name (without file ending)
-    # e.g. bpview.yaml => $conf{'bpview'}
-#    $conf{ $tmp[-1] } =  $ret{ $tmp[-1] };
   }
   
   closedir (CONFDIR);
@@ -136,8 +174,22 @@ sub read_dir {
 }
 
 
-# validate configuration file
+#----------------------------------------------------------------
+
+=head2 validate
+
+ validate ($config)
+
+Validates a specified config hashref if required parameters for BPView are present.
+Errors are printed out.
+Returns 0 or 1 (Config failure).
+
+  my $config = $conf->validate($config);
+
+=cut
+
 sub validate {
+	
   my $self		= shift;
   my $config	= shift or croak ("BPView::Config->validate: Missing config!");
   
@@ -156,6 +208,7 @@ sub validate {
   
   # print errors to webpage
   if ($self->{'errors'}){
+  	
    print "<p>";
    print "Configuration validation failed: <br />";
    
@@ -165,66 +218,46 @@ sub validate {
    
    print "</p>";
    return 1;
+   
   }
   
   return 0;
+  
 }
 
 
-sub getDashboards {
+#----------------------------------------------------------------
+
+=head2 get_dashboards
+
+ get_dashboard ($views)
+
+Gets dashboard names out of given view config.
+Returns dashboard names arrayref.
+
+  my $dashboards = $conf->get_dashboards($views);
+
+=cut
+
+sub get_dashboards {
 	
   my $self 	= shift;
   my $views = shift;
   my $dashboards = [];
   
   # go through view hash
-#  foreach my $conffile (keys %{ $views} ){
-#  	foreach my $dashboard (keys %{ $views->{ $conffile } }){
-#  	  push @{ $dashboards }, $dashboard;
-#  	}
   foreach my $dashboard (keys %{ $views }){
+  	
    push @{ $dashboards }, $dashboard;
+   
   }
-#  }
   
   return $dashboards;
   
 }
 
 
-## old!!!
-#sub getProvider {
-#	
-#  my $self	= shift;
-#  my $conf	= shift;
-#  my $provider = undef;
-#  
-#  if (! $conf->{ 'provider' }{ 'source' }){
-#  	croak "Provider not found in config!\n";
-#  }else{
-#  	$provider = $conf->{ 'provider' }{ 'source' };
-#  }
-#  
-#  # verify provider details
-#  if (! $conf->{ $provider }){
-#  	croak "Provider $provider not found in config!\n";
-#  } 
-#  
-#  if ($provider eq "ido"){
-#  	my $ido = BPView::Config::IDO->new( %{ $conf->{ $provider } } );
-#  	   $ido->verify();
-#  	croak "Validating ido config failed!" unless $? eq 0;
-#  }elsif( $provider eq "mk-livestatus"){
-#    BPView::Config::Livestatus->verify( %{ $conf->{ $provider } });  	
-#    croak "Validating mk-livestatus config failed!" unless $? eq 0;
-#  }else{
-#  	croak "Unsupported provider $provider\n!";
-#  }
-#  
-#  return $provider;
-#  
-#}
-
+#----------------------------------------------------------------
 
 # internal methods
 ##################
@@ -245,6 +278,7 @@ sub _check_dir {
 
 # check for datasource provider
 sub _check_provider {
+	
   my $self	= shift;
   my $conf	= shift;
   my $provider	= shift or croak ("Missing provider!");
@@ -260,11 +294,13 @@ sub _check_provider {
     
     # IDOutils
     if ($provider eq "ido"){
+    	
       push @{ $self->{'errors'} }, "ido: Missing host!" unless $config->{'host'};
       push @{ $self->{'errors'} }, "ido: Missing database!" unless $config->{'database'};
       push @{ $self->{'errors'} }, "ido: Missing username!" unless $config->{'username'};
       push @{ $self->{'errors'} }, "ido: Missing password!" unless $config->{'password'};
       push @{ $self->{'errors'} }, "ido: Missing prefix!" unless $config->{'prefix'};
+      
       # Support PostgreSQL, too!
       push @{ $self->{'errors'} }, "ido: Unsupported database type: $config->{'type'}!" unless $config->{'type'} eq "mysql";
      
@@ -273,11 +309,15 @@ sub _check_provider {
      # mk-livestatus 
      # requires socket or server
      if (! $config->{ $provider }{'socket'} && ! $config->{'server'}){
+     	
        push @{ $self->{'errors'} }, "mk-livestatus: Missing server or socket!";
+       
      }else{
+     	
        if ($config->{'server'}){
          push @{ $self->{'errors'} }, "mk-livestatus: Missing port!" unless $config->{ $provider }{'port'};
        }
+       
      }
    }
   }
@@ -285,3 +325,42 @@ sub _check_provider {
 
 
 1;
+
+=head1 EXAMPLES
+
+Read all config files from a given directory and validate its parameters.
+
+  use BPView::Config;
+  my $directory = '/etc/bpview';
+  
+  my $conf = BPView::Config->new;
+  my $config = $conf->read_dir( $directory );
+  $conf->validate($config);
+  
+Read view config files and get dashboard names.
+
+  use BPView::Config;
+  my $directory = '/etc/bpview/views';
+  
+  my $conf = BPView::Config->new;
+  my $views = $conf->read_dir( $directory );
+  my $dashboards = $conf->get_dashboards($views);
+
+
+=head1 SEE ALSO
+
+TODO
+
+
+=head1 AUTHOR
+
+Rene Koch, E<lt>r.koch@ovido.atE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2013 by ovido gmbh
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
