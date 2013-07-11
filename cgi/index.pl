@@ -25,23 +25,124 @@
 use strict;
 use warnings;
 
-use Template;
-
-use Log::Log4perl qw(:easy);
-
-
-
-use vars qw(%Config $logger);
-
-Log::Log4perl::init( $Config{logging}{logfile} );
-my $logger = Log::Log4perl::get_logger();
-$logger->level($Config{logging}{level});
+use CGI qw(param);
+use CGI::Carp qw(fatalsToBrowser);
+use CGI::Session;
 
 
+# for debugging only
+#use Data::Dumper;
+
+# define default paths required to read config files
+my ($lib_path, $cfg_path);
+BEGIN {
+  $lib_path = "../lib";		# path to BPView lib directory
+  $cfg_path = "../etc";		# path to BPView etc directory
+}
 
 
+# load custom Perl modules
+use lib "$lib_path";
+use BPView::Config;
+use BPView::Data;
+use BPView::Web;
 
 
+# global variables
+my $session_cache	= 3600;		# 1 hour
+my $config;
+my $views;
+my $dashboards;
+
+
+# HTML code
+print "Content-type: text/html\n\n" unless defined param;
+
+# CGI sessions
+my $post	= CGI->new;
+my $sid     = $post->cookie("CGISESSID") || undef;
+my $session = new CGI::Session(undef, $sid, {Directory=>File::Spec->tmpdir});
+   $session->expire('config', $session_cache);
+   $session->expire('views', $session_cache);
+   $session->expire('dashboards', $session_cache);
+my $cookie  = $post->cookie(CGISESSID => $session->id);
+#print $post->header( -cookie=>$cookie );
+
+
+# open config files if not cached
+my $conf = BPView::Config->new;
+if (! $session->param('config')){
+  
+  # open config file directory and push configs into hash
+  $config = $conf->read_dir( $cfg_path );
+  # validate config
+  exit 1 unless ( $conf->validate($config) == 0);
+  # cache config
+  $session->param('config', $config);
+  
+}else{
+
+  # use cached config
+  $config = $session->param('config');
+  
+}
+
+if (! $session->param('views')){
+  $views = $conf->read_dir( $cfg_path . "/views");
+  # TODO: validate views config!
+  $dashboards = $conf->getDashboards($views);
+  
+  $session->param('views', $views);
+  $session->param('dashboards', $dashboards);
+}else{
+  $views = $session->param('views');
+  $dashboards = $session->param('dashboards');
+}
+
+
+# process URL
+if (defined param){
+	
+  # JSON Header
+  print "Content-type: application/json charset=iso-8859-1\n\n";
+  my $json = undef;
+  
+  if (defined param("dashboard")){
+  	
+    # get dasgboard data
+    my $dashboard = BPView::Data->new();
+    $json = $dashboard->get_status(
+    	 views		=> $views->{ param("dashboard") }{ 'views' },
+    	 provider	=> $config->{ 'provider' }{ 'source' },
+    	 provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
+       );	
+       
+  }else{
+  	
+  	print "Unknown paramater!\n";
+  	exit 1;
+  	
+  }
+  
+  print $json;
+  exit 0;
+  
+}
+
+#print "Content-type: text/html\n\n";
+
+# display web page
+my $page = BPView::Web->new(
+ 	src_dir		=> $config->{ 'bpview' }{ 'src_dir' },
+ 	data_dir	=> $config->{ 'bpview' }{ 'data_dir' },
+ 	site_url	=> $config->{ 'bpview' }{ 'site_url' },
+ 	template	=> $config->{ 'bpview' }{ 'template' },
+);
+#   $page->login();
+   $page->displayPage(
+     page		=> "main",
+     dashboards	=> $dashboards,
+);
 
 
 exit 0;

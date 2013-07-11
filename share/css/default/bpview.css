@@ -1,0 +1,90 @@
+
+.environment {
+  font-weight: bold;
+  font-style: underline;
+  font-size: 30px;
+  padding-top: 30px;
+}
+
+.groups {
+  font-weight: bold;
+  font-size: 18px;
+  padding-top: 20px;
+}
+
+.groupTiles {
+  padding: 6px;
+  margin: 5px;
+  border-radius: 5px;
+  border: 1px solid black;
+  overflow: hidden;
+  display: table;
+  width: 98%;
+}
+
+.tile {
+  height: 25px;
+  width: 260px;
+  padding: 10px;
+  margin: 5px;
+  border-radius: 5px;
+  border: 1px solid black;
+  float: left;
+  vertical-align: middle;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Status OK */
+.state0 {
+  background-color: lightgreen;
+}
+
+/* Status WARNING */
+.state1 {
+  background-color: yellow;
+}
+
+/* Status CRITICAL */
+.state2 {
+  background-color: red;
+}
+
+/* State UNKNOWN */
+.state3 {
+  background-color: orange;
+}
+
+/* State Not-Monitored */
+.state99 {
+  background-color: lightgrey;
+}
+
+.mainTable {
+  border: 0px;
+  width: 100%;
+  height: 100%;
+}
+
+.topRow {
+  height: 50px;
+}
+
+.serviceRow {
+  height: 20px;
+  text-align: right;
+}
+
+.mainRow {
+  vertical-align: top;
+}
+
+.bottomRow {
+  height: 20px;
+  background-color: #333333;
+}
+
+body {
+  color: black;
+}
+
