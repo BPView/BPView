@@ -24,8 +24,19 @@
 
 
 $(document).ready(function() {
-  $('#dashboards').change(function() {
+ $('#dashboards').change(function() {
     // get JSON data
+	getDbOverview();
+  })
+  .trigger('change');
+
+  // get JSON data
+  setInterval("getDbOverview()", 15000);
+
+});
+
+
+function getDbOverview(){
 	var dashboard = $("#dashboards option:selected").val();
 	$.getJSON( "?dashboard=" + dashboard, function(data){
   	  var jsonData = "";
@@ -51,9 +62,15 @@ $(document).ready(function() {
 		  });
 			  
 		jsonData += "    </div>\n";
+		
 		});
 			
 	  });
+	  
+	  // show last refresh date
+	  var date = new Date();
+	  jsonData += "<div>&nbsp;</div>";
+	  jsonData += "<div>Last refresh: " + date + "</div>";
 		
       // create new start page
 	  $('#bps').empty();
@@ -63,7 +80,4 @@ $(document).ready(function() {
 	.fail(function(){ console.log("fail"); })		// TODO: Error handling!
 	.done(function(){ console.log("done"); })
 	
-  })
-  .trigger('change');
-
-});
+}
