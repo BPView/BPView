@@ -37,7 +37,11 @@ $(document).ready(function() {
 
 // clickable products
 $(document).on('click', 'div.tile', function(){
-  window.open('?details=' + $(this).attr("id"), '_blank', "width=700,height=500,location=no,status=no" )
+  // open window only if business process is defined
+  // TODO: Better JavaScript check!!!
+  if ($(this).attr("class") != "tile state99"){
+    window.open('?details=' + $(this).attr("id"), '_blank', "width=700,height=500,location=no,status=no" )
+  }
 });
   
   
