@@ -146,6 +146,8 @@ sub get_status {
 	      	# didn't found status in IDO database
 	      	$self->{ 'views' }{ $environment }{ $groups }{ $product }{ 'state' } = 99;
 	      }
+	      # return also business process name
+	      $self->{ 'views' }{ $environment }{ $groups }{ $product }{ 'bpname' } = $service;
   	    }
   	  }
     }
