@@ -32,10 +32,15 @@ $(document).ready(function() {
 
   // get JSON data
   setInterval("getDbOverview()", 15000);
-
 });
 
 
+// clickable products
+$(document).on('click', 'div.tile', function(){
+  window.open('?details=' + $(this).attr("id"), '_blank', "width=700,height=500,location=no,status=no" )
+});
+  
+  
 function getDbOverview(){
 	var dashboard = $("#dashboards option:selected").val();
 	$.getJSON( "?dashboard=" + dashboard, function(data){
@@ -55,9 +60,10 @@ function getDbOverview(){
 			  
 			// set class for status code
 			var statusClass = "state" + productval.state;
+			var bpName      = productval.bpname;
 			  
 			//products
-		    jsonData += "      <div class=\"tile " + statusClass + "\">" + products + "</div>\n";
+		    jsonData += "      <div id=\"" + bpName +"\" class=\"tile " + statusClass + "\">" + products + "</div>\n";
 		    
 		  });
 			  
@@ -81,3 +87,4 @@ function getDbOverview(){
 	.done(function(){ console.log("done"); })
 	
 }
+
