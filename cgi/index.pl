@@ -109,13 +109,23 @@ if (defined param){
   
   if (defined param("dashboard")){
   	
-    # get dasgboard data
+    # get dashboard data
     my $dashboard = BPView::Data->new();
     $json = $dashboard->get_status(
     	 views		=> $views->{ param("dashboard") }{ 'views' },
     	 provider	=> $config->{ 'provider' }{ 'source' },
     	 provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
        );	
+       
+  }elsif (defined param("details")){
+  	
+  	# get details for this business process
+  	my $details = BPView::Data->new(
+  		provider	=> 'bpaddon',
+  		provdata	=> $config->{ 'bpaddon' },
+  		bp			=> param("details"),
+  	   );
+  	$json = $details->get_details();
        
   }else{
   	

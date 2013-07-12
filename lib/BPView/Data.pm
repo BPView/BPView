@@ -49,7 +49,12 @@ use YAML::Syck;
 use CGI::Carp qw(fatalsToBrowser);
 use File::Spec;
 use JSON::PP;
+# required for IDO-MySQL 
 use DBI;
+# required for BP-Addon
+use LWP::UserAgent;
+use HTTP::Request;
+use HTTP::Request::Common qw(POST);
 
 # for debugging only
 use Data::Dumper;
@@ -63,6 +68,7 @@ sub new {
     
   my $self 		= {
   	"views"		=> undef,	# views object (hash)
+  	"bp"		=> undef,	# name of business process
   	"provider"	=> "ido",	# provider (ido | mk-livestatus)
   	"provdata"	=> undef,	# provider details like hostname, username,... 
 	"verbose"	=> 0,		# enable verbose output
@@ -78,6 +84,12 @@ sub new {
   
   # parameter validation
   # TODO!
+  # don't use views and bps together
+  if (defined $self->{ 'views' } && defined $self->{ 'bp' }){
+  	croak ("Can't use views and bp together!");
+  }
+  
+  chomp $self->{ 'bp' } if defined $self->{ 'bp' };
   
   bless $self, $class;
   return $self;
@@ -165,6 +177,78 @@ sub get_status {
   my $json = JSON::PP->new->pretty;
   $json = $json->sort_by(sub { $JSON::PP::a cmp $JSON::PP::b })->encode($self->{ 'views' });
 
+  return $json;
+  
+}
+
+
+# get data
+sub get_details {
+	
+  my $self		= shift;
+  my %options 	= @_;
+  
+  for my $key (keys %options){
+  	if (exists $self->{ $key }){
+  	  $self->{ $key } = $options{ $key };
+  	}else{
+  	  croak "Unknown option: $key";
+  	}
+  }
+  
+  # we only support business process addon api queries at the moment
+  if (! $self->{ 'provider' } eq "bpaddon" ){
+  	croak "Unsupported provider: " . $self->{ 'provider' };
+  }
+   
+  # connect to BP Addon API
+  
+  # construct URL
+  #https://monitoring.ovido.at/nagiosbp/cgi-bin/nagios-bp.cgi?detail=production-mail-lb&conf=bpview&outformat=json
+  my $url = $self->{ 'provdata' }{ 'cgi_url' } . "/nagios-bp.cgi?detail=" . $self->{ 'bp' } . "&conf=" . $self->{ 'provdata' }{ 'conf' } . "&outformat=json";
+  
+  # connect to API
+  my $ra = LWP::UserAgent->new();
+  $ra->timeout(10);					# TODO: Config option
+  
+  # skip SSL certificate verification
+  if (LWP::UserAgent->VERSION >= 6.0){
+    $ra->ssl_opts(verify_hostname => 0, SSL_verify_mode => 0x00);	# disable SSL cert verification
+  }
+  
+  my $rr = HTTP::Request->new(GET => $url);
+  
+  # Authentication
+  if (defined $self->{ 'provdata' }{ 'username' }){
+    $rr->authorization_basic($self->{ 'provdata' }{ 'username' }, $self->{ 'provdata' }{ 'password' });
+  }
+  
+  my $re = $ra->request($rr);
+  if (! $re->is_success){	
+    croak ("Can't connect to BP-Addon API: " . $re->error_as_HTML);
+  }
+  
+  my $result = $re->content;
+  my $json = JSON::PP->new->pretty;
+  my $decoded = $json->decode($result) or croak ("JSON data provided from BP-Addon are invalid!");
+  
+  my $return = {};
+  
+  # go through hash
+  # we only need host, service and hardstate
+  for (my $i=0;$i<scalar @{ $decoded->{ 'business_process' }{ 'components' } };$i++){
+  	my $hostname  = $decoded->{ 'business_process' }{ 'components' }[$i]{ 'host' };
+  	my $service   = $decoded->{ 'business_process' }{ 'components' }[$i]{ 'service' };
+  	my $output    = $decoded->{ 'business_process' }{ 'components' }[$i]{ 'plugin_output' };
+  	my $hardstate = $decoded->{ 'business_process' }{ 'components' }[$i]{ 'hardstate' };
+  	$return->{ $hostname }{ $service }{ 'output' } = $output;
+  	$return->{ $hostname }{ $service }{ 'hardstate' } = $hardstate;
+  }
+  
+  # produce json output
+  $json = JSON::PP->new->pretty;
+  $json = $json->sort_by(sub { $JSON::PP::a cmp $JSON::PP::b })->encode($return);
+  
   return $json;
   
 }
