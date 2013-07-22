@@ -16,10 +16,15 @@ ovido:
     Produktion:
       Handel:
         Topic with Umlauts öäuÖÄÜß -&gt; oau!:
+        otrs:
+        DAX:
+        NASDAQ:
+        NIKKEI:
+        ASE:
+        TASE:
 # ERROR handling!!!
 #    qa:
 #      mail:
 #      web:
 #    testing:
 #      mail:
-        

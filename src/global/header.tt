@@ -22,15 +22,16 @@
 # If not, see <http://www.gnu.org/licenses/>.
 %]
 
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>BPView</title>
-    
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="Title" content="BPView">
+    <meta name="Description" content="Open Source Business Process View for Nagios and Icinga">
+    <title>BPView | [% site_url %]</title>
     <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/bpview.css">
-    
     <script src="[% site_url %]/share/javascript/jquery-1.10.1.js"></script>
     <script src="[% site_url %]/share/javascript/bpview.js"></script>
-    
   </head>
   <body>
   
