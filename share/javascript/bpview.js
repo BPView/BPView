@@ -52,7 +52,7 @@ function getDbOverview(){
 	  $.each(data, function(environment, envval){
 		
 	    // main environments
-  	    jsonData += "<div class=\"environment\">" + environment + "</div>\n";
+  	    jsonData += "<h2 class=\"environment\">" + environment + "</h2>\n";
   	    
 		$.each(envval, function(groups, groupval){
 			

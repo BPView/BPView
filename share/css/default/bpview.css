@@ -1,9 +1,13 @@
-
-.environment {
+body {
+	font-size: 14px;
+	line-height: 1.4;
+	font-family: Interstate,'Liberation Sans',Helvetica,Arial,sans-serif;
+	background: rgb(255, 255, 255);
+}
+h2 {
   font-weight: bold;
   font-style: underline;
   font-size: 30px;
-  padding-top: 30px;
 }
 
 .groups {
