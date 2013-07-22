@@ -64,7 +64,7 @@ html #wrapper {
 
 /* Status CRITICAL */
 .state2 {
-  background-color: red;
+  background-color: #FF5C5C;
 }
 
 /* State UNKNOWN */
