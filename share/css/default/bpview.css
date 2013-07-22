@@ -1,25 +1,36 @@
-body {
+html, body {
 	font-size: 14px;
 	line-height: 1.4;
 	font-family: Interstate,'Liberation Sans',Helvetica,Arial,sans-serif;
 	background: rgb(255, 255, 255);
+	height 100%;
 }
-h2 {
-  font-weight: bold;
-  font-style: underline;
+body {
+  margin: 0;
+  padding: 0;
+}
+#wrapper {
+  min-height: 100%;
+  position: relative;
+}
+html #wrapper {
+  height: 100%;
+}
+.environment {
+  padding-top: 25px;
   font-size: 30px;
 }
 
 .groups {
   font-weight: bold;
-  font-size: 18px;
-  padding-top: 20px;
+  font-size: 16px;
+  line-height: 0.8;
 }
 
 .groupTiles {
   padding: 6px;
-  margin: 5px;
-  border-radius: 5px;
+  margin: 10px 0px 20px 10px;
+  border-radius: 4px;
   border: 1px solid black;
   overflow: hidden;
   display: table;
@@ -27,16 +38,18 @@ h2 {
 }
 
 .tile {
-  height: 25px;
-  width: 260px;
+  height: 11px;
+  min-width: 60px;
   padding: 10px;
   margin: 5px;
-  border-radius: 5px;
+  border-radius: 4px;
   border: 1px solid black;
   float: left;
   vertical-align: middle;
   text-align: center;
-  font-weight: bold;
+  font-size: 14px;
+  box-shadow: rgb(102, 102, 102) 0px 3px 3px;
+  line-height: 0.8;
 }
 
 /* Status OK */
@@ -64,43 +77,45 @@ h2 {
   background-color: lightgrey;
 }
 
-.mainTable {
-  border: 0px;
-  width: 100%;
-  height: 100%;
+#topContainer {
+  padding-bottom: 55px;
 }
 
-.topRow {
-  height: 50px;
+.main {
+  margin-top: 1px;
 }
 
-.serviceRow {
-  height: 20px;
-  text-align: right;
-}
-
-.mainRow {
-  vertical-align: top;
-}
-
-.bottomRow {
-  height: 20px;
+#footer {
+  height: 25px;
   background-color: #333333;
-  position: absolute; 
-  bottom: 1px;
-}
-
-
-div#bps {
-  position: absolute; 
-  left: 10px; 
+  color: #FFFFFF;
+  font-size: 12px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
   width: 100%;
 }
 
-div#details {
-  position: absolute; 
-  right: 10px; 
-  width: 1px;
+.bps, .details {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.bps {
+  width: 66%;
+}
+
+.details {
+  float: left;
+  width: 33px;
+}
+
+p {
+display: block;
+-webkit-margin-before: 1em;
+-webkit-margin-after: 1em;
+-webkit-margin-start: 0px;
+-webkit-margin-end: 0px;
 }
 
 .overlayBG {

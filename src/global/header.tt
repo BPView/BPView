@@ -1,12 +1,3 @@
-[%#
-# COPYRIGHT:
-#
-# This software is Copyright (c) 2013 by ovido
-#                             <sales@ovido.at>
-#
-# This file is part of Business Process View (BPView).
-#
-# (Except where explicitly superseded by other copyright notices)
 # BPView is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU General Public License as published by 
 # the Free Software Foundation, either version 3 of the License, or 
@@ -34,19 +25,16 @@
     <script src="[% site_url %]/share/javascript/bpview.js"></script>
   </head>
   <body>
-  
-    <div class="mainTable">
-      <div class="topRow">
+
+    <div class="page" id="wrapper">
+      <div id="topContainer">
         <div style="float: left; padding: 10px;"><img src="[% site_url %]/share/images/[% templ %]/logo.png" alt="Logo" /></div>
         <div style="float: left;"><h1>Business Process View</h1></div>
-        <div style="float: right; padding: 10px;">Hello Username</div>
-      </div>
-      <div class="serviceRow">
-        <div>
-          <select name="dashboards" id="dashboards" size="1">
-          [% FOR db = content %]
-            <option>[% db %]</option>
-          [% END %]
-          </select>
-        </div>
+        <div style="float: right; padding: 10px;">
+	          <select name="dashboards" id="dashboards" size="1">
+	          [% FOR db = dashboards %]
+	            <option>[% db %]</option>
+	          [% END %]
+	          </select>
+		</div>
       </div>

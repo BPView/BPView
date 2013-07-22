@@ -31,14 +31,7 @@ $(document).ready(function() {
   .trigger('change');
 
   // get JSON data
-  // TODO: get value from config file!
   setInterval("getDbOverview()", 15000);
-  
-  // close popup windows
-  $('.closePopup').click(function(){
-	$('.overlayBG').hide();
-  });
-  
 });
 
 
@@ -59,13 +52,13 @@ function getDbOverview(){
 	  $.each(data, function(environment, envval){
 		
 	    // main environments
-  	    jsonData += "<h2 class=\"environment\">" + environment + "</h2>\n";
+  	    jsonData += "<div class=\"environment\">" + environment + "</div>\n";
   	    
 		$.each(envval, function(groups, groupval){
 			
 		  // product groups
-		  jsonData += "  <div class=\"groups\">" + groups + "</div>\n";
-		  jsonData += "    <div class=\"groupTiles\">\n";
+//		  jsonData += "  <div class=\"groups\">" + groups + "</div>\n";
+		  jsonData += "    <div class=\"groupTiles\"><div class=\"groups\">" + groups + "</div>\n";
 			  
 		  $.each(groupval, function(products, productval){
 			  
@@ -84,11 +77,6 @@ function getDbOverview(){
 			
 	  });
 	  
-	  // display error message on empty returns
-	  if (jsonData == ""){
-		$('.overlayBG').show();
-	  }
-	  
 	  // show last refresh date
 	  var date = new Date();
 	  jsonData += "<div>&nbsp;</div>";
@@ -99,14 +87,7 @@ function getDbOverview(){
 	  $('#bps').append(jsonData);
 	  
 	})
-	.fail(function(){ 
-	  // Open DIV popup and inform user about error
-	  console.log("fail");
-	  $('.overlayBG').show();
-	})
-	.done(function(){ 
-	  console.log("done"); 
-	})
+	.fail(function(){ console.log("fail"); })		// TODO: Error handling!
+	.done(function(){ console.log("done"); })
 	
 }
-

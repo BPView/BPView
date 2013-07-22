@@ -24,13 +24,13 @@
 
 [% INCLUDE header.tt %]
 
-      <div class="mainRow">
+      <div class="main">
         
           [%# Business Process DIV #%]
-          <div id="bps"></div>
+          <div class="bps" id="bps"></div>
           
           [%# Details DIV #%]
-          <div id="details"></div>
+          <div class="details" id="details"></div>
           
       </div>
 
