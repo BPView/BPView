@@ -35,18 +35,18 @@
   </head>
   <body>
   
-    <table class="mainTable">
-      <tr class="topRow">
-        <td><img src="[% site_url %]/share/images/[% templ %]/logo.png" alt="Logo" /></td>
-        <td><h1>Business Process View</h1></td>
-        <td>Hello Username</td>
-      </tr>
-      <tr class="serviceRow">
-        <td colspan="3">
+    <div class="mainTable">
+      <div class="topRow">
+        <div><img src="[% site_url %]/share/images/[% templ %]/logo.png" alt="Logo" /></div>
+        <div><h1>Business Process View</h1></div>
+        <div>Hello Username</div>
+      </div>
+      <div class="serviceRow">
+        <td>
           <select name="dashboards" id="dashboards" size="1">
           [% FOR db = dashboards %]
             <option>[% db %]</option>
           [% END %]
           </select>
-        </td>
-      </tr>
+        </div>
+      </div>

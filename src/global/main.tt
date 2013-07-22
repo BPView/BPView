@@ -24,12 +24,12 @@
 
 [% INCLUDE header.tt %]
 
-      <tr class="mainRow">
-        <td colspan="3">
+      <div class="mainRow">
+        <div>
           <div id="bps">
 
           </div>
-        </td>
-      </tr>
+        </div>
+      </div>
 
 [% INCLUDE footer.tt %]

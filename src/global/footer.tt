@@ -22,9 +22,9 @@
 # If not, see <http://www.gnu.org/licenses/>.
 %]
 
-      <tr class="bottomRow">
-        <td colspan="3">(C) 2013, ovido gmbh</td>
-      </tr>
-    </table>
+      <div class="bottomRow">
+        <div>(C) 2013, ovido gmbh</div>
+      </div>
+    </div>
   </body>
 </html>
