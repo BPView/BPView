@@ -84,6 +84,11 @@ function getDbOverview(){
 			
 	  });
 	  
+	  // display error message on empty returns
+	  if (jsonData == ""){
+		$('.overlayBG').show();
+	  }
+	  
 	  // show last refresh date
 	  var date = new Date();
 	  jsonData += "<div>&nbsp;</div>";
@@ -99,7 +104,9 @@ function getDbOverview(){
 	  console.log("fail");
 	  $('.overlayBG').show();
 	})
-	.done(function(){ console.log("done"); })
+	.done(function(){ 
+	  console.log("done"); 
+	})
 	
 }
 
