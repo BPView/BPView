@@ -45,7 +45,7 @@ sub new {
   	"site_url"			=> "/bpview",	# site url
   	"template"			=> "default",	# template to use
   	"page"				=> "main",		# page to display
-  	"dashboards"		=> undef,		# dashboards for main page 
+  	"content"			=> undef,		# various content to pass to template toolkit (like dashboards)
   };
   
   for my $key (keys %options){
@@ -94,8 +94,8 @@ sub displayPage {
   	'site_url'		=> $self->{ 'site_url' }, 
   };
   
-  if (defined $self->{ 'dashboards' }){
-  	$tt_vars->{ 'dashboards' } = $self->{ 'dashboards' };
+  if (defined $self->{ 'content' }){
+  	$tt_vars->{ 'content' } = $self->{ 'content' };
   }
   
   # create new template

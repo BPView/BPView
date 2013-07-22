@@ -31,7 +31,7 @@ use CGI::Session;
 
 
 # for debugging only
-#use Data::Dumper;
+use Data::Dumper;
 
 # define default paths required to read config files
 my ($lib_path, $cfg_path);
@@ -126,7 +126,7 @@ if (defined param){
   		bp			=> param("details"),
   	   );
   	$json = $details->get_details();
-       
+  	
   }else{
   	
   	print "Unknown paramater!\n";
@@ -151,7 +151,7 @@ my $page = BPView::Web->new(
 #   $page->login();
    $page->displayPage(
      page		=> "main",
-     dashboards	=> $dashboards,
+     content	=> $dashboards,
 );
 
 
