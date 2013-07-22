@@ -32,6 +32,11 @@ $(document).ready(function() {
 
   // get JSON data
   setInterval("getDbOverview()", 15000);
+  
+  // close popup windows
+  $('.closePopup').click(function(){
+	$('.overlayBG').hide();
+  });
 });
 
 
@@ -77,6 +82,11 @@ function getDbOverview(){
 			
 	  });
 	  
+	  // display error message on empty returns
+	  if (jsonData == ""){
+		$('.overlayBG').show();
+	  }
+	  
 	  // show last refresh date
 	  var date = new Date();
 	  jsonData += "<div>&nbsp;</div>";
@@ -87,7 +97,13 @@ function getDbOverview(){
 	  $('#bps').append(jsonData);
 	  
 	})
-	.fail(function(){ console.log("fail"); })		// TODO: Error handling!
-	.done(function(){ console.log("done"); })
+	.fail(function(){ 
+	  // Open DIV popup and inform user about error
+	  console.log("fail");
+	  $('.overlayBG').show();
+	})
+	.done(function(){ 
+	  console.log("done"); 
+	})	
 	
 }

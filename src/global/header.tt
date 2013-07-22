@@ -33,7 +33,7 @@
         <div style="float: left;"><h1>Business Process View</h1></div>
         <div style="float: right; padding: 10px;">
 	          <select name="dashboards" id="dashboards" size="1">
-	          [% FOR db = dashboards %]
+	          [% FOR db = content %]
 	            <option>[% db %]</option>
 	          [% END %]
 	          </select>
