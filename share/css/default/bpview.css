@@ -2,7 +2,7 @@ html, body {
 	font-size: 14px;
 	line-height: 1.4;
 	font-family: Interstate,'Liberation Sans',Helvetica,Arial,sans-serif;
-	background: rgb(255, 255, 255);
+	background: white;
 	height 100%;
 }
 body {
@@ -10,7 +10,7 @@ body {
   padding: 0;
 }
 #wrapper {
-  min-height: 100%;
+  height: 100%;
   position: relative;
 }
 html #wrapper {
@@ -54,7 +54,7 @@ html #wrapper {
 
 /* Status OK */
 .state0 {
-  background-color: lightgreen;
+  background-color: #14FF14;
 }
 
 /* Status WARNING */
@@ -64,7 +64,10 @@ html #wrapper {
 
 /* Status CRITICAL */
 .state2 {
-  background-color: #FF5C5C;
+  background-color: #FF1414;
+  color: white;
+  font-weight:bold;
+  
 }
 
 /* State UNKNOWN */
@@ -90,9 +93,9 @@ html #wrapper {
   background-color: #333333;
   color: #FFFFFF;
   font-size: 12px;
-  position: absolute;
+/*  position: absolute; */
   bottom: 0;
-  left: 0;
+  left: 10px;
   width: 100%;
 }
 
@@ -106,8 +109,8 @@ html #wrapper {
 }
 
 .details {
-  float: left;
-  width: 33px;
+/*  float: left; */
+  width: 33%;
 }
 
 p {
