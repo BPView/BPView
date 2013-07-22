@@ -45,7 +45,8 @@ $(document).on('click', 'div.tile', function(){
   // open window only if business process is defined
   // TODO: Better JavaScript check!!!
   if ($(this).attr("class") != "tile state99"){
-    window.open('?details=' + $(this).attr("id"), '_blank', "width=700,height=500,location=no,status=no" )
+	getDetails( $(this).attr("id") );
+//    window.open('?details=' + $(this).attr("id"), '_blank', "width=700,height=500,location=no,status=no" )
   }
 });
   
@@ -106,4 +107,46 @@ function getDbOverview(){
 	  console.log("done"); 
 	})	
 	
+}
+
+
+function getDetails(businessProcess) {
+	$.getJSON( "?details=" + businessProcess, function(data){
+  	  var jsonData = "";
+	  $.each(data, function(host, hostval){
+		
+	    // host names
+  	    jsonData += "<div><div class=\"host\">" + host + "</div>\n";
+  	    
+		$.each(hostval, function(service, serviceval){
+			
+		  // service names
+		  jsonData += "    <div><div class=\"service\">" + service + "</div>\n";
+		  jsonData += "    <div class=\"status\">" + serviceval.hardstate + "</div>\n";
+		  jsonData += "    <div class=\"output\">" + serviceval.output + "</div></div>\n";
+			  
+		});
+		
+		jsonData += "    </div>\n";
+			
+	  });
+	  
+	  // display error message on empty returns
+	  if (jsonData == ""){
+		$('.overlayBG').show();
+	  }
+	  
+      // create new details div
+	  $('#details').empty();
+	  $('#details').append(jsonData);
+	  
+	})
+	.fail(function(){ 
+	  // Open DIV popup and inform user about error
+	  console.log("fail");
+	  $('.overlayBG').show();
+	})
+	.done(function(){ 
+	  console.log("done"); 
+	})
 }
