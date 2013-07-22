@@ -86,9 +86,19 @@ h2 {
 .bottomRow {
   height: 20px;
   background-color: #333333;
+  position: absolute; 
+  bottom: 1px;
 }
 
-body {
-  color: black;
+
+div#bps {
+  position: absolute; 
+  left: 10px; 
+  width: 100%;
 }
 
+div#details {
+  position: absolute; 
+  right: 10px; 
+  width: 1px;
+}

@@ -37,12 +37,12 @@
   
     <div class="mainTable">
       <div class="topRow">
-        <div><img src="[% site_url %]/share/images/[% templ %]/logo.png" alt="Logo" /></div>
-        <div><h1>Business Process View</h1></div>
-        <div>Hello Username</div>
+        <div style="float: left; padding: 10px;"><img src="[% site_url %]/share/images/[% templ %]/logo.png" alt="Logo" /></div>
+        <div style="float: left;"><h1>Business Process View</h1></div>
+        <div style="float: right; padding: 10px;">Hello Username</div>
       </div>
       <div class="serviceRow">
-        <td>
+        <div>
           <select name="dashboards" id="dashboards" size="1">
           [% FOR db = dashboards %]
             <option>[% db %]</option>
