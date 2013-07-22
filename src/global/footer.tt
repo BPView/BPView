@@ -26,5 +26,15 @@
         <div>(C) 2013, ovido gmbh</div>
       </div>
     </div>
+    
+    [%# Popup for error messages #%]
+    <div class="overlayBG">
+      <div class="errorPopup">
+        <p>An error occured fetching data from datasource!</p>
+        <p>Please check webserver logs for details...</p>
+        <button class="closePopup">OK</button>
+      </div>
+    </div>
+    
   </body>
 </html>

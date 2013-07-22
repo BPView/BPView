@@ -31,7 +31,14 @@ $(document).ready(function() {
   .trigger('change');
 
   // get JSON data
+  // TODO: get value from config file!
   setInterval("getDbOverview()", 15000);
+  
+  // close popup windows
+  $('.closePopup').click(function(){
+	$('.overlayBG').hide();
+  });
+  
 });
 
 
@@ -87,7 +94,11 @@ function getDbOverview(){
 	  $('#bps').append(jsonData);
 	  
 	})
-	.fail(function(){ console.log("fail"); })		// TODO: Error handling!
+	.fail(function(){ 
+	  // Open DIV popup and inform user about error
+	  console.log("fail");
+	  $('.overlayBG').show();
+	})
 	.done(function(){ console.log("done"); })
 	
 }

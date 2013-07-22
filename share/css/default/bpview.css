@@ -102,3 +102,28 @@ div#details {
   right: 10px; 
   width: 1px;
 }
+
+.overlayBG {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: lightgrey;
+}
+
+.errorPopup {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  width: 350px;
+  height: 120px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.closePopup {
+  border: 1px solid;
+  cursor: pointer;
+}
