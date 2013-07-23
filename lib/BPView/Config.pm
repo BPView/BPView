@@ -25,14 +25,18 @@
 
 package BPView::Config;
 
+BEGIN {
+    $VERSION = '1.000'; # Don't forget to set version and release
+}  						# date in POD below!
+
 use strict;
 use warnings;
 use YAML::Syck;
-use Carp;
+use CGI::Carp qw(fatalsToBrowser);
 use File::Spec;
 
 # for debugging only
-#use Data::Dumper;
+use Data::Dumper;
 
 
 
@@ -43,9 +47,9 @@ use File::Spec;
 =head1 SYNOPSIS
 
   use BPView::Config;
-  my $conf = BPView::Config->new;
-  my $config = $conf->read_dir( $cfg_dir );
-  $conf->validate($config);
+  my $conf = BPView::Config->new( 'dir'	=> $cfg_dir);
+  my $config = $conf->read_dir();
+  $conf->validate( 'config' => $config);
 
 =head1 DESCRIPTION
 
@@ -55,19 +59,62 @@ This module searches, opens and validates BPView-YAML config files.
 
 =head2 new ( [ARGS] )
 
-Creates an BPView::Config object.
+Creates an BPView::Config object. Arguments are in key-value pairs.
+See L<EXAMPLES> for more complex variants.
+
+=over 4
+
+=item dir
+
+directory to scan for config files with BPView::Config->read_dir()
+
+=item file
+
+config file to parse with BPView::Config->read_config()
+
+=item config
+
+config to validate by BPView::Config->validate() or to get dashboards
+from with BPView::Config->get_dashboards() 
+
+=item template
+
+name of template to use (default: default)
+Make sure to create a folder with this name in:
+  $data_dir/css/
+  $data_dir/images
+  $src_dir/
+  
+=item page
+
+name of TT template for displaying webpage
+
+=item content
+
+additional content which shall be passed to TT 
 
 =cut
 
 
 sub new {
 	
-  my $invocant	= shift;
+  my $invocant 	= shift;
   my $class 	= ref($invocant) || $invocant;
+  my %options	= @_;
   
   my $self 		= {
-	"verbose"	=> 0,	# enable verbose output
+  		dir		=> undef,	# directory to search for configs
+  		file	=> undef,	# file to read
+  		config	=> undef,	# config (for validation)
   };
+
+  for my $key (keys %options){
+  	if (exists $self->{ $key }){
+  	  $self->{ $key } = $options{ $key };
+  	}else{
+  	  croak "Unknown option: $key";
+  	}
+  }
   
   bless $self, $class;
   return $self;
@@ -81,13 +128,13 @@ sub new {
 
 =head2 read_config
 
- read_config ($file)
+ read_config ( 'file' => $file)
 
 Opens a specified file and reads its content into Hashref.
 Returns Hashref.
 
   my $file = 'test.yml';
-  my $config = $conf->read_config($file);
+  my $config = $conf->read_config( 'file' => $file);
 
 $VAR1 = {
           'refresh' => {
@@ -99,14 +146,26 @@ $VAR1 = {
 
 sub read_config {
 	
-  my $self = shift;
-  my $file = shift or croak ("Missing file to read!");
+  my $self		= shift;
+  my %options	= @_;
+  
+  for my $key (keys %options){
+  	if (exists $self->{ $key }){
+  	  $self->{ $key } = $options{ $key };
+  	}else{
+  	  croak "Unknown option: $key";
+  	}
+  }
+  
+  # validation
+  croak ("Missing file!") unless defined $self->{ 'file' };
+  
   my %return;
   
   # read and parse YAML config file
-  chomp $file;
+#  chomp $file;
   $YAML::Syck::ImplicitTyping = 1;
-  my $yaml = LoadFile($file);
+  my $yaml = LoadFile( $self->{ 'file' } );
   
   return $yaml;
   
@@ -117,14 +176,14 @@ sub read_config {
 
 =head2 read_dir
 
- read_dir ($directory)
+ read_dir ( 'dir' => $directory)
 
 Searches for files with ending ".yml" in specified directories and calls read_config to
 reads its content into Hash.
 Returns Hash.
 
   my $directory = '/etc/bpview';
-  my $config = $conf->read_dir($directory);
+  my $config = $conf->read_dir( 'dir' => $directory);
 
 $VAR1 = {
           'refresh' => {
@@ -136,30 +195,40 @@ $VAR1 = {
 
 sub read_dir {
 	
-  my $self	= shift;
-  my $dir	= shift or croak ("Missing directory to read!");
+  my $self		= shift;
+  my %options	= @_;
   
-  croak ("Read Config: Input parameter $dir isn't a directory!") if ! -d $dir;
+  for my $key (keys %options){
+  	if (exists $self->{ $key }){
+  	  $self->{ $key } = $options{ $key };
+  	}else{
+  	  croak "Unknown option: $key";
+  	}
+  }
+  
+  # validation
+  croak ("Missing directory!") unless defined $self->{ 'dir' };
+  croak ("$self->{ 'dir' } isn't a directory!") if ! -d $self->{ 'dir' };
   
   my %conf;
   
   # get list of config files
-  opendir (CONFDIR, $dir) or croak ("Read Config: Can't open directory $dir: $!");
+  opendir (CONFDIR, $self->{ 'dir' }) or croak ("Can't open directory $self->{ 'dir' }: $!");
   
   while (my $file = readdir (CONFDIR)){
   	
   	next if $file =~ /\.\./;
   	
   	# use absolute path instead of relative
-  	$file = File::Spec->rel2abs($dir . "/" . $file);
+  	$self->{ 'file' } = File::Spec->rel2abs($self->{ 'dir' } . "/" . $file);
   	
   	# skip directories and non *.yml files
-  	next if -d $file;
-  	next unless $file =~ /\.yml$/;
-  	chomp $file;
+  	next if -d $self->{ 'file' };
+  	next unless $self->{ 'file' } =~ /\.yml$/;
+  	chomp $self->{ 'file' };
   	
     # get content of files
-    my $tmp = BPView::Config->read_config( $file );
+    my $tmp = $self->read_config();
     
     # push values into config hash
     foreach my $key (keys %{ $tmp }){
@@ -178,22 +247,34 @@ sub read_dir {
 
 =head2 validate
 
- validate ($config)
+ validate ( 'config' => $config)
 
 Validates a specified config hashref if required parameters for BPView are present.
 Errors are printed out.
 Returns 0 or 1 (Config failure).
 
-  my $config = $conf->validate($config);
+  my $config = $conf->validate( 'config' => $config);
 
 =cut
 
 sub validate {
 	
   my $self		= shift;
-  my $config	= shift or croak ("BPView::Config->validate: Missing config!");
+  my %options	= @_;
+  
+  for my $key (keys %options){
+  	if (exists $self->{ $key }){
+  	  $self->{ $key } = $options{ $key };
+  	}else{
+  	  croak "Unknown option: $key";
+  	}
+  }
+  
+  # validation
+  croak ("Missing config!") unless defined $self->{ 'config' };
   
   # go through config values
+  my $config = $self->{ 'config' };
   # parameters given?
   push @{ $self->{'errors'} }, "src_dir missing!"  unless $config->{'bpview'}{'src_dir'};
   push @{ $self->{'errors'} }, "data_dir missing!" unless $config->{'bpview'}{'data_dir'};
@@ -230,23 +311,35 @@ sub validate {
 
 =head2 get_dashboards
 
- get_dashboard ($views)
+ get_dashboard ( 'config' => $views)
 
 Gets dashboard names out of given view config.
 Returns dashboard names arrayref.
 
-  my $dashboards = $conf->get_dashboards($views);
+  my $dashboards = $conf->get_dashboards( 'config' => $views);
 
 =cut
 
 sub get_dashboards {
 	
-  my $self 	= shift;
-  my $views = shift;
+  my $self		= shift;
+  my %options	= @_;
+  
+  for my $key (keys %options){
+  	if (exists $self->{ $key }){
+  	  $self->{ $key } = $options{ $key };
+  	}else{
+  	  croak "Unknown option: $key";
+  	}
+  }
+  
+  # validation
+  croak ("Missing dashboards!") unless defined $self->{ 'config' };
+  
   my $dashboards = [];
   
   # go through view hash
-  foreach my $dashboard (keys %{ $views }){
+  foreach my $dashboard (keys %{ $self->{ 'config' } }){
   	
    push @{ $dashboards }, $dashboard;
    
@@ -275,6 +368,8 @@ sub _check_dir {
   
 }
 
+
+#----------------------------------------------------------------
 
 # check for datasource provider
 sub _check_provider {
@@ -319,12 +414,17 @@ sub _check_provider {
        }
        
      }
+     
    }
+   
+   # bp-addon
+   # TODO!
+   
   }
 }
 
-
 1;
+
 
 =head1 EXAMPLES
 
@@ -333,34 +433,35 @@ Read all config files from a given directory and validate its parameters.
   use BPView::Config;
   my $directory = '/etc/bpview';
   
-  my $conf = BPView::Config->new;
-  my $config = $conf->read_dir( $directory );
-  $conf->validate($config);
+  my $conf = BPView::Config->new( 'directory' => $directory ));
+  my $config = $conf->read_dir();
+  $conf->validate( 'config' => $config);
   
 Read view config files and get dashboard names.
 
   use BPView::Config;
   my $directory = '/etc/bpview/views';
   
-  my $conf = BPView::Config->new;
-  my $views = $conf->read_dir( $directory );
-  my $dashboards = $conf->get_dashboards($views);
+  my $conf = BPView::Config->new ( 'directory' => $directory );
+  my $views = $conf->read_dir();
+  my $dashboards = $conf->get_dashboards( 'config' => $views);
 
 
 =head1 SEE ALSO
 
-TODO
-
-
 =head1 AUTHOR
 
 Rene Koch, E<lt>r.koch@ovido.atE<gt>
+
+=head1 VERSION
+
+Version 1.000  (July 23 2013))
 
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2013 by ovido gmbh
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
+it under the same terms as BPView itself.
 
 =cut

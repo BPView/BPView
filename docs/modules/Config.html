@@ -4,9 +4,9 @@
 <head>
 	<title>&lt;pre&gt;  BPView::Config</title>
 	<meta name="description" content="Pod documentation for &lt;pre&gt;  BPView::Config" />
-	<meta name="inputfile" content="lib/BPView/Config.pm" />
-	<meta name="outputfile" content="docs/Config.pm.html" />
-	<meta name="created" content="Thu Jul 11 18:10:01 2013" />
+	<meta name="inputfile" content="../lib/BPView/Config.pm" />
+	<meta name="outputfile" content="../docs/modules/Config.html" />
+	<meta name="created" content="Tue Jul 23 11:50:32 2013" />
 	<meta name="generator" content="Pod::Xhtml 1.61" />
 </head>
 <body>
@@ -31,6 +31,7 @@
 <li><a href="#EXAMPLES">EXAMPLES</a></li>
 <li><a href="#SEE_ALSO">SEE ALSO</a></li>
 <li><a href="#AUTHOR">AUTHOR</a></li>
+<li><a href="#VERSION">VERSION</a></li>
 <li><a href="#COPYRIGHT_AND_LICENSE">COPYRIGHT AND LICENSE</a>
 </li>
 </ul><hr />
@@ -46,9 +47,9 @@
 <h1 id="SYNOPSIS">SYNOPSIS</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="SYNOPSIS_CONTENT">
 <pre>  use BPView::Config;
-  my $conf = BPView::Config-&gt;new;
-  my $config = $conf-&gt;read_dir( $cfg_dir );
-  $conf-&gt;validate($config);
+  my $conf = BPView::Config-&gt;new( 'dir'	=&gt; $cfg_dir);
+  my $config = $conf-&gt;read_dir();
+  $conf-&gt;validate( 'config' =&gt; $config);
 
 </pre>
 
@@ -64,7 +65,37 @@
 </div>
 <h2 id="new_ARGS">new ( [ARGS] )</h2>
 <div id="new_ARGS_CONTENT">
-<p>Creates an BPView::Config object.</p>
+<p>Creates an BPView::Config object. Arguments are in key-value pairs.
+See <cite>EXAMPLES</cite> for more complex variants.</p>
+<dl>
+	<dt>dir</dt>
+	<dd>
+		<p>directory to scan for config files with BPView::Config-&gt;read_dir()</p>
+	</dd>
+	<dt>file</dt>
+	<dd>
+		<p>config file to parse with BPView::Config-&gt;read_config()</p>
+	</dd>
+	<dt>config</dt>
+	<dd>
+		<p>config to validate by BPView::Config-&gt;validate() or to get dashboards
+from with BPView::Config-&gt;get_dashboards() </p>
+	</dd>
+	<dt>template</dt>
+	<dd>
+		<p>name of template to use (default: default)
+Make sure to create a folder with this name in:
+  $data_dir/css/
+  $data_dir/images
+  $src_dir/</p>
+	</dd>
+	<dt>page</dt>
+	<dd>
+		<p>name of TT template for displaying webpage</p>
+	</dd>
+	<dt>content</dt>
+	<dd>
+		<p>additional content which shall be passed to TT </p>
 
 </div>
 <h1 id="METHODS">METHODS	</h1><p><a href="#TOP" class="toplink">Top</a></p>
@@ -73,16 +104,16 @@
 </div>
 <h2 id="read_config">read_config</h2>
 <div id="read_config_CONTENT">
-<pre> read_config ($file)
+<pre> read_config ( 'file' =&gt; $file)
 
 </pre>
-<p>Opens a specified file and reads its content into Hashref.
+		<p>Opens a specified file and reads its content into Hashref.
 Returns Hashref.</p>
 <pre>  my $file = 'test.yml';
-  my $config = $conf-&gt;read_config($file);
+  my $config = $conf-&gt;read_config( 'file' =&gt; $file);
 
 </pre>
-<p>$VAR1 = {
+		<p>$VAR1 = {
           'refresh' =&gt; {
                          'interval' =&gt; 300
                        }
@@ -91,17 +122,17 @@ Returns Hashref.</p>
 </div>
 <h2 id="read_dir">read_dir</h2>
 <div id="read_dir_CONTENT">
-<pre> read_dir ($directory)
+<pre> read_dir ( 'dir' =&gt; $directory)
 
 </pre>
-<p>Searches for files with ending &quot;.yml&quot; in specified directories and calls read_config to
+		<p>Searches for files with ending &quot;.yml&quot; in specified directories and calls read_config to
 reads its content into Hash.
 Returns Hash.</p>
 <pre>  my $directory = '/etc/bpview';
-  my $config = $conf-&gt;read_dir($directory);
+  my $config = $conf-&gt;read_dir( 'dir' =&gt; $directory);
 
 </pre>
-<p>$VAR1 = {
+		<p>$VAR1 = {
           'refresh' =&gt; {
                          'interval' =&gt; 300
                        }
@@ -110,47 +141,47 @@ Returns Hash.</p>
 </div>
 <h2 id="validate">validate</h2>
 <div id="validate_CONTENT">
-<pre> validate ($config)
+<pre> validate ( 'config' =&gt; $config)
 
 </pre>
-<p>Validates a specified config hashref if required parameters for BPView are present.
+		<p>Validates a specified config hashref if required parameters for BPView are present.
 Errors are printed out.
 Returns 0 or 1 (Config failure).</p>
-<pre>  my $config = $conf-&gt;validate($config);
+<pre>  my $config = $conf-&gt;validate( 'config' =&gt; $config);
 
 </pre>
 
 </div>
 <h2 id="get_dashboards">get_dashboards</h2>
 <div id="get_dashboards_CONTENT">
-<pre> get_dashboard ($views)
+<pre> get_dashboard ( 'config' =&gt; $views)
 
 </pre>
-<p>Gets dashboard names out of given view config.
+		<p>Gets dashboard names out of given view config.
 Returns dashboard names arrayref.</p>
-<pre>  my $dashboards = $conf-&gt;get_dashboards($views);
+<pre>  my $dashboards = $conf-&gt;get_dashboards( 'config' =&gt; $views);
 
 </pre>
 
 </div>
 <h1 id="EXAMPLES">EXAMPLES</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="EXAMPLES_CONTENT">
-<p>Read all config files from a given directory and validate its parameters.</p>
+		<p>Read all config files from a given directory and validate its parameters.</p>
 <pre>  use BPView::Config;
   my $directory = '/etc/bpview';
 
-  my $conf = BPView::Config-&gt;new;
-  my $config = $conf-&gt;read_dir( $directory );
-  $conf-&gt;validate($config);
+  my $conf = BPView::Config-&gt;new( 'directory' =&gt; $directory ));
+  my $config = $conf-&gt;read_dir();
+  $conf-&gt;validate( 'config' =&gt; $config);
 
 </pre>
-<p>Read view config files and get dashboard names.</p>
+		<p>Read view config files and get dashboard names.</p>
 <pre>  use BPView::Config;
   my $directory = '/etc/bpview/views';
 
-  my $conf = BPView::Config-&gt;new;
-  my $views = $conf-&gt;read_dir( $directory );
-  my $dashboards = $conf-&gt;get_dashboards($views);
+  my $conf = BPView::Config-&gt;new ( 'directory' =&gt; $directory );
+  my $views = $conf-&gt;read_dir();
+  my $dashboards = $conf-&gt;get_dashboards( 'config' =&gt; $views);
 
 
 
@@ -160,23 +191,23 @@ Returns dashboard names arrayref.</p>
 </div>
 <h1 id="SEE_ALSO">SEE ALSO</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="SEE_ALSO_CONTENT">
-<p>TODO</p>
-
-
-
-
 
 </div>
 <h1 id="AUTHOR">AUTHOR</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="AUTHOR_CONTENT">
-<p>Rene Koch, &lt;r.koch@ovido.at&gt;</p>
+		<p>Rene Koch, &lt;r.koch@ovido.at&gt;</p>
+
+</div>
+<h1 id="VERSION">VERSION</h1><p><a href="#TOP" class="toplink">Top</a></p>
+<div id="VERSION_CONTENT">
+		<p>Version 1.000  (July 23 2013))</p>
 
 </div>
 <h1 id="COPYRIGHT_AND_LICENSE">COPYRIGHT AND LICENSE</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="COPYRIGHT_AND_LICENSE_CONTENT">
-<p>Copyright (C) 2013 by ovido gmbh</p>
-<p>This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.</p>
+		<p>Copyright (C) 2013 by ovido gmbh</p>
+		<p>This library is free software; you can redistribute it and/or modify
+it under the same terms as BPView itself.</p>
 
 </div>
 </div></body>

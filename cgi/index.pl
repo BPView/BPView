@@ -70,13 +70,14 @@ my $cookie  = $post->cookie(CGISESSID => $session->id);
 
 
 # open config files if not cached
-my $conf = BPView::Config->new;
+my $conf = BPView::Config->new();
+
 if (! $session->param('config')){
   
   # open config file directory and push configs into hash
-  $config = $conf->read_dir( $cfg_path );
+  $config = $conf->read_dir( dir => $cfg_path );
   # validate config
-  exit 1 unless ( $conf->validate($config) == 0);
+  exit 1 unless ( $conf->validate( 'config' => $config ) == 0);
   # cache config
   $session->param('config', $config);
   
@@ -88,9 +89,9 @@ if (! $session->param('config')){
 }
 
 if (! $session->param('views')){
-  $views = $conf->read_dir( $cfg_path . "/views");
+  $views = $conf->read_dir( dir	=> $cfg_path . "/views" );
   # TODO: validate views config!
-  $dashboards = $conf->get_dashboards($views);
+  $dashboards = $conf->get_dashboards( 'config' => $views );
   
   $session->param('views', $views);
   $session->param('dashboards', $dashboards);
