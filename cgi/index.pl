@@ -149,7 +149,7 @@ my $page = BPView::Web->new(
  	template	=> $config->{ 'bpview' }{ 'template' },
 );
 #   $page->login();
-   $page->displayPage(
+   $page->display_page(
      page		=> "main",
      content	=> $dashboards,
 );

@@ -24,6 +24,10 @@
 
 package BPView::Web;
 
+BEGIN {
+    $VERSION = '1.000'; # Don't forget to set version and release
+}  						# date in POD below!
+
 use strict;
 use warnings;
 use Template;
@@ -33,8 +37,66 @@ use CGI::Carp qw(fatalsToBrowser);
 #use Data::Dumper;
 
 
-# create an BPView::Web object
+=head1 NAME
+
+  BPView::Web - Create a webpage with Template Toolkit
+
+=head1 SYNOPSIS
+
+  use BPView::Web;
+  my $page	= BPView::Web->new(
+             src_dir	=> '/var/www/bpview/src',
+             data_dir	=> '/var/www/bpview/static'
+             );
+  $page->display_page( page	=> 'main' );
+
+=head1 DESCRIPTION
+
+This module creates a webpage with Template Toolkit.
+
+=head1 CONSTRUCTOR
+
+=head2 new ( [ARGS] )
+
+Creates an BPView::Web object. <new> takes at least the src_dir 
+and data_dir. Arguments are in key-value pairs.
+See L<EXAMPLES> for more complex variants.
+
+=over 4
+
+=item src_dir
+
+path to Template Toolkit src directory
+
+=item data_dir
+
+path to BPView static directory
+
+=item site_url
+
+site url of BPView (default: /bpview)
+
+=item template
+
+name of template to use (default: default)
+Make sure to create a folder with this name in:
+  $data_dir/css/
+  $data_dir/images
+  $src_dir/
+  
+=item page
+
+name of TT template for displaying webpage
+
+=item content
+
+additional content which shall be passed to TT 
+
+=cut
+
+
 sub new {
+	
   my $invocant 	= shift;
   my $class 	= ref($invocant) || $invocant;
   my %options	= @_;
@@ -57,7 +119,7 @@ sub new {
   }
   
   # parameter validation
-  croak "Missing src_dir!\n" if (! defined $self->{ 'src_dir' });
+  croak "Missing src_dir!\n"  if (! defined $self->{ 'src_dir' });
   croak "Missing data_dir!\n" if (! defined $self->{ 'data_dir' });
   
   bless $self, $class;
@@ -71,8 +133,23 @@ sub new {
 }
 
 
-# display web page
-sub displayPage {
+#----------------------------------------------------------------
+
+=head1 METHODS	
+
+=head2 display_page
+
+ display_Page ( page => 'page_name' )
+
+Creates a new webpage by using argument 'page' as Template Toolkit template name.
+The search order of TT template is: src/template_name, src/global.
+
+  $page->display_page( page	=> 'main' );
+
+=cut
+
+
+sub display_page {
 	
   my $self		= shift;
   my %options	= @_;
@@ -85,7 +162,7 @@ sub displayPage {
   	}
   }
 	
-  # page to display ( login | main | detail )
+  # page to display ( e.g. main )
   my $tt_template	= $self->{ 'src_dir' } . "/global/" . $self->{ 'page' } . ".tt";
   my $tt_vars		= { 
   	'templ' 		=> $self->{ 'template' },
@@ -128,5 +205,47 @@ sub _check_dir {
   
 }
 
-
 1;
+
+
+=head1 EXAMPLES
+
+Display main page of BPView with template default.
+
+  use BPView::Web;
+  my $src_dir	= "/var/www/bpview/src";
+  my $data_dir	= "/var/www/bpview/static";
+  my $site_url	= "/bpview";
+  my $template	= "default";
+  
+  my $page = BPView::Web->new(
+ 	src_dir		=> $src_dir,
+ 	data_dir	=> $data_dir,
+ 	site_url	=> $site_url,
+ 	template	=> $template,
+  );
+  $page->display_page(
+    page		=> "main",
+  )
+  
+
+=head1 SEE ALSO
+
+See BPView::Config for reading and parsing configuration files.
+
+=head1 AUTHOR
+
+Rene Koch, E<lt>r.koch@ovido.atE<gt>
+
+=head1 VERSION
+
+Version 1.000  (July 23 2013))
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2013 by ovido gmbh
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as BPView itself.
+
+=cut
