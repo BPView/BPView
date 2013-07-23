@@ -406,7 +406,7 @@ sub _check_provider {
     }else{
      	
       if ($config->{'server'}){
-        push @{ $self->{'errors'} }, "mk-livestatus: Missing port!" unless $config->{ $provider }{'port'};
+        push @{ $self->{'errors'} }, "mk-livestatus: Missing port!" unless $config->{'port'};
       }
        
     }
