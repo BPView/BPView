@@ -91,8 +91,8 @@ function getDbOverview(){
 	  
 	  // show last refresh date
 	  var date = new Date();
-//	  jsonData += "<div>&nbsp;</div>";
-//	  jsonData += "<div>Last refresh: " + date + "</div>";
+	  jsonData += "<div>&nbsp;</div>";
+	  jsonData += "<div>Last refresh: " + date + "</div>";
 		
       // create new start page
 	  $('#bps').empty();
