@@ -24,6 +24,7 @@
 
 
 $(document).ready(function() {
+	
  $('#dashboards').change(function() {
     // get JSON data
 	getDbOverview();
