@@ -26,7 +26,7 @@
 package BPView::Config;
 
 BEGIN {
-    $VERSION = '1.000'; # Don't forget to set version and release
+    $VERSION = '1.001'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -285,7 +285,11 @@ sub validate {
   $self->_check_dir( "src_dir", $config->{'bpview'}{'src_dir'} );
   $self->_check_dir( "data_dir", $config->{'bpview'}{'data_dir'} );
   $self->_check_dir( "template", "$config->{'bpview'}{'src_dir'}/$config->{'bpview'}{'template'}" );
+  
+  # check data backend provider
   $self->_check_provider( "provider", $config->{'provider'}{'source'}, $config->{ $config->{'provider'}{'source'} } );
+  # check bpaddon API
+  $self->_check_provider( "provider", "bpaddon", $config->{'bpaddon'} ); 
   
   # print errors to webpage
   if ($self->{'errors'}){
@@ -379,48 +383,46 @@ sub _check_provider {
   my $provider	= shift or croak ("Missing provider!");
   my $config	= shift or croak ("Missing config!");
   
-  # check provider
-  if ($provider ne "ido" && $provider ne "mk-livestatus"){
-  	
+  # IDOutils
+  if ($provider eq "ido"){
+    	
+    push @{ $self->{'errors'} }, "ido: Missing host!" unless $config->{'host'};
+    push @{ $self->{'errors'} }, "ido: Missing database!" unless $config->{'database'};
+    push @{ $self->{'errors'} }, "ido: Missing username!" unless $config->{'username'};
+    push @{ $self->{'errors'} }, "ido: Missing password!" unless $config->{'password'};
+    push @{ $self->{'errors'} }, "ido: Missing prefix!" unless $config->{'prefix'};
+      
+    # Support PostgreSQL, too!
+    push @{ $self->{'errors'} }, "ido: Unsupported database type: $config->{'type'}!" unless ( $config->{'type'} eq "mysql" || $config->{'type'} eq "pgsql" );
+     
+  }elsif ($provider eq "mk-livestatus"){
+   	 
+    # mk-livestatus 
+    # requires socket or server
+    if (! $config->{ $provider }{'socket'} && ! $config->{'server'}){
+     	
+      push @{ $self->{'errors'} }, "mk-livestatus: Missing server or socket!";
+       
+    }else{
+     	
+      if ($config->{'server'}){
+        push @{ $self->{'errors'} }, "mk-livestatus: Missing port!" unless $config->{ $provider }{'port'};
+      }
+       
+    }
+     
+  }elsif ($provider eq "bpaddon"){
+   	
+   	push @{ $self->{'errors'} }, "bpaddon: Missing cgi_url!" unless $config->{'cgi_url'};
+   	push @{ $self->{'errors'} }, "bpaddon: Missing conf!" unless $config->{'conf'};
+   	
+  }else{
+   	
   	# unsupported provider
     push @{ $self->{'errors'} }, "$conf: $provider not supported!";
-    
-  }else{
-    
-    # IDOutils
-    if ($provider eq "ido"){
-    	
-      push @{ $self->{'errors'} }, "ido: Missing host!" unless $config->{'host'};
-      push @{ $self->{'errors'} }, "ido: Missing database!" unless $config->{'database'};
-      push @{ $self->{'errors'} }, "ido: Missing username!" unless $config->{'username'};
-      push @{ $self->{'errors'} }, "ido: Missing password!" unless $config->{'password'};
-      push @{ $self->{'errors'} }, "ido: Missing prefix!" unless $config->{'prefix'};
-      
-      # Support PostgreSQL, too!
-      push @{ $self->{'errors'} }, "ido: Unsupported database type: $config->{'type'}!" unless $config->{'type'} eq "mysql";
-     
-   }elsif ($provider eq "mk-livestatus"){
-   	 
-     # mk-livestatus 
-     # requires socket or server
-     if (! $config->{ $provider }{'socket'} && ! $config->{'server'}){
-     	
-       push @{ $self->{'errors'} }, "mk-livestatus: Missing server or socket!";
-       
-     }else{
-     	
-       if ($config->{'server'}){
-         push @{ $self->{'errors'} }, "mk-livestatus: Missing port!" unless $config->{ $provider }{'port'};
-       }
-       
-     }
-     
-   }
-   
-   # bp-addon
-   # TODO!
-   
+   	
   }
+   
 }
 
 1;
@@ -455,7 +457,7 @@ Rene Koch, E<lt>r.koch@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.000  (July 23 2013))
+Version 1.001  (July 23 2013))
 
 =head1 COPYRIGHT AND LICENSE
 
