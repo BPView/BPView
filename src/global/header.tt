@@ -31,8 +31,6 @@
     <script src="[% site_url %]/share/javascript/bpview.js"></script>
   </head>
   <body>
-
-    <div class="page" id="wrapper">
       <div id="topContainer">
         <div style="float: left; padding: 10px;"><img src="[% site_url %]/share/images/[% templ %]/logo.png" alt="Logo" /></div>
         <div style="float: left;"><h1>Business Process View</h1></div>
