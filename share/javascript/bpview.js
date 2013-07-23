@@ -24,6 +24,7 @@
 
 
 $(document).ready(function() {
+	
  $('#dashboards').change(function() {
     // get JSON data
 	getDbOverview();
@@ -31,7 +32,7 @@ $(document).ready(function() {
   .trigger('change');
 
   // get JSON data
-  setInterval("getDbOverview()", 15000);
+  setInterval("getDbOverview()", refreshInterval);
   
   // close popup windows
   $('.closePopup').click(function(){

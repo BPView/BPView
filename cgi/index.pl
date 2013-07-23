@@ -153,6 +153,7 @@ my $page = BPView::Web->new(
    $page->display_page(
      page		=> "main",
      content	=> $dashboards,
+     refresh	=> $config->{ 'refresh' }{ 'interval' },
 );
 
 
