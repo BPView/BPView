@@ -6,16 +6,10 @@ html, body {
 	height 100%;
 }
 body {
-  margin: 0;
-  padding: 0;
+  margin: 4px;
+  padding: 4px;
 }
-#wrapper {
-  height: 100%;
-  position: relative;
-}
-html #wrapper {
-  height: 100%;
-}
+
 .environment {
   padding-top: 25px;
   font-size: 24px;
@@ -35,6 +29,7 @@ html #wrapper {
   overflow: hidden;
   display: table;
   width: 98%;
+  background: rgb(238, 238, 238);
 }
 
 .tile {
@@ -80,8 +75,8 @@ html #wrapper {
   background-color: lightgrey;
 }
 
-#topContainer {
-  padding-bottom: 55px;
+.topContainer {
+  padding-bottom: 85px;
 }
 
 .main {
@@ -99,18 +94,32 @@ html #wrapper {
   width: 100%;
 }
 
-.bps, .details {
+.bpsContainer, .detailsContainer {
   margin-left: 10px;
   margin-right: 10px;
+  padding: 10px;
+  margin: 5px;
+  border-radius: 4px;
+  border: 1px solid black;
+  box-shadow: rgb(102, 102, 102) 0px 3px 3px;
+  
 }
 
-.bps {
-  width: 66%;
+.bpsContainer {
+  width: 64%;
+  float: left;
 }
 
-.details {
-/*  float: left; */
-  width: 33%;
+.detailsContainer {
+  width: 32%;
+  float: right;
+  padding: 10px;
+  margin: 5px;
+  border-radius: 4px;
+  border: 1px solid black;
+  box-shadow: rgb(102, 102, 102) 0px 3px 3px;
+
+
 }
 
 p {

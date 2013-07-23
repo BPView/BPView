@@ -27,10 +27,10 @@
       <div class="main">
         
           [%# Business Process DIV #%]
-          <div class="bps" id="bps"></div>
+          <div class="bpsContainer" id="bps"></div>
           
           [%# Details DIV #%]
-          <div class="details" id="details"></div>
+          <div class="detailsContainer" id="details"></div>
           
       </div>
 
