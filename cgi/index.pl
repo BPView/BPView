@@ -111,12 +111,12 @@ if (defined param){
   if (defined param("dashboard")){
   	
     # get dashboard data
-    my $dashboard = BPView::Data->new();
-    $json = $dashboard->get_status(
+    my $dashboard = BPView::Data->new(
     	 views		=> $views->{ param("dashboard") }{ 'views' },
     	 provider	=> $config->{ 'provider' }{ 'source' },
     	 provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
        );	
+    $json = $dashboard->get_status();
        
   }elsif (defined param("details")){
   	
@@ -153,6 +153,7 @@ my $page = BPView::Web->new(
    $page->display_page(
      page		=> "main",
      content	=> $dashboards,
+     refresh	=> $config->{ 'refresh' }{ 'interval' },
 );
 
 

@@ -25,7 +25,7 @@
 package BPView::Web;
 
 BEGIN {
-    $VERSION = '1.000'; # Don't forget to set version and release
+    $VERSION = '1.001'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -92,6 +92,10 @@ name of TT template for displaying webpage
 
 additional content which shall be passed to TT 
 
+=item refresh
+
+refresh interval of webpage (default: 15000) [ms]
+
 =cut
 
 
@@ -108,6 +112,7 @@ sub new {
   	"template"			=> "default",	# template to use
   	"page"				=> "main",		# page to display
   	"content"			=> undef,		# various content to pass to template toolkit (like dashboards)
+  	"refresh"			=> 15000,			# refresh interval
   };
   
   for my $key (keys %options){
@@ -173,6 +178,11 @@ sub display_page {
   
   if (defined $self->{ 'content' }){
   	$tt_vars->{ 'content' } = $self->{ 'content' };
+  }
+  
+  if (defined $self->{ 'refresh' }){
+  	# set refresh interval in ms
+  	$tt_vars->{ 'refresh_interval' } = $self->{ 'refresh' } * 1000;
   }
   
   # create new template
@@ -241,7 +251,7 @@ Rene Koch, E<lt>r.koch@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.000  (July 23 2013))
+Version 1.001  (July 23 2013))
 
 =head1 COPYRIGHT AND LICENSE
 
