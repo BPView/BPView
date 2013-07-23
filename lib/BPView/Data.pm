@@ -23,25 +23,11 @@
 # If not, see <http://www.gnu.org/licenses/>.
 
 
-=head1 NAME
-
-  BPView::Config - Initialize the config parameter
-
-=head1 SYNOPSIS
-
-  use BPView::Config;
-  my $ReadConfig = BPView::Config->read("FILENAME");
-
-=head1 DESCRIPTION
-
-
-=head1 METHODS
-
-
-=cut
-
-
 package BPView::Data;
+
+BEGIN {
+    $VERSION = '1.000'; # Don't forget to set version and release
+}  						# date in POD below!
 
 use strict;
 use warnings;
@@ -49,18 +35,81 @@ use YAML::Syck;
 use CGI::Carp qw(fatalsToBrowser);
 use File::Spec;
 use JSON::PP;
-# required for IDO-MySQL 
-use DBI;
+
 # required for BP-Addon
 use LWP::UserAgent;
 use HTTP::Request;
 use HTTP::Request::Common qw(POST);
 
 # for debugging only
-use Data::Dumper;
+#use Data::Dumper;
 
 
-# create an empty BPView::Data object
+=head1 NAME
+
+  BPView::Data - Connect to data backend
+
+=head1 SYNOPSIS
+
+  use BPView::Data;
+  my $details = BPView::Data->new(
+  		provider	=> 'ido',
+  		provdata	=> $provdata,
+  		views		=> $views,
+  	 );
+  $json = $details->get_status();
+
+=head1 DESCRIPTION
+
+This module fetches business process data from various backends like
+IDOutils and BPaddon-API.
+
+=head1 CONSTRUCTOR
+
+=head2 new ( [ARGS] )
+
+Creates an BPView::Data object. <new> takes at least the provider and 
+provdata. Arguments are in key-value pairs.
+See L<EXAMPLES> for more complex variants.
+
+=over 4
+
+=item provider
+
+name of datasource provider (supported: ido|bpaddon)
+
+=item provdata
+
+provider specific connection data
+
+IDO:
+  host: hostname (e.g. localhost)
+  port: port (e.g. 3306)
+  type: mysql|pgsql
+  database: database name (e.g. icinga)
+  username: database user (e.g. icinga)
+  password: database password (e.g. icinga)
+  prefix: database prefix (e.g. icinga_)
+  
+BPAddon:
+  cgi_url: url to BPAddon-CGIs (e.g. https://localhost/nagiosbp/cgi-bin)
+  conf: BPAddon config file name (e.g. nagios-bp)
+  username: CGI username (if url is protected)
+  password: CGI password (if url is protected)
+
+=item views
+
+hash reference of view config
+required for BPView::Data->get_status()
+
+=item bp
+
+name of business process to query service details from
+required for BPView::Data->get_details()
+
+=cut
+
+
 sub new {
   my $invocant	= shift;
   my $class 	= ref($invocant) || $invocant;
@@ -71,7 +120,6 @@ sub new {
   	"bp"		=> undef,	# name of business process
   	"provider"	=> "ido",	# provider (ido | mk-livestatus)
   	"provdata"	=> undef,	# provider details like hostname, username,... 
-	"verbose"	=> 0,		# enable verbose output
   };
   
   for my $key (keys %options){
@@ -96,7 +144,33 @@ sub new {
 }
 
 
-# get data
+#----------------------------------------------------------------
+
+=head1 METHODS	
+
+=head2 get_status
+
+ get_status ( 'views' => $views )
+
+Connects to backend and queries status of business process.
+Business process must be available in Icinga/Nagios!
+Returns JSON data.
+
+  my $json = $get_status( 'views' => $views );
+  
+$VAR1 = {
+   "production" : {
+       "mail" : {
+          "lb" : {
+             "bpname" : "production-mail-lb",          	
+              "state" : "0"         	
+           }
+       }
+    }
+ }                               	
+
+=cut
+
 sub get_status {
 	
   my $self		= shift;
@@ -176,13 +250,47 @@ sub get_status {
   # produce json output
   my $json = JSON::PP->new->pretty;
   $json = $json->sort_by(sub { $JSON::PP::a cmp $JSON::PP::b })->encode($self->{ 'views' });
-
+  
   return $json;
   
 }
 
 
-# get data
+#----------------------------------------------------------------
+
+=head1 METHODS	
+
+=head2 get_details
+
+ get_details ( 'bp' => $business_process )
+
+Connects to BPAddon API and fetches service status details for all
+services of this business process.
+Returns JSON data.
+
+  my $json = $get_details( 'bp' => $business_process );
+  
+$VAR1 = {
+   "priority_definitions" : {},
+   "business_process" : {
+      "hardstate" : "OK",
+      "components" : [
+         {
+            "hardstate" : "OK",
+            "plugin_output" : "HTTP OK: HTTP/1.1 302 Moved Temporarily - 351 bytes in 0.187 second response time",
+            "service" : "HTTPS Check",
+            "host" : "localhost"
+         }
+      ],
+      "bp_id" : "production-mail-lb",
+      "display_name" : "Loadbalancer",
+      "display_prio" : "0"
+   },
+   "json_created" : "2013-07-23 15:41:19"
+}
+
+=cut
+
 sub get_details {
 	
   my $self		= shift;
@@ -200,16 +308,19 @@ sub get_details {
   if (! $self->{ 'provider' } eq "bpaddon" ){
   	croak "Unsupported provider: " . $self->{ 'provider' };
   }
+  
+  # set default timeout if missing
+  if (! defined $self->{ 'provdata' }{ 'timeout' }){ $self->{ 'provdata' }{ 'timeout' } = 10; };
    
   # connect to BP Addon API
   
   # construct URL
-  #https://monitoring.ovido.at/nagiosbp/cgi-bin/nagios-bp.cgi?detail=production-mail-lb&conf=bpview&outformat=json
+  #https://localhost/nagiosbp/cgi-bin/nagios-bp.cgi?detail=production-mail-lb&conf=bpview&outformat=json
   my $url = $self->{ 'provdata' }{ 'cgi_url' } . "/nagios-bp.cgi?detail=" . $self->{ 'bp' } . "&conf=" . $self->{ 'provdata' }{ 'conf' } . "&outformat=json";
   
   # connect to API
   my $ra = LWP::UserAgent->new();
-  $ra->timeout(10);					# TODO: Config option
+  $ra->timeout( $self->{ 'provdata' }{ 'timeout' } );
   
   # skip SSL certificate verification
   if (LWP::UserAgent->VERSION >= 6.0){
@@ -254,6 +365,8 @@ sub get_details {
 }
 
 
+#----------------------------------------------------------------
+
 # internal methods
 ##################
 
@@ -281,6 +394,8 @@ sub _query_ido {
 }
 
 
+#----------------------------------------------------------------
+
 # get service status from IDOutils
 sub _get_ido {
 	
@@ -292,9 +407,11 @@ sub _get_ido {
   my $dsn = undef;
   # database driver
   if ($self->{'provdata'}{'type'} eq "mysql"){
+    use DBI;	  # MySQL
   	$dsn = "DBI:mysql:database=$self->{'provdata'}{'database'};host=$self->{'provdata'}{'host'};port=$self->{'provdata'}{'port'}";
-  }elsif ($self->{'provdata'}{'type'} eq "postgresql"){
-  	
+  }elsif ($self->{'provdata'}{'type'} eq "pgsql"){
+	use DBD::Pg;  # PostgreSQL
+  	$dsn = "DBI:pg:dbname=$self->{'provdata'}{'database'};host=$self->{'provdata'}{'host'};port=$self->{'provdata'}{'port'}";
   }else{
   	croak "Unsupported database type: $self->{'provdata'}{'type'}";
   }
@@ -332,3 +449,50 @@ sub _get_ido {
 }
 
 1;
+
+
+=head1 EXAMPLES
+
+Get business process status from IDO backend
+
+  use BPView::Data;
+  my $dashboard = BPView::Data->new(
+  	 views		=> $views,
+   	 provider	=> "ido",
+   	 provdata	=> $provdata,
+  );	
+  $json = $dashboard->get_status();
+    
+    
+Get business process details from BPAddon API for business process
+production-mail-lb
+
+  use BPView::Data;
+  my $details = BPView::Data->new(
+  	provider	=> 'bpaddon',
+  	provdata	=> $provdata,
+  	bp			=> "production-mail-lb",
+  );
+  $json = $details->get_details();
+
+
+=head1 SEE ALSO
+
+See BPView::Config for reading and parsing config files.
+
+=head1 AUTHOR
+
+Rene Koch, E<lt>r.koch@ovido.atE<gt>
+
+=head1 VERSION
+
+Version 1.000  (July 23 2013))
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2013 by ovido gmbh
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as BPView itself.
+
+=cut
