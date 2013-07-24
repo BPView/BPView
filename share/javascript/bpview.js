@@ -72,9 +72,21 @@ function getDbOverview(){
 			// set class for status code
 			var statusClass = "state" + productval.state;
 			var bpName      = productval.bpname;
-			  
+
+
+
+			var products_short = (products.length > 20) ? products.substr(0,20) + " ..." : products;
+
+				
+			
+
 			//products
-		    jsonData += "      <div id=\"" + bpName +"\" class=\"tile " + statusClass + "\">" + products + "</div>\n";
+		    jsonData += "      <div id=\"" + bpName +"\" class=\"tile " + statusClass + "\" title=\"" + products + "\">" + products_short + "</div>\n";
+		    
+
+
+			//products
+//		    jsonData += "      <div id=\"" + bpName +"\" class=\"tile " + statusClass + "\">" + products + "</div>\n";
 		    
 		  });
 			  

@@ -212,7 +212,24 @@ display: block;
   font-size: 14px;
 }
 
-
+.tooltip {
+	border-bottom: 1px dotted #000000;
+	color: #000000;
+	outline: none;
+	text-decoration: none;
+	position: relative;
+}
+.tooltip span {
+	margin-left: -999em;
+	position: absolute;
+}
+.classic {
+	background: #FFFFAA;
+	border: 1px solid #FFAD33;
+}
+.classic {
+	padding: 0.8em 1em;
+}
 
 
 .form-select {
