@@ -21,8 +21,10 @@
 # along with BPView.  
 # If not, see <http://www.gnu.org/licenses/>.
 %]
-
-
-<!--   <div id="footer">C) 2013, ovido gmbh</div>   -->
+	</div>
+	<div class="footer topBar">
+		<div id="copyr">&copy; 2013, ovido gmbh</div>
+		<div id="refresh">Last refresh</div>
+	</div>
   </body>
 </html>

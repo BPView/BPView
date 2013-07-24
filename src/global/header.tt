@@ -28,17 +28,19 @@
       var refreshInterval = [% refresh_interval %];
     </script>
     <script src="[% site_url %]/share/javascript/jquery-1.10.1.js"></script>
+    <script src="[% site_url %]/share/javascript/moment.min.js"></script>
     <script src="[% site_url %]/share/javascript/bpview.js"></script>
   </head>
   <body>
-      <div class="topContainer">
-        <div style="float: left; padding: 10px;"><img src="[% site_url %]/share/images/[% templ %]/logo.png" alt="Logo" /></div>
-        <div style="float: left;"><h1>Business Process View</h1></div>
-        <div style="float: right; padding: 10px;">
-	          <select name="dashboards" id="dashboards" size="1">
-	          [% FOR db = content %]
-	            <option>[% db %]</option>
-	          [% END %]
-	          </select>
+	<div class="topContainer topBar">
+		<div id="nametag">
+        	<span id="appname">BPView</span>
+        	<span id="appdesc">a universal <b>B</b>usiness <b>P</b>rocess <b>View</b> UI for Icinga and Nagios</span>
+    	</div>
+		<div class="form-select" id="dashboard_select">Dashboard: <select name="dashboards" id="dashboards" size="1">
+				          [% FOR db = content %]
+				            <option>[% db %]</option>
+				          [% END %]
+				          </select>
 		</div>
-      </div>
+	</div>

@@ -59,7 +59,7 @@ function getDbOverview(){
 	  $.each(data, function(environment, envval){
 		
 	    // main environments
-  	    jsonData += "<div class=\"environment\">" + environment + "</div>\n";
+  	    jsonData += "<div class=\"environment\">" + environment + "\n";
   	    
 		$.each(envval, function(groups, groupval){
 			
@@ -81,7 +81,7 @@ function getDbOverview(){
 		jsonData += "    </div>\n";
 		
 		});
-			
+		jsonData += "  </div>\n";		
 	  });
 	  
 	  // display error message on empty returns
@@ -90,10 +90,10 @@ function getDbOverview(){
 	  }
 	  
 	  // show last refresh date
-	  var date = new Date();
-//	  jsonData += "<div>&nbsp;</div>";
-//	  jsonData += "<div>Last refresh: " + date + "</div>";
-		
+	  // TODO: Change the date format setting to dynamicly generated based on a config-value (bpview.yml)
+	  var date = moment().format('DD.MM.YYYY, HH:mm:ss');
+	  $('#refresh').replaceWith("<div id=\"refresh\">Last refresh: <b>" + date + "</b></div>");
+	  
       // create new start page
 	  $('#bps').empty();
 	  $('#bps').append(jsonData);

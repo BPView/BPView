@@ -3,16 +3,30 @@ html, body {
 	line-height: 1.4;
 	font-family: Interstate,'Liberation Sans',Helvetica,Arial,sans-serif;
 	background: white;
-	height 100%;
+	height: 100%;
 }
 body {
+  margin: 0px;
+  padding: 0px;
+
+}
+
+#page {
   margin: 4px;
   padding: 4px;
+  min-height: 95%;
 }
 
 .environment {
-  padding-top: 25px;
+/*  padding-top: 25px; */
   font-size: 24px;
+  padding: 8px;
+  margin: 3px;
+  margin-right: 0px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  border: 1px solid black;
+  box-shadow: rgb(102, 102, 102) 0px 3px 3px;
 }
 
 .groups {
@@ -28,7 +42,8 @@ body {
   border: 1px solid black;
   overflow: hidden;
   display: table;
-  width: 98%;
+  width: 97%;
+  overflow: auto;
   background: rgb(238, 238, 238);
 }
 
@@ -50,11 +65,15 @@ body {
 /* Status OK */
 .state0 {
   background-color: #14FF14;
+  cursor: pointer;
+  cursor: hand;
 }
 
 /* Status WARNING */
 .state1 {
   background-color: yellow;
+  cursor: pointer;
+  cursor: hand;
 }
 
 /* Status CRITICAL */
@@ -62,59 +81,64 @@ body {
   background-color: #FF1414;
   color: white;
   font-weight:bold;
-  
+  cursor: pointer;
+  cursor: hand;  
 }
 
 /* State UNKNOWN */
 .state3 {
   background-color: orange;
+  cursor: pointer;
+  cursor: hand;
 }
 
 /* State Not-Monitored */
 .state99 {
   background-color: lightgrey;
+  cursor: url(/bpview/share/images/global/cursor-not-allowed.gif), not-allowed;
 }
 
 .topContainer {
-  padding-bottom: 85px;
+  width: 100%;
+  height: 45px;
+  position: fixed;
+  top: 0;
+}
+
+.topBar {
+    background-color: rgb(63, 63, 63);
+    color: white;
 }
 
 .main {
-  margin-top: 1px;
+  margin: 75px 4px 4px 4px;
+  padding: 4px;
 }
 
-#footer {
-  height: 25px;
-  background-color: #333333;
-  color: #FFFFFF;
+.footer {
+  height: 26px;
   font-size: 12px;
-/*  position: absolute; */
   bottom: 0;
-  left: 10px;
-  width: 100%;
+  width: 100%;  
+  position: fixed;
 }
 
 .bpsContainer, .detailsContainer {
-  margin-left: 10px;
-  margin-right: 10px;
-  padding: 10px;
-  margin: 5px;
-  border-radius: 4px;
-  border: 1px solid black;
-  box-shadow: rgb(102, 102, 102) 0px 3px 3px;
+/*  padding-bottom: 75px; */
   
 }
 
 .bpsContainer {
-  width: 64%;
+  width: 65%;
   float: left;
 }
 
 .detailsContainer {
-  width: 32%;
+  width: 33%;
   float: right;
-  padding: 10px;
-  margin: 5px;
+  padding: 8px;
+  margin: 3px;
+  margin-left: 0px;
   border-radius: 4px;
   border: 1px solid black;
   box-shadow: rgb(102, 102, 102) 0px 3px 3px;
@@ -153,4 +177,44 @@ display: block;
 .closePopup {
   border: 1px solid;
   cursor: pointer;
+}
+
+#copyr {
+  float: left;
+  padding: 3px 0px 0px 5px;
+  
+}
+
+#refresh {
+  font-size: 13px;
+  float: right;
+  padding: 3px 5px 0px 0px;
+}
+
+#dashboard_select {
+	font-size: 14px;
+	float: right;
+	padding: 12px 5px 0px 0px;
+}
+
+#nametag {
+  float: left;
+  padding-left: 5px
+}
+
+#appname {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+#appdesc {
+  margin-left: 10px;
+  font-size: 14px;
+}
+
+
+
+
+.form-select {
+  /* hmmm */
 }
