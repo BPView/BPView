@@ -129,8 +129,8 @@ body {
 }
 
 .bpsContainer {
-  width: 65%;
-  float: left;
+/*   width: 65%; */
+/*   float: left;  */
 }
 
 .detailsContainer {
@@ -142,7 +142,7 @@ body {
   border-radius: 4px;
   border: 1px solid black;
   box-shadow: rgb(102, 102, 102) 0px 3px 3px;
-
+text-align: center;
 
 }
 
@@ -182,7 +182,6 @@ display: block;
 #copyr {
   float: left;
   padding: 3px 0px 0px 5px;
-  
 }
 
 #refresh {
@@ -267,43 +266,47 @@ border-radius: 0px;
 font-weight: bold;
 }
 
-.detail_system, .detail_host, .detail_service, .detail_output, .detail_system_services {
-display: table;
-}
-
 .detail_system {
+border: 1px solid black;
+display: table;
 margin: 4px;
-padding: 4px;
-border-bottom: 1px solid black;
 }
 
 .detail_host {
-background-color: red;
-width: 978px;
+width: 961px;
+border-bottom: 0px;
+display: table;
+padding: 1px 0px 1px 5px;
 }
 
 .detail_system_services {
-/* padding: 1px 3px 1px 3px */
-/* margin: 0px 0px 10px 0px; */
-width: 974px;
-background-color: rgb(63, 163, 255);
 }
 
 .detail_service {
 float: left;
-padding-left: 50px;
+padding: 0px 0px 0px 20px;
 width: 300px;
+display: table-cell;
+vertical-align: middle;
+border: 1px dashed grey;
 }
 
 .detail_status {
 float: left;
-width: 100px;
+width: 85px;
+text-align: center;
+display: table-cell;
+vertical-align: middle;
+border: 1px dashed grey;
 }
 
 .detail_output {
-width: 300px;
+width: 560px;
 float: left;
-background-color: green;
+border-top: 1px dashed grey;
+border-bottom: 1px dashed grey;
+display: table-cell;
+vertical-align: middle;
 }
 
 

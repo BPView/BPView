@@ -29,9 +29,9 @@
           [%# Business Process DIV #%]
           <div class="bpsContainer" id="bps"></div>
           
-          [%# Details DIV #%]
+  <!--        [%# Details DIV #%]
           <div class="detailsContainer" id="details">Select a product on the left for a detail status view.</div>
-          
+-->          
       </div>
 
 [% INCLUDE footer.tt %]
