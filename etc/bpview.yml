@@ -1,16 +1,127 @@
+#
+# This is the main BPView configuration file.  It contains the
+# configuration directives that give the webtool its instructions.
+#
+
+
+#
+# This is the main BPView config block which controls the basic
+# behaviour of BPView. The configuration format is YAML.
+#
+# Make sure to use correct YAML syntax and especially don't use
+# tabs instead of spaces!
+#
+# The structure and shifting hast to be:
+# bpview:
+#   src_dir: <src_dir>
+#   data_dir: <data_dir>
+#   site_url: <site_url>
+#   template: <template>
+#
+
+bpview:
+
+#
+# src_dir: path to Template Toolkit source directory.
+#    This directory contains templates for displaying BPView main
+#    webpage.
+#
+#    You can override these templates with your custom ones by
+#    defining a new template name and copying the files to be
+#    modified from global folder to your template name folder. 
+#
+
+  src_dir: /data/www/BPView/src
+  
+#
+# data_dir: path to the data directory.
+#    This directory contains static data required for generating
+#    BPView webpage including javascript code, CSS style sheets
+#    and images.
+#
+#    You can override CSS style sheets with your custom ones by
+#    defining a new template name and copying the files to be
+#    modified from global folder to your template name folder.
+#
+#    To change images also copy them into a folder named same as
+#    the template specified in this configuration file.
+#
+  
+  data_dir: /data/www/BPView/share
+  
+#
+# site_url: site URL of BPView webpage (default: /bpview)
+#    This URL is required to be able to find images, style sheets
+#    and javascript files.
+#
+#    You can change this to whatever URL you want. Just make sure
+#    to configure your webserver accordingly.
+#    See sample-config folder for an example Apache configuration
+#    for site_url /bpview.
+#
+#
+  
+  site_url: /bpview
+
+#
+# template: name of the template to use (default: default)
+#    This configuration options lets you create own CSS style sheets,
+#    Template Toolkit templates and custom images.
+#
+#    When changing the template name make sure to have a folder named
+#    same as the template in:
+#      * src_dir/
+#      * data_dir/css
+#      * data_dir/images
+#
+  
+  template: default
+
+    
+# ---
+  
+#
+# This is the BPView refresh interval config block.
+# behaviour of BPView. The configuration format is YAML.
+#
+# Make sure to use correct YAML syntax and especially don't use
+# tabs instead of spaces!
+#
+# The structure and shifting hast to be:
+# refresh:
+#   interval: <interval>
+#
+
 refresh:
-  interval: 300
+
+#
+# interval: refresh interval of dashboard overview in seconds
+#    (default: 10)
+#
+
+  interval: 10
+
+    
+# ---
+  
+#
+# Configuration options for future release features.
+# These options aren't used yet!
 
 logging:
   logfile: /var/log/bpview/bpview.log
   level: notice
 
+  
+# ---
+  
 auth:
   provider: ldap
   
-bpview:
-  src_dir: /data/www/BPView/src
-  data_dir: /data/www/BPView/share
-  site_url: /bpview
-  template: default
-  
+
+# ---
+
+    
+#
+# Also make sure to end this file with a newline!
+#
