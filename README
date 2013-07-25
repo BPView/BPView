@@ -12,3 +12,33 @@ What is BPView?
 BPView is the short name for Business Process View. This Tool
 for Nagios and Icinga is used to display a combination of Checks
 in a Business Process.
+
+
+Requirements
+============
+
+Make sure the following requirements are fulfilled:
+  * Webserver (Apache)
+  * Perl
+  * Perl Modules:
+    - CGI
+    - CGI::Carp
+    - CGI::Session
+    - YAML::Syck
+    - File::Spec
+    - JSON::PP
+    - LWP::UserAgent
+    - HTTP::Request
+    - HTTP::Request::Common
+    - Data::Dumper
+    - Template
+    - DBI			# for MySQL
+    - DBD::Pg		# for PostgreSQL
+    
+
+Installation of modules on RHEL 6:
+
+Note: You need RHEL Server Optional channel.
+
+# yum install httpd perl perl-CGI perl-CGI-Session perl-YAML-Syck perl-JSON perl-libwww-perl perl-Template-Toolkit perl-DBI perl-DBD-Pg
+
