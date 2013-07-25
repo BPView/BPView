@@ -26,7 +26,7 @@
 package BPView::Config;
 
 BEGIN {
-    $VERSION = '1.001'; # Don't forget to set version and release
+    $VERSION = '1.002'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -553,7 +553,7 @@ Rene Koch, E<lt>r.koch@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.001  (July 23 2013))
+Version 1.002  (July 25 2013))
 
 =head1 COPYRIGHT AND LICENSE
 
