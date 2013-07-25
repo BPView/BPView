@@ -6,7 +6,7 @@
 	<meta name="description" content="Pod documentation for &lt;pre&gt;  BPView::Config" />
 	<meta name="inputfile" content="../lib/BPView/Config.pm" />
 	<meta name="outputfile" content="../docs/modules/Config.html" />
-	<meta name="created" content="Tue Jul 23 11:50:32 2013" />
+	<meta name="created" content="Thu Jul 25 10:59:43 2013" />
 	<meta name="generator" content="Pod::Xhtml 1.61" />
 </head>
 <body>
@@ -25,6 +25,7 @@
 <ul><li><a href="#read_config">read_config</a></li>
 <li><a href="#read_dir">read_dir</a></li>
 <li><a href="#validate">validate</a></li>
+<li><a href="#process_views">process_views</a></li>
 <li><a href="#get_dashboards">get_dashboards</a></li>
 </ul>
 </li>
@@ -152,6 +153,34 @@ Returns 0 or 1 (Config failure).</p>
 </pre>
 
 </div>
+<h2 id="process_views">process_views</h2>
+<div id="process_views_CONTENT">
+<pre> process_views ( 'config' =&gt; $config)
+
+</pre>
+		<p>Converts an array into hash if products are configured other then expected and
+checks if enviroments, topics and products are defined (empty categories aren't
+allowed.)</p>
+		<p>Expected:
+dashboard:
+  views:
+    environment:
+      topic:
+        product1:
+        product2:</p>
+		<p>Also possible (will be converted into structure above):        
+dashboard:
+  views:
+    environment:
+      topic:
+        - product1
+        - product2</p>
+		<p>Returns converted view config.</p>
+<pre>  $config = $conf-&gt;process_views( 'config' =&gt; $config);
+
+</pre>
+
+</div>
 <h2 id="get_dashboards">get_dashboards</h2>
 <div id="get_dashboards_CONTENT">
 <pre> get_dashboard ( 'config' =&gt; $views)
@@ -179,9 +208,10 @@ Returns dashboard names arrayref.</p>
 <pre>  use BPView::Config;
   my $directory = '/etc/bpview/views';
 
-  my $conf = BPView::Config-&gt;new ( 'directory' =&gt; $directory );
+  my $conf = BPView::Config-&gt;new ( 'dir' =&gt; $directory );
   my $views = $conf-&gt;read_dir();
-  my $dashboards = $conf-&gt;get_dashboards( 'config' =&gt; $views);
+     $views = $conf-&gt;process_views( 'config' =&gt; $views );
+  my $dashboards = $conf-&gt;get_dashboards( 'config' =&gt; $views );
 
 
 
@@ -200,7 +230,7 @@ Returns dashboard names arrayref.</p>
 </div>
 <h1 id="VERSION">VERSION</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="VERSION_CONTENT">
-		<p>Version 1.000  (July 23 2013))</p>
+		<p>Version 1.001  (July 23 2013))</p>
 
 </div>
 <h1 id="COPYRIGHT_AND_LICENSE">COPYRIGHT AND LICENSE</h1><p><a href="#TOP" class="toplink">Top</a></p>

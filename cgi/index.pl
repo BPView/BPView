@@ -90,7 +90,8 @@ if (! $session->param('config')){
 
 if (! $session->param('views')){
   $views = $conf->read_dir( dir	=> $cfg_path . "/views" );
-  # TODO: validate views config!
+  # replaces possible arrays in views with hashes
+  $views = $conf->process_views( 'config' => $views );
   $dashboards = $conf->get_dashboards( 'config' => $views );
   
   $session->param('views', $views);

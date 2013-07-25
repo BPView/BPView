@@ -313,6 +313,100 @@ sub validate {
 
 #----------------------------------------------------------------
 
+=head2 process_views
+
+ process_views ( 'config' => $config)
+
+Converts an array into hash if products are configured other then expected and
+checks if enviroments, topics and products are defined (empty categories aren't
+allowed.)
+
+Expected:
+dashboard:
+  views:
+    environment:
+      topic:
+        product1:
+        product2:
+
+Also possible (will be converted into structure above):        
+dashboard:
+  views:
+    environment:
+      topic:
+        - product1
+        - product2
+
+Returns converted view config.
+
+  $config = $conf->process_views( 'config' => $config);
+
+=cut
+
+sub process_views {
+	
+  my $self		= shift;
+  my %options	= @_;
+  
+  for my $key (keys %options){
+  	if (exists $self->{ $key }){
+  	  $self->{ $key } = $options{ $key };
+  	}else{
+  	  croak "Unknown option: $key";
+  	}
+  }
+  
+  # validation
+  croak ("Missing config!") unless defined $self->{ 'config' };
+  
+  # go through config values
+  my $config = $self->{ 'config' };
+  
+  # go through hash
+  foreach my $view ( keys %{ $config }){
+  	
+  	croak ("Missing 'views' option for view $view") unless ( exists $config->{ $view }{ 'views' } );
+  	croak ("Empty view $view") unless ( $config->{ $view }{ 'views' } );
+  	
+  	foreach my $environment ( keys %{ $config->{ $view }{ 'views' } } ){
+  		
+  	  croak ("Missing topic in environment $environment ($view)") unless ( $config->{ $view }{ 'views' }{ $environment });
+  	  
+  	  foreach my $topic ( keys %{ $config->{ $view }{ 'views' }{ $environment } }){
+  	  	
+  	    croak ("Missing product in topic $topic ($view -> $environment)") unless ( $config->{ $view }{ 'views' }{ $environment }{ $topic });
+  	    
+  	    if (ref ($config->{$view}{'views'}{$environment}{$topic}) eq "ARRAY"){
+  	    	
+  	      my %tmp;
+  	      for (my $i=0;$i<scalar (@{ $config->{ $view }{ 'views' }{ $environment }{ $topic } });$i++){
+  	      
+  	      	$tmp { $config->{ $view }{ 'views' }{ $environment }{ $topic }->[ $i ] } = undef;
+  	      
+  	      }
+  	      
+  	      # replace array with tmp hash values
+  	      undef $config->{ $view }{ 'views' }{ $environment }{ $topic };
+  	      foreach my $key ( keys %tmp ){
+  	      
+  	        $config->{ $view }{ 'views' }{ $environment }{ $topic }{ $key } = $tmp{ $key };
+  	      
+  	      }
+  	    }
+  	  	
+  	  }
+  		
+  	}
+  	
+  }
+  
+  return $config;
+  
+}
+
+
+#----------------------------------------------------------------
+
 =head2 get_dashboards
 
  get_dashboard ( 'config' => $views)
@@ -425,6 +519,7 @@ sub _check_provider {
    
 }
 
+
 1;
 
 
@@ -444,9 +539,10 @@ Read view config files and get dashboard names.
   use BPView::Config;
   my $directory = '/etc/bpview/views';
   
-  my $conf = BPView::Config->new ( 'directory' => $directory );
+  my $conf = BPView::Config->new ( 'dir' => $directory );
   my $views = $conf->read_dir();
-  my $dashboards = $conf->get_dashboards( 'config' => $views);
+     $views = $conf->process_views( 'config' => $views );
+  my $dashboards = $conf->get_dashboards( 'config' => $views );
 
 
 =head1 SEE ALSO
