@@ -22,7 +22,6 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 $(document).ready(function() {
 	
  $('#dashboards').change(function() {
@@ -41,13 +40,22 @@ $(document).ready(function() {
 });
 
 
+
 // clickable products
 $(document).on('click', 'div.tile', function(){
   // open window only if business process is defined
   // TODO: Better JavaScript check!!!
   if ($(this).attr("class") != "tile state99"){
-	getDetails( $(this).attr("id") );
-//    window.open('?details=' + $(this).attr("id"), '_blank', "width=700,height=500,location=no,status=no" )
+	  gHelperJSON = "";
+	var det = getDetails( $(this).attr("id") );
+
+	$.magnificPopup.open({
+		items: {
+			src: '<div class="white-popup"><div id="details_subject" class="topBar">' + $(this).attr("title") +'</div><div id="details_data">Data loading ...</div></div>',
+			type: 'inline'
+		}
+	});
+	//    window.open('?details=' + $(this).attr("id"), '_blank', "width=700,height=500,location=no,status=no" )
   }
 });
   
@@ -65,7 +73,7 @@ function getDbOverview(){
 			
 		  // product groups
 //		  jsonData += "  <div class=\"groups\">" + groups + "</div>\n";
-		  jsonData += "    <div class=\"groupTiles\"><div class=\"groups\">" + groups + "</div>\n";
+		  jsonData += "    <div class=\"groupTiles\"><div id=\"" + groups + "\" class=\"groups\">" + groups + "</div>\n";
 			  
 		  $.each(groupval, function(products, productval){
 			  
@@ -82,8 +90,8 @@ function getDbOverview(){
 
 			//products
 		    jsonData += "      <div id=\"" + bpName +"\" class=\"tile " + statusClass + "\" title=\"" + products + "\">" + products_short + "</div>\n";
+		    //?details=" + $(this).attr("id") + "\
 		    
-
 
 			//products
 //		    jsonData += "      <div id=\"" + bpName +"\" class=\"tile " + statusClass + "\">" + products + "</div>\n";
@@ -125,34 +133,33 @@ function getDbOverview(){
 
 function getDetails(businessProcess) {
 	$.getJSON( "?details=" + businessProcess, function(data){
-  	  var jsonData = "";
-	  $.each(data, function(host, hostval){
+		var jsonData = "";
+		$.each(data, function(host, hostval){
 		
 	    // host names
-  	    jsonData += "<div><div class=\"host\">" + host + "</div>\n";
+  	    jsonData += "<div class=\"detail_system\" id=\"" + host + "\"><div class=\"detail_host\">" + host + "</div>\n";
   	    
 		$.each(hostval, function(service, serviceval){
 			
 		  // service names
-		  jsonData += "    <div><div class=\"service\">" + service + "</div>\n";
-		  jsonData += "    <div class=\"status\">" + serviceval.hardstate + "</div>\n";
-		  jsonData += "    <div class=\"output\">" + serviceval.output + "</div></div>\n";
-			  
+		  jsonData += "    <div class=\"detail_system_services\" id=\"detail_system_services_" + host + "\"><div class=\"detail_service\" id=\"service_" + host + "\">" + service + "</div>\n";
+		  jsonData += "    <div class=\"detail_output\" id=\"output_" + host + "\">" + serviceval.output + "</div>\n";
+		  jsonData += "    <div class=\"detail_status\" id=\"status_" + host + "\">" + serviceval.hardstate + "</div></div>\n";			  
 		});
 		
 		jsonData += "    </div>\n";
 			
 	  });
-	  
 	  // display error message on empty returns
 	  if (jsonData == ""){
 		$('.overlayBG').show();
 	  }
-	  
+  
       // create new details div
 	  $('#details').empty();
-	  $('#details').append(jsonData);
-	  
+	  $('.details').append(jsonData);
+	  $('#details_data').empty();
+	  $('#details_data').append(jsonData);
 	})
 	.fail(function(){ 
 	  // Open DIV popup and inform user about error
