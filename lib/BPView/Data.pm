@@ -411,7 +411,7 @@ sub _get_ido {
   	$dsn = "DBI:mysql:database=$self->{'provdata'}{'database'};host=$self->{'provdata'}{'host'};port=$self->{'provdata'}{'port'}";
   }elsif ($self->{'provdata'}{'type'} eq "pgsql"){
 	use DBD::Pg;  # PostgreSQL
-  	$dsn = "DBI:pg:dbname=$self->{'provdata'}{'database'};host=$self->{'provdata'}{'host'};port=$self->{'provdata'}{'port'}";
+  	$dsn = "DBI:Pg:dbname=$self->{'provdata'}{'database'};host=$self->{'provdata'}{'host'};port=$self->{'provdata'}{'port'}";
   }else{
   	croak "Unsupported database type: $self->{'provdata'}{'type'}";
   }
