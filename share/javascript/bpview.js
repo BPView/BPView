@@ -64,6 +64,12 @@ function getDbOverview(){
         var dashboard = $("#dashboards option:selected").val();
         $.getJSON( "?dashboard=" + dashboard, function(data){
           var jsonData = "";
+          
+          // error handling
+          if (data == 1){
+        	  showErrorMessage();
+          }
+          
           $.each(data, function(environment, envval){
 
             // main environments
@@ -102,11 +108,11 @@ function getDbOverview(){
 
                 });
                 jsonData += "  </div>\n";
-          });
+          })
 
           // display error message on empty returns
           if (jsonData == ""){
-                $('.overlayBG').show();
+        	showErrorMessage();
           }
 
           // show last refresh date
@@ -121,11 +127,7 @@ function getDbOverview(){
         })
         .fail(function(){
           // Open DIV popup and inform user about error
-          console.log("fail");
-          $('.overlayBG').show();
-        })
-        .done(function(){
-          console.log("done");
+          showErrorMessage();
         })
 
 }
@@ -133,8 +135,14 @@ function getDbOverview(){
 
 function getDetails(businessProcess) {
         $.getJSON( "?details=" + businessProcess, function(data){
-                var jsonData = "";
-                $.each(data, function(host, hostval){
+            var jsonData = "";
+            
+            // error handling
+            if (data == 1){
+              showErrorMessage();
+            }
+            
+            $.each(data, function(host, hostval){
 
             // host names
 //          jsonData += "<div class=\"detail_system\"><div class=\"detail_host\">" + host + "</div>\n";
@@ -163,7 +171,7 @@ function getDetails(businessProcess) {
           });
           // display error message on empty returns
           if (jsonData == ""){
-                $('.overlayBG').show();
+        	showErrorMessage();
           }
 
       // create new details div
@@ -174,10 +182,19 @@ function getDetails(businessProcess) {
         })
         .fail(function(){
           // Open DIV popup and inform user about error
-          console.log("fail");
-          $('.overlayBG').show();
+          showErrorMessage();
         })
-        .done(function(){
-          console.log("done");
-        })
+}
+
+
+
+function showErrorMessage(){
+	
+	$.magnificPopup.open({
+        items: {
+                src: '<div class="white-popup"><div id="error_popup" class="topBar">An error occured!</div><div id="details_data">An error occured!<br>Please check error_log of your webserver or try to reload this webapp!</div></div>',
+                type: 'inline'
+        }
+});
+	
 }
