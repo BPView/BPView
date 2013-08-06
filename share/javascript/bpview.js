@@ -145,28 +145,18 @@ function getDetails(businessProcess) {
             $.each(data, function(host, hostval){
 
             // host names
-//          jsonData += "<div class=\"detail_system\"><div class=\"detail_host\">" + host + "</div>\n";
-            jsonData += "<table class=\"details\" width=\"100%\"><tr><td width=\"32%\" class=\"detail_host\">" + host + "</td><td>&nbsp;</td><td width=\"80px\">&nbsp;</td></tr>\n";
+            jsonData += "<table class=\"details\" width=\"100%\">\n";
+            jsonData += "  <colgroup>\n    <col class=\"detail_service\">\n    <col class=\"detail_output\">\n    <col class=\"detail_status\">\n  </colgroup>\n";
+            jsonData += "<thead><tr><th width=\"100%\" class=\"detail_host\" colspan=\"3\">" + host + "</th></tr></thead>\n";
 
                 $.each(hostval, function(service, serviceval){
 
                   // service names
-
-                  var state_div = "";
-
-//                  if (serviceval.hardstate != "OK") {
-                          state_div = " detail_status_" + serviceval.hardstate;
-//                  }
-//                jsonData += "    <div class=\"detail_system_services\"><div class=\"detail_service" + state_div + "\" \"title=\"" + service + "\">" + service + "</div>\n";
-//                jsonData += "    <div class=\"detail_output" + state_div + "\" title=\"" + serviceval.output + "\">" + serviceval.output + "</div>\n";
-//                jsonData += "    <div class=\"detail_status detail_status_" + serviceval.hardstate + "\" title=\"" + serviceval.hardstate + "\">" + serviceval.hardstate + "</div></div>\n";
-
-                  jsonData += "    <tr><td class=\"detail_service" + state_div + " \"title=\"" + service + "\">" + service + "</td>\n";
-                  jsonData += "    <td class=\"detail_output" + state_div + "\" title=\"" + serviceval.output + "\">" + serviceval.output + "</td>\n";
-                  jsonData += "    <td class=\"detail_status detail_status_" + serviceval.hardstate + "\" title=\"" + serviceval.hardstate + "\">" + serviceval.hardstate + "</td></tr>\n";
+                  jsonData += "    <tbody><tr><td class=\"detail_service detail_status_" + serviceval.hardstate + " \"title=\"" + service + "\">" + service + "</td>\n";
+                  jsonData += "    <td class=\"detail_output detail_status_" + serviceval.hardstate + "\" title=\"" + serviceval.output + "\">" + serviceval.output + "</td>\n";
+                  jsonData += "    <td class=\"detail_status detail_status_" + serviceval.hardstate + "\" title=\"" + serviceval.hardstate + "\">" + serviceval.hardstate + "</td></tr></tbody>\n";
                 });
 
-//              jsonData += "    </div>\n";
                 jsonData += "</table>\n";
           });
           // display error message on empty returns

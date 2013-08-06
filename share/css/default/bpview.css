@@ -288,7 +288,7 @@ border-collapse: collapse;
 
 .detail_service {
 padding: 0px 0px 0px 20px;
-width: 25%;
+width: 30%;
 vertical-align: middle;
 border: 1px dotted grey;
 overflow: hidden;
@@ -302,6 +302,7 @@ overflow: hidden;
 text-overflow: ellipsis;
 white-space: nowrap;
 padding: 0px 0px 0px 2px;
+width: 70%;
 }
 
 .detail_status {
