@@ -252,6 +252,18 @@ border: 4px solid black;
 border-radius: 10px;
 }
 
+.error-popup {
+position: relative;
+background: #FFF;
+/* padding: 30px 12px 12px 12px; */
+min-width: 600px;
+max-width: 600px;
+margin: 20px auto;
+/* border: 4px solid black; */
+/* border-radius: 10px; */
+}
+
+
 #details_subject {
 margin: 10px 0px 0px 0px;
 padding: 10px;
@@ -262,6 +274,10 @@ font-size: 18px;
 #details_data {
 border: 1px solid black;
 margin: 0px 0px 0px 0px;
+}
+
+.details_data_error {
+	height: 250px;
 }
 
 .details {
@@ -337,14 +353,18 @@ table{
   border: 1px solid black;
 }
 
+.details_data_error_content_image {
+	float: right;
+	padding: 20px 0px 0px 0px;
+}
 
-
-
-
-
-
-
-
+.details_data_error_content {
+float: left;
+width: 370px;
+height: 100%;
+padding: 70px 0px 0px 20px;
+font-size: 24px;
+}
 
 
 

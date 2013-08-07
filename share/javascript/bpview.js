@@ -181,8 +181,11 @@ function getDetails(businessProcess) {
 function showErrorMessage(){
 	
 	$.magnificPopup.open({
+		enableEscapeKey: false,
+		closeOnBgClick: false,
+		showCloseBtn: false,
         items: {
-                src: '<div class="white-popup"><div id="error_popup" class="topBar">An error occured!</div><div id="details_data">An error occured!<br>Please check error_log of your webserver or try to reload this webapp!</div></div>',
+				src: '<div class="error-popup"><div id="details_subject" class="topBar">An error occured!</div><div id="details_data" class="details_data_error"><div class="details_data_error_content">Please check error_log of your webserver or try to reload this webapp!<br/><span style="font-size:13px;">&nbsp;<br/>(press &lt;F5\&gt; or &lt;CTRL-R&gt;)</span></div><div class="details_data_error_content_image"><img src="../share/images/global/exclamation_mark_red.png"></div></div</div>',
                 type: 'inline'
         }
 });
