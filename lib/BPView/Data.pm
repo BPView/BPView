@@ -26,7 +26,7 @@
 package BPView::Data;
 
 BEGIN {
-    $VERSION = '1.000'; # Don't forget to set version and release
+    $VERSION = '1.010'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -377,7 +377,6 @@ sub _query_ido {
   my $service_names	= shift or croak ("Missing service_names!");
   
   # construct SQL query
-  # TODO: validate if it's working with PostreSQL and MySQL!
   my $sql = "SELECT name2 AS service, current_state AS state FROM " . $self->{'provdata'}{'prefix'} . "objects, " . $self->{'provdata'}{'prefix'} . "servicestatus ";
     $sql .= "WHERE object_id = service_object_id AND is_active = 1 AND name2 IN (";
   # go trough service_names array
@@ -417,7 +416,7 @@ sub _get_ido {
   }
   
   # connect to database
-  my $dbh   = DBI->connect($dsn, $self->{'provdata'}{'username'}, $self->{'provdata'}{'password'});
+  my $dbh   = DBI->connect_cached($dsn, $self->{'provdata'}{'username'}, $self->{'provdata'}{'password'});
   if ($DBI::errstr){
   	push @{ $self->{'errors'} }, "Can't connect to database: $DBI::errstr";
   	return 1;
@@ -426,7 +425,7 @@ sub _get_ido {
   $query->execute;
   if ($DBI::errstr){
   	push @{ $self->{'errors'} }, "Can't execute query: $DBI::errstr";
-    $dbh->disconnect;
+    #$dbh->disconnect;
   	return 1;
   }
   
@@ -442,7 +441,7 @@ sub _get_ido {
   
   
   # disconnect from database
-  $dbh->disconnect;
+  #$dbh->disconnect;
   
   return $result;
   
@@ -486,7 +485,7 @@ Rene Koch, E<lt>r.koch@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.000  (July 23 2013))
+Version 1.010  (August 7 2013))
 
 =head1 COPYRIGHT AND LICENSE
 
