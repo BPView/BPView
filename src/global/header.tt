@@ -38,10 +38,10 @@
         	<span id="appname">BPView</span>
         	<span id="appdesc">a universal <b>B</b>usiness <b>P</b>rocess <b>View</b> UI for Icinga and Nagios</span>
     	</div>
-		<div class="form-select" id="dashboard_select">Dashboard: <select name="dashboards" id="dashboards" size="1">
+		<div id="dashboard_select"><div class="dashboard_subject">Dashboard: </div><div class="form-select"><select name="dashboards" id="dashboards" size="1">
 				          [% FOR db = content %]
 				            <option>[% db %]</option>
 				          [% END %]
-				          </select>
+				          </select></div>
 		</div>
 	</div>

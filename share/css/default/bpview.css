@@ -191,11 +191,7 @@ display: block;
   padding: 3px 5px 0px 0px;
 }
 
-#dashboard_select {
-        font-size: 14px;
-        float: right;
-        padding: 12px 5px 0px 0px;
-}
+
 
 #nametag {
   float: left;
@@ -232,9 +228,38 @@ display: block;
 }
 
 
-.form-select {
-  /* hmmm */
+#dashboard_select {
+        float: right;
+	margin: 12px 5px 0px 0px;
 }
+
+.dashboard_subject {
+font-size: 14px;
+float: left;
+margin: 4px 0px 0px 0px;
+margin-right: 10px;
+}
+
+
+.form-select {
+	float: right;
+overflow: hidden;
+/* width: 250px; */
+/* background: url("/bpview/share/images/global/arrow_orange_down.png") no-repeat #999 225px 0px; */
+background-color: #ddd;
+}
+
+select {
+border: 0;
+background-color: transparent;
+height: 24px;
+border: 1px solid #fff; /*#d8d8d8 */
+width: 250px;
+/*-webkit-appearance: none; */
+}
+
+
+
 
 a {
   display:block;
@@ -365,6 +390,8 @@ height: 100%;
 padding: 70px 0px 0px 20px;
 font-size: 24px;
 }
+
+
 
 
 
