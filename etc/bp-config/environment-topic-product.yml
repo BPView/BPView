@@ -1,0 +1,42 @@
+and:
+  HOST_Nr1:
+    SERVICE_Nr1: true
+    SERVICE_Nr2: false
+    SERVICE_Nr3: true
+  HOST_Nr2:
+    SERVICE_Nr1:
+    SERVICE_Nr2:
+    SERVICE_Nr3:
+    SERVICE_Nr4:
+    SERVICE_Nr5:
+    SERVICE_Nr6:
+  HOST_Nr3:
+    SERVICE_Nr1:
+    SERVICE_Nr2:
+or:
+  HOST_Nr1:
+    SERVICE_Nr1:
+    SERVICE_Nr2:
+    SERVICE_Nr3:
+  HOST_Nr2:
+    SERVICE_Nr1:
+    SERVICE_Nr2:
+    SERVICE_Nr3:
+    SERVICE_Nr4:
+    SERVICE_Nr5:
+    SERVICE_Nr6:
+  HOST_Nr3:
+    SERVICE_Nr1:
+    SERVICE_Nr2:
+min:
+  numb: 1
+  prio: 0 
+  ENV-TOPIC-PROD: BP
+  HOST_Nr2:
+    SERVICE_Nr1:
+    SERVICE_Nr2:
+    SERVICE_Nr3:
+    SERVICE_Nr4:
+    SERVICE_Nr5:
+    SERVICE_Nr6:
+  ENV-TOPIC-PROD2: BP
