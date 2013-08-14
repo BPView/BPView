@@ -47,7 +47,9 @@ use BPView::BPWriter;
 my $conf = BPView::Config->new();
 
 # open config file directory and push configs into hash
-my $config = $conf->read_dir( dir => $cfg_path );
+my $config = eval{ $conf->read_dir( dir => $cfg_path ) };
+die "Reading configuration files failed.\nReason: $@" if $@;
+
 # validate config
 exit 1 unless ( $conf->validate( 'config' => $config ) == 0);
 
