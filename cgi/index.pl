@@ -28,7 +28,7 @@ use warnings;
 use CGI qw(param);
 use CGI::Fast;
 use CGI::Carp qw(fatalsToBrowser);
-use CGI::Session;
+use Log::Log4perl;
 
 
 # for debugging only
@@ -53,15 +53,34 @@ use BPView::Web;
 my $conf = BPView::Config->new();
 
 # open config file directory and push configs into hash
-my $config = $conf->read_dir( dir => $cfg_path );
-# validate config
-exit 1 unless ( $conf->validate( 'config' => $config ) == 0);
+my $config = eval{ $conf->read_dir( dir => $cfg_path ) };
+die "Reading configuration files failed.\nReason: $@" if $@;
 
-my $views = $conf->read_dir( dir	=> $cfg_path . "/views" );
+# initialize Log4perl
+my $logconf = "
+    log4perl.category.BPView.Log		= WARN, Logfile
+    log4perl.appender.Logfile			= Log::Log4perl::Appender::File
+	log4perl.appender.Logfile.filename	= $config->{ 'logging' }{ 'logfile' }
+    log4perl.appender.Logfile.layout	= Log::Log4perl::Layout::PatternLayout
+    log4perl.appender.Logfile.layout.ConversionPattern = %d %F: [%p] %m%n
+";
+Log::Log4perl::init( \$logconf );
+my $log = Log::Log4perl::get_logger("BPView::Log");
+
+
+# validate config
+eval { $conf->validate( 'config' => $config ) };
+$log->error_die($@) if $@;
+
+my $views = eval { $conf->read_dir( dir	=> $cfg_path . "/views" ) };
+$log->error_die($@) if $@;
 # replaces possible arrays in views with hashes
-$views = $conf->process_views( 'config' => $views );
-my $dashboards = $conf->get_dashboards( 'config' => $views );
-  
+$views = eval { $conf->process_views( 'config' => $views ) };
+$log->error_die($@) if $@;
+my $dashboards = eval { $conf->get_dashboards( 'config' => $views ) };
+$log->error_die($@) if $@;
+
+
 
 # loop for FastCGI
 while ( my $q = new CGI::Fast ){
@@ -81,7 +100,8 @@ while ( my $q = new CGI::Fast ){
     	   provider	=> $config->{ 'provider' }{ 'source' },
     	   provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
          );	
-      $json = $dashboard->get_status();
+      $json = eval { $dashboard->get_status() };
+	  $log->error_die($@) if $@;
        
     }elsif (defined param("details")){
   	
@@ -91,11 +111,12 @@ while ( my $q = new CGI::Fast ){
   		  provdata	=> $config->{ 'bpaddon' },
   		  bp		=> param("details"),
   	     );
-  	  $json = $details->get_details();
+  	  $json = eval { $details->get_details() };
+	  $log->error_die($@) if $@;
   	
     }else{
   	
-  	  print "Unknown paramater!\n";
+  	  $log->error_die("Unknown paramater!");
   	
     }
   
@@ -113,11 +134,12 @@ while ( my $q = new CGI::Fast ){
  	  template	=> $config->{ 'bpview' }{ 'template' },
     );
     #   $page->login();
-    $page->display_page(
+    eval{ $page->display_page(
        page		=> "main",
        content	=> $dashboards,
        refresh	=> $config->{ 'refresh' }{ 'interval' },
-    );
+    ) };
+    $log->error_die($@) if $@;
 
   }
 

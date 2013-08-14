@@ -26,13 +26,13 @@
 package BPView::Data;
 
 BEGIN {
-    $VERSION = '1.010'; # Don't forget to set version and release
+    $VERSION = '1.100'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
 use warnings;
 use YAML::Syck;
-use CGI::Carp qw(fatalsToBrowser);
+use Carp;
 use File::Spec;
 use JSON::PP;
 
@@ -416,17 +416,14 @@ sub _get_ido {
   }
   
   # connect to database
-  my $dbh   = DBI->connect_cached($dsn, $self->{'provdata'}{'username'}, $self->{'provdata'}{'password'});
+  my $dbh   = eval { DBI->connect_cached($dsn, $self->{'provdata'}{'username'}, $self->{'provdata'}{'password'}) };
   if ($DBI::errstr){
-  	push @{ $self->{'errors'} }, "Can't connect to database: $DBI::errstr";
-  	return 1;
+  	croak "$DBI::errstr: $@";
   }
-  my $query = $dbh->prepare( $sql );
-  $query->execute;
+  my $query = eval { $dbh->prepare( $sql ) };
+  eval { $query->execute };
   if ($DBI::errstr){
-  	push @{ $self->{'errors'} }, "Can't execute query: $DBI::errstr";
-    #$dbh->disconnect;
-  	return 1;
+  	croak "$DBI::errstr: $@";
   }
   
   # prepare return
@@ -485,7 +482,7 @@ Rene Koch, E<lt>r.koch@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.010  (August 7 2013))
+Version 1.100  (August 14 2013))
 
 =head1 COPYRIGHT AND LICENSE
 
