@@ -146,8 +146,14 @@ bp-addon:
 # The name for the generic service names at Nagios and Icinga Config.
 #
 
-  generic_top: generic-bp-service
-  generic_minor: generic-bp-detail-service
+  generic_service_top: bpview-service
+  generic_service_minor: bpview-detail-service
+
+#
+# The name for the used generic host template at Nagios and Icinga Config.
+#
+
+  generic_host: generic-host
 
 #
 # Path to bp_cfg2service_cfg.pl, a BP-Addon Config Conversation Tool.
@@ -177,13 +183,15 @@ bp-addon:
   ni_output_path: /etc/icinga/objects
 
 #
-# The output file for the generated BP-Addon Config
+# The output file Nagios/Icinga
 # You don't need to change it if you use the packages BP-Addon from our Repository.
 #
 
   ni_output_cfg: bpview_businessprocesses.cfg
 
 
+
+  check_plugin: check_bp_status
 
 #
 # Also make sure to end this file with a newline!

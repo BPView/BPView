@@ -26,7 +26,7 @@ use strict;
 use warnings;
 use YAML::Syck;
 use File::Spec;
-use POSIX qw/strftime/;
+use Log::Log4perl;
 
 # for debugging only
 use Data::Dumper;
@@ -50,96 +50,49 @@ my $conf = BPView::Config->new();
 my $config = eval{ $conf->read_dir( dir => $cfg_path ) };
 die "Reading configuration files failed.\nReason: $@" if $@;
 
+# initialize Log4perl
+my $logconf = "
+    log4perl.category.BPView.Log		= WARN, Logfile
+    log4perl.appender.Logfile			= Log::Log4perl::Appender::File
+	log4perl.appender.Logfile.filename	= $config->{ 'logging' }{ 'logfile' }
+    log4perl.appender.Logfile.layout	= Log::Log4perl::Layout::PatternLayout
+    log4perl.appender.Logfile.layout.ConversionPattern = %d %F: [%p] %m%n
+";
+Log::Log4perl::init( \$logconf );
+my $log = Log::Log4perl::get_logger("BPView::Log");
+
 # validate config
-exit 1 unless ( $conf->validate( 'config' => $config ) == 0);
-
-
-sub error_msg {
-	my $message = shift(@_);
-	print "$message\n";
-}
-
-
-# load custom Perl modules
-use lib "$lib_path";
-##use BPView::Config;
-
-
-
-
-
+eval { $conf->validate( 'config' => $config ) };
+$log->error_die($@) if $@;
 
 # open config file directory and push configs into hash
-my $yaml = $conf->read_dir( dir => $dir );
+my $yaml = eval {$conf->read_dir( dir => $dir )};
+$log->error_die($@) if $@;
 
-exit 1 unless ( $conf->validate_bpconfig( 'config' => $yaml ) == 0);
+eval {$conf->validate_bpconfig( 'config' => $yaml )};
+$log->error_die($@) if $@;
 
-
-
-
-
-my $time = strftime('%A, %d-%b-%Y %H:%M',localtime); ## outputs 17-Dec-2008 10:08
-
-my $output = "#######################################################################\n" .
-			 "#   Automatically generated config file for Business Process Addon \n" .
-			 "#   Generated with: BPView - http://github.com/ovido/BPView    \n" .
-			 "#   Generated on: $time    \n" .
-			 "#######################################################################\n\n\n";
-
-
-foreach my $bp_host (keys %{ $yaml }) {
-
-	my $type_var;
-	
-	if ($yaml->{$bp_host}{'BP'}{'TYPE'} eq "or") {
-		$type_var = "|";
-	}
-	elsif ($yaml->{$bp_host}{'BP'}{'TYPE'} eq "and") {
-		$type_var = "&";
-	}
-	elsif ($yaml->{$bp_host}{'BP'}{'TYPE'} eq "min") {
-		$type_var = "+";
-	}
-	else {
-	#	error_msg("You have an error at the TYPE declaration on file: \"$file\". You need to fix it.");
-		exit;
-	}
-	
-	$output .= "# BP-Definition:  ". $yaml->{$bp_host}{'BP'}{'NAME'} ."\n";
-	$output .= "# BP-Description: ". $yaml->{$bp_host}{'BP'}{'DESC'} ."\n";
-	$output .= "#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+my $gencfg = BPView::BPWriter->new();
 
 
 
+if ($config->{'businessprocess'}{'provider'} eq "bp-addon") {
+	eval {$gencfg->gen_bpaddoncfg( 'bpcfg' => $yaml)};
+	$log->error_die($@) if $@;
 
-	my $bp_text = "$yaml->{$bp_host}{'BP'}{'FILE'} = ";
-	if ($yaml->{$bp_host}{'BP'}{'TYPE'} eq "min") {
-		$bp_text .= "$yaml->{$bp_host}{'BP'}{'MIND'} of: ";
-	}
-
-#production-mail-zarafa = ovido-tyr.dmz.ovido.at;SMTP Check & ovido-tyr.dmz.ovido.at;Zarafa Idle Threads & ovido-tyr.dmz.ovido.at;Zarafa Queue Age
-#display 0;production-mail-zarafa;Zarafa
-
-
-
-	foreach my $key0 (keys %{ $yaml->{$bp_host}{'HOSTS'} }) {
-		foreach my $key1 (keys %{ $yaml->{$bp_host}{'HOSTS'}->{ $key0 } }) {
-			if ($key0 eq "BPROC") {
-				$bp_text .= "$key1;$key1 $type_var ";
-			}
-			else {
-				$bp_text .= "$key0;$key1 $type_var ";
-			}
-		}
-	}
-	$bp_text = substr($bp_text,0,-3," $type_var ");
-	$output .= "$bp_text\n";
-	$output .= "display $yaml->{$bp_host}{'BP'}{'DISP'};$yaml->{$bp_host}{'BP'}{'FILE'};$yaml->{$bp_host}{'BP'}{'NAME'}\n";
-	$output .= "###########################################################################\n\n\n\n";
-
-
+	eval {$gencfg->gen_nicfg( 'bpcfg' => $yaml,
+							  'config' => $config )};
+	$log->error_die($@) if $@;	
+}
+else {
+	next;
 }
 
-print $output;
+
+
+
+
+
+
 
 exit 0;
