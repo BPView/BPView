@@ -1,17 +1,19 @@
-env-topic-product:
+env-topic-product2:
   BP: 
-    FILE: env-topic-product
-    NAME: "OR-BP"
-    DESC: "This BP is an OR construct. It isn't my favorite sample"
-    TYPE: or
+    FILE: env-topic-product2
+    NAME: "AND-BP"
+    DESC: "This BP is an AND construct. It isn't my favorite sample"
+    TYPE: and
     DISP: 0
     MIND: 0
   HOSTS:
     host-nr1:
       service_nr1:
+    host-nr2:
+      service_nr1:
       service_nr2:
       service_nr3:
-    host-nr2:
+    host-nr3:
       service_nr1:
       service_nr2:
     BPROC:

@@ -119,9 +119,72 @@ auth:
   provider: ldap
   
 
-# ---
 
-    
+##################################################################
+#
+# This is the BPView Businessprocess generation config block.
+#
+##################################################################
+
+
+businessprocess:
+
+#    This requires a configuration block with the same name later
+#    in this configuration file.
+#    Supported values are:
+#      * bp-addon (for Nagios and Icinga)
+#      * ......
+
+  provider: bp-addon
+
+#
+# This is the config block for the BP-Addon. 
+
+bp-addon:
+
+#
+# The name for the generic service names at Nagios and Icinga Config.
+#
+
+  generic_top: generic-bp-service
+  generic_minor: generic-bp-detail-service
+
+#
+# Path to bp_cfg2service_cfg.pl, a BP-Addon Config Conversation Tool.
+# You don't need to change it if you use the packages BP-Addon from our Repository. 
+#
+
+  cfg2service_path: /usr/bin/bp_cfg2service_cfg.pl
+
+#
+# The output dir for the generated BP-Addon Config (without trailing slash)
+# You don't need to change it if you use the packages BP-Addon from our Repository.  
+#
+
+  bp_output_path: /etc/icinga/objects
+
+#
+# The output file for the generated BP-Addon Config
+# You don't need to change it if you use the packages BP-Addon from our Repository.
+#
+
+  bp_output_cfg: bpview.conf
+
+#
+# The output dir for the generated Nagios and Icinga Config Config (without trailing slash)
+#
+
+  ni_output_path: /etc/icinga/objects
+
+#
+# The output file for the generated BP-Addon Config
+# You don't need to change it if you use the packages BP-Addon from our Repository.
+#
+
+  ni_output_cfg: bpview_businessprocesses.cfg
+
+
+
 #
 # Also make sure to end this file with a newline!
 #

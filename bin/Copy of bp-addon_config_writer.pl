@@ -24,24 +24,23 @@
 
 use strict;
 use warnings;
-use YAML::Syck;
-use File::Spec;
-use POSIX qw/strftime/;
 
 # for debugging only
 use Data::Dumper;
+use YAML::Syck;
+use File::Spec;
+use POSIX qw/strftime/;
 
 # define default paths required to read config files
 my ($lib_path, $cfg_path, $dir);
 BEGIN {
   $lib_path = "../lib";		# path to BPView lib directory
   $cfg_path = "../etc";		# path to BPView etc directory
-  $dir		= $cfg_path . "/bp-config";
+  $dir = $cfg_path . "/bp-config";
 }
 
 use lib "$lib_path";
 use BPView::Config;
-use BPView::BPWriter;
 
 # open config files if not cached
 my $conf = BPView::Config->new();
@@ -62,20 +61,6 @@ sub error_msg {
 use lib "$lib_path";
 ##use BPView::Config;
 
-
-
-
-
-
-# open config file directory and push configs into hash
-my $yaml = $conf->read_dir( dir => $dir );
-
-exit 1 unless ( $conf->validate_bpconfig( 'config' => $yaml ) == 0);
-
-
-
-
-
 my $time = strftime('%A, %d-%b-%Y %H:%M',localtime); ## outputs 17-Dec-2008 10:08
 
 my $output = "#######################################################################\n" .
@@ -84,35 +69,52 @@ my $output = "##################################################################
 			 "#   Generated on: $time    \n" .
 			 "#######################################################################\n\n\n";
 
+my %conf;
 
-foreach my $bp_host (keys %{ $yaml }) {
+# get list of config files
+opendir (CONFDIR, $dir) or croak ("Can't open directory $dir: $!");
+
+while (my $file = readdir (CONFDIR)) {
+
+	next if $file =~ /\.\./;
+
+	# use absolute path instead of relative
+	$file = File::Spec->rel2abs($dir . "/" . $file);
+
+	# skip directories and non *.yml files
+	next if -d $file;
+	next unless $file =~ /\.yml$/;
+	chomp $file;
+
+	$YAML::Syck::ImplicitTyping = 1;
+	my $yaml = LoadFile($file);
 
 	my $type_var;
 	
-	if ($yaml->{$bp_host}{'BP'}{'TYPE'} eq "or") {
+	if ($yaml->{'BP'}{'TYPE'} eq "or") {
 		$type_var = "|";
 	}
-	elsif ($yaml->{$bp_host}{'BP'}{'TYPE'} eq "and") {
+	elsif ($yaml->{'BP'}{'TYPE'} eq "and") {
 		$type_var = "&";
 	}
-	elsif ($yaml->{$bp_host}{'BP'}{'TYPE'} eq "min") {
+	elsif ($yaml->{'BP'}{'TYPE'} eq "min") {
 		$type_var = "+";
 	}
 	else {
-	#	error_msg("You have an error at the TYPE declaration on file: \"$file\". You need to fix it.");
+		error_msg("You have an error at the TYPE declaration on file: \"$file\". You need to fix it.");
 		exit;
 	}
 	
-	$output .= "# BP-Definition:  ". $yaml->{$bp_host}{'BP'}{'NAME'} ."\n";
-	$output .= "# BP-Description: ". $yaml->{$bp_host}{'BP'}{'DESC'} ."\n";
+	$output .= "# BP-Definition:  ". $yaml->{'BP'}{'NAME'} ."\n";
+	$output .= "# BP-Description: ". $yaml->{'BP'}{'DESC'} ."\n";
 	$output .= "#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
 
 
 
-	my $bp_text = "$yaml->{$bp_host}{'BP'}{'FILE'} = ";
-	if ($yaml->{$bp_host}{'BP'}{'TYPE'} eq "min") {
-		$bp_text .= "$yaml->{$bp_host}{'BP'}{'MIND'} of: ";
+	my $bp_text = "$yaml->{'BP'}{'FILE'} = ";
+	if ($yaml->{'BP'}{'TYPE'} eq "min") {
+		$bp_text .= "$yaml->{'BP'}{'MIND'} of: ";
 	}
 
 #production-mail-zarafa = ovido-tyr.dmz.ovido.at;SMTP Check & ovido-tyr.dmz.ovido.at;Zarafa Idle Threads & ovido-tyr.dmz.ovido.at;Zarafa Queue Age
@@ -120,8 +122,8 @@ foreach my $bp_host (keys %{ $yaml }) {
 
 
 
-	foreach my $key0 (keys %{ $yaml->{$bp_host}{'HOSTS'} }) {
-		foreach my $key1 (keys %{ $yaml->{$bp_host}{'HOSTS'}->{ $key0 } }) {
+	foreach my $key0 (keys %{ $yaml->{'HOSTS'} }) {
+		foreach my $key1 (keys %{ $yaml->{'HOSTS'}->{ $key0 } }) {
 			if ($key0 eq "BPROC") {
 				$bp_text .= "$key1;$key1 $type_var ";
 			}
@@ -132,11 +134,12 @@ foreach my $bp_host (keys %{ $yaml }) {
 	}
 	$bp_text = substr($bp_text,0,-3," $type_var ");
 	$output .= "$bp_text\n";
-	$output .= "display $yaml->{$bp_host}{'BP'}{'DISP'};$yaml->{$bp_host}{'BP'}{'FILE'};$yaml->{$bp_host}{'BP'}{'NAME'}\n";
+	$output .= "display $yaml->{'BP'}{'DISP'};$yaml->{'BP'}{'FILE'};$yaml->{'BP'}{'NAME'}\n";
 	$output .= "###########################################################################\n\n\n\n";
 
-
 }
+
+closedir (CONFDIR);
 
 print $output;
 
