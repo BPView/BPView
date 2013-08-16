@@ -431,6 +431,72 @@ sub get_dashboards {
 }
 
 
+
+#----------------------------------------------------------------
+
+=head2 validate_bpconfig
+
+ validate_bpconfig ( 'config' => $config)
+
+Validates a specified hashref if required parameters are present.
+Errors are printed out.
+Returns 0 or 1 (Config failure).
+
+  my $config = $conf->validate_bpconfig( 'config' => $config);
+
+=cut
+
+sub validate_bpconfig {
+	
+	my $self	= shift;
+	my %options	= @_;
+	
+	for my $key (keys %options){
+		if (exists $self->{ $key }){
+			$self->{ $key } = $options{ $key };
+		}else{
+			croak "Unknown option: $key";
+		}
+	}
+
+	# validation
+	croak ("Missing config!") unless defined $self->{ 'config' };
+
+	# go through config values
+	my $config = $self->{ 'config' };
+	# parameters given?
+
+	foreach my $bp_host (keys %{ $config }) {
+		push @{ $self->{'errors'} }, "HOSTS value missing!"  unless $config->{$bp_host}{'HOSTS'};
+		push @{ $self->{'errors'} }, "BP value missing!"  unless $config->{$bp_host}{'BP'};
+
+		foreach my $key0 (keys %{ $config->{$bp_host}{'HOSTS'} }) {
+			push @{ $self->{'errors'} }, "Host definition or BPROC definition missing!"  unless $config->{$bp_host}{'HOSTS'}{$key0};
+
+			unless ($config->{$bp_host}{'BP'}) {
+				foreach my $key1 (keys %{ $config->{$bp_host}{'HOSTS'}{ $key0 } }) {
+					push @{ $self->{'errors'} }, "Service definition definition missing!"  unless $config->{$bp_host}{'HOSTS'}{$key0}{$key1};
+				}
+			}
+		}
+	}
+	# print errors
+	if ($self->{'errors'}){
+		print "<p>";
+		print "Configuration validation failed: <br />";
+	 
+		for (my $x=0;$x< scalar @{ $self->{'errors'} };$x++){
+			print $self->{'errors'}->[$x] . "<br />";
+		}
+	  
+		print "</p>";
+		return 1;
+	}
+	return 0;
+}
+
+
+
 #----------------------------------------------------------------
 
 # internal methods
@@ -531,10 +597,11 @@ Read view config files and get dashboard names.
 =head1 AUTHOR
 
 Rene Koch, E<lt>r.koch@ovido.atE<gt>
+Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.100  (Aug 14 2013))
+Version 1.002  (July 25 2013))
 
 =head1 COPYRIGHT AND LICENSE
 
