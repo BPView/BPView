@@ -31,7 +31,7 @@ bpview:
 #    modified from global folder to your template name folder. 
 #
 
-  src_dir: /data/www/BPView/src
+  src_dir: /data/www/BPView/share/src
   
 #
 # data_dir: path to the data directory.
