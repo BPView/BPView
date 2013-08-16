@@ -1,6 +1,5 @@
-env-topic-product:
-  BP: 
-    FILE: env-topic-product
+env-topic-product_or:
+  BP:
     NAME: "OR-BP"
     DESC: "This BP is an OR construct. It isn't my favorite sample"
     TYPE: or

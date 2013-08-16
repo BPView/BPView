@@ -1,6 +1,5 @@
-env-topic-product2:
-  BP: 
-    FILE: env-topic-product2
+env-topic-product_and:
+  BP:
     NAME: "AND-BP"
     DESC: "This BP is an AND construct. It isn't my favorite sample"
     TYPE: and

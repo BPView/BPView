@@ -1,6 +1,5 @@
-env-topic-product-min:
-  BP: 
-    FILE: env-topic-product-min
+env-topic-product_min:
+  BP:
     NAME: "The Name"
     DESC: "This BP is my favorite sample"
     TYPE: min
