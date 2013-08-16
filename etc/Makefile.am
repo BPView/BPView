@@ -27,6 +27,7 @@ all:
 	sed -i 's!src_dir: /data/www/BPView/share/src!src_dir: $(DATAROOTDIR)/src!' $(CONF).tmp
 	sed -i 's!logfile: /data/www/BPView/log/bpview.log!logfile: $(LOCALSTATEDIR)/log/bpview.log!' $(CONF).tmp
 	cp $(CONF).tmp $(CONF).yml
+	cp datasource.yml.in datasource.yml
 	rm -f $(CONF).tmp
 
 # install
