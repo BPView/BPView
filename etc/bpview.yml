@@ -156,18 +156,12 @@ bp-addon:
   generic_host: generic-host
 
 #
-# Path to bp_cfg2service_cfg.pl, a BP-Addon Config Conversation Tool.
-# You don't need to change it if you use the packages BP-Addon from our Repository. 
-#
-
-  cfg2service_path: /usr/bin/bp_cfg2service_cfg.pl
-
-#
 # The output dir for the generated BP-Addon Config (without trailing slash)
 # You don't need to change it if you use the packages BP-Addon from our Repository.  
 #
 
-  bp_output_path: /etc/icinga/objects
+ #  bp_output_path: /etc/icinga/objects
+  bp_output_path: /tmp/haha
 
 #
 # The output file for the generated BP-Addon Config
@@ -180,7 +174,8 @@ bp-addon:
 # The output dir for the generated Nagios and Icinga Config Config (without trailing slash)
 #
 
-  ni_output_path: /etc/icinga/objects
+#  ni_output_path: /etc/icinga/objects
+  ni_output_path: /tmp/haha
 
 #
 # The output file Nagios/Icinga

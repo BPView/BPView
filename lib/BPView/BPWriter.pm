@@ -31,7 +31,7 @@ BEGIN {
 
 use strict;
 use warnings;
-use CGI::Carp qw(fatalsToBrowser);
+use CGI::Carp;
 use File::Spec;
 use POSIX qw/strftime/;
 use Log::Log4perl;
@@ -129,9 +129,9 @@ sub gen_bpaddoncfg {
 			croak "Unknown option: $key";
 		}
 	}
+	my $return = 0;
 	my $yaml = $self->{ 'bpcfg' };
 	my $config	= $self->{ 'config' };
-
 	my $output = "#######################################################################\n" .
 				 "#   Automatically generated config file for Business Process Addon \n" .
 				 "#   Generated with: BPView - http://github.com/ovido/BPView    \n" .
@@ -184,7 +184,17 @@ sub gen_bpaddoncfg {
 	
 	
 	}
-	_write_config($config->{'bp-addon'}{'bp_output_path'}, $config->{'bp-addon'}{'bp_output_cfg'}, $output);
+	eval { _write_file($config->{'bp-addon'}{'bp_output_path'}, $config->{'bp-addon'}{'bp_output_cfg'}, $output) };
+	if ($@) {
+		if ($config->{'logging'}{'level'} eq "debug") {
+			print $@;
+		}
+		croak "Do you have a permission problem? Unable to write to $config->{'bp-addon'}{'bp_output_path'}, $config->{'bp-addon'}{'bp_output_cfg'}";
+		return 1;
+	}
+	else {
+		return 0;
+	}
 }
 
 #----------------------------------------------------------------
@@ -210,9 +220,9 @@ sub gen_nicfg {
 		}
 	}
 	
+	my $return = 0;
 	my $yaml	= $self->{ 'bpcfg' };
 	my $config	= $self->{ 'config' };
-
 	my $output = "#######################################################################\n" .
 				 "#   Automatically generated config file for Nagios or Icinga \n" .
 				 "#   Generated with: BPView - http://github.com/ovido/BPView    \n" .
@@ -233,9 +243,19 @@ sub gen_nicfg {
 
 		$output .= "                 service_description      ". $bp_host ."\n";
 		$output .= "                 check_command            ". $config->{'bp-addon'}{'check_plugin'} . "!". $bp_host ."!". $config->{'bp-addon'}{'bp_output_cfg'} ."\n}\n\n";
+
 	}
-#	print $output;
-	_write_config($config->{'bp-addon'}{'ni_output_path'}, $config->{'bp-addon'}{'ni_output_cfg'}, $output);
+	eval { _write_file($config->{'bp-addon'}{'ni_output_path'}, $config->{'bp-addon'}{'ni_output_cfg'}, $output) };
+	if ($@) {
+		if ($config->{'logging'}{'level'} eq "debug") {
+			print $@;
+		}
+		croak "Do you have a permission problem? Unable to write to $config->{'bp-addon'}{'ni_output_path'}/$config->{'bp-addon'}{'ni_output_cfg'}";
+		return 1;
+	}
+	else {
+		return 0;
+	}
 }
 
 
@@ -246,26 +266,27 @@ sub gen_nicfg {
 # internal methods
 ##################
 
-sub _write_config {
-	my $output_path	= shift;
-	my $output_cfg	= shift;
-	my $output		= shift or croak ("Missing path or name of configfile");
-	
+sub _write_file {
+	my $output_path	= shift or croak ("Missing path or name of configfile");
+	my $output_cfg	= shift or croak ("Missing name of configfile");
+	my $output		= shift or croak ("Missing output to write");
+
 	$output_path =~ s/\/$//;
 
         if (!(-w "$output_path/$output_cfg")) {
+            die "Do you have a permission problem? Unable to write to $output_path/$output_cfg";
             return 1;
-            last;
         }
-
-
-#	open (OUT, ">$output_path/$output_cfg") or croak "unable to write to $service_cfg";
-#		print OUT $output;
-#	close(OUT);
-
-print "$output_path\n\n$output_cfg\n\n$output\n\n"
-	
+		else {
+			open (OUT, ">$output_path/$output_cfg") or croak "unable to write to $output_path/$output_cfg";
+				print OUT $output;
+			close(OUT);
+			return 0;
+		}
 }
+
+
+
 
 1;
 
@@ -279,7 +300,6 @@ TODO: Examples
 
 =head1 AUTHOR
 
-Rene Koch, E<lt>r.koch@ovido.atE<gt>
 Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION

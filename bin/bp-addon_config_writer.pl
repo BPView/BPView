@@ -74,18 +74,18 @@ $log->error_die($@) if $@;
 
 my $gencfg = BPView::BPWriter->new();
 
-
-
 if ($config->{'businessprocess'}{'provider'} eq "bp-addon") {
-	eval {$gencfg->gen_bpaddoncfg( 'bpcfg' => $yaml)};
+	eval {$gencfg->gen_bpaddoncfg( 'bpcfg' => $yaml, 'config' => $config )};
 	$log->error_die($@) if $@;
 
-	eval {$gencfg->gen_nicfg( 'bpcfg' => $yaml,
-							  'config' => $config )};
+	eval {$gencfg->gen_nicfg( 'bpcfg' => $yaml, 'config' => $config )};
 	$log->error_die($@) if $@;	
 }
+elsif ($config->{'businessprocess'}{'provider'} eq "bp-view") {
+	#TODO: some other BP provider
+}
 else {
-	next;
+	$log->error_die("No business process provider defined!");
 }
 
 
