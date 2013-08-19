@@ -22,8 +22,8 @@ SCRIPT=bpview
 # compile
 all:
 	cp $(SCRIPT).pl.in $(SCRIPT).tmp
-	sed -i -e 's!lib_path = .*$!lib_path = "$(LIBDIR)";!' $(SCRIPT).tmp
-	sed -i -e 's!cfg_path = .*$!cfg_path = "$(SYSCONFDIR)";!' $(SCRIPT).tmp
+	sed -i -e 's!lib_path = .*!lib_path = "$(LIBDIR)";!' $(SCRIPT).tmp
+	sed -i -e 's!cfg_path = .*!cfg_path = "$(SYSCONFDIR)";!' $(SCRIPT).tmp
 	cp $(SCRIPT).tmp $(SCRIPT).pl
 	rm -f $(SCRIPT).tmp
 
