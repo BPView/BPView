@@ -69,9 +69,11 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/%{name}/bpview.yml
 %config(noreplace) %{_sysconfdir}/%{name}/datasource.yml
 %config(noreplace) %{_sysconfdir}/%{name}/views
+%config(noreplace) %{_sysconfdir}/%{name}/bp-config
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/bpview.conf
 %{_libdir}/perl5/vendor_perl
 %attr(0755,root,root) %{_libdir}/%{name}/bpview.pl
+%attr(0755,root,root) %{_bindir}/bp-addon_config_writer.pl
 %{_datarootdir}/%{name}
 %attr(0755,%{apacheuser},%{apacheuser}) %{_localstatedir}/log/bpview.log
 %doc AUTHORS ChangeLog COPYING NEWS README sample-config

@@ -12,6 +12,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 # directories
+BIN_DIR=@srcdir@/bin
 CGI_DIR=@srcdir@/cgi
 ETC_DIR=@srcdir@/etc
 LIB_DIR=@srcdir@/lib
@@ -28,7 +29,7 @@ VERSION=@VERSION@
 
 distdir=$(PACKAGE)-$(VERSION)
 DIST_COMMON=config.sub configure.ac configure NEWS INSTALL missing aclocal.m4 install-sh Makefile.am ChangeLog COPYING README AUTHORS Makefile.in config.guess autogen.sh bpview.spec
-DISTFILES=$(DIST_COMMON) $(CGI_DIR) $(ETC_DIR) $(LIB_DIR) $(LOG_DIR) $(SHARE_DIR) sample-config docs tools
+DISTFILES=$(DIST_COMMON) $(BIN_DIR) $(CGI_DIR) $(ETC_DIR) $(LIB_DIR) $(LOG_DIR) $(SHARE_DIR) sample-config docs tools
 
 # compiler settings
 prefix=@prefix@
@@ -37,6 +38,7 @@ INSTALL_OPTS=@INSTALL_OPTS@
 
 # Compile
 all:
+	cd $(BIN_DIR) && $(MAKE) $@
 	cd $(CGI_DIR) && $(MAKE) $@
 	cd $(ETC_DIR) && $(MAKE) $@
 	cd $(LIB_DIR) && $(MAKE) $@
@@ -51,6 +53,7 @@ all:
 
 # Install
 install:
+	cd $(BIN_DIR) && $(MAKE) $@
 	cd $(CGI_DIR) && $(MAKE) $@
 	cd $(ETC_DIR) && $(MAKE) $@
 	cd $(LIB_DIR) && $(MAKE) $@
@@ -65,6 +68,7 @@ install:
 
 # Cleanup
 clean:
+	cd $(BIN_DIR) && $(MAKE) $@
 	cd $(CGI_DIR) && $(MAKE) $@
 	cd $(ETC_DIR) && $(MAKE) $@
 	cd $(LIB_DIR) && $(MAKE) $@

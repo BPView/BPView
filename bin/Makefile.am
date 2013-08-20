@@ -12,30 +12,27 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 # compiler settings
-SYSCONFDIR=@sysconfdir@
-DATAROOTDIR=@datarootdir@
+BINDIR=@bindir@
 LIBDIR=@libdir@
-LOCALSTATEDIR=@localstatedir@
+SYSCONFDIR=@sysconfdir@
 INSTALL=@INSTALL@
 INSTALL_OPTS=@INSTALL_OPTS@
-CONF=bpview
+SCRIPT=bpview
 
 # compile
 all:
-	cp $(CONF).yml.in $(CONF).tmp
-	sed -i -e 's!^  data_dir:.*!  data_dir: $(DATAROOTDIR)!' $(CONF).tmp
-	sed -i -e 's!^  src_dir:.*!  src_dir: $(DATAROOTDIR)/src!' $(CONF).tmp
-	sed -i -e 's!^  logfile:.*!  logfile: $(LOCALSTATEDIR)/log/bpview.log!' $(CONF).tmp
-	cp $(CONF).tmp $(CONF).yml
-	cp datasource.yml.in datasource.yml
-	rm -f $(CONF).tmp
+	cp $(SCRIPT).pl.in $(SCRIPT).tmp
+	sed -i -e 's!lib_path = .*!lib_path = "$(LIBDIR)";!' $(SCRIPT).tmp
+	sed -i -e 's!cfg_path = .*!cfg_path = "$(SYSCONFDIR)";!' $(SCRIPT).tmp
+	cp $(SCRIPT).tmp $(SCRIPT).pl
+	rm -f $(SCRIPT).tmp
 
 # install
 install:
-	for file in *.yml views/*.yml bp-config/*.yml; do \
-	  $(INSTALL) -D -m 644 $(INSTALL_OPTS) $$file $(DESTDIR)$(SYSCONFDIR)/$$file; \
+	for file in *.pl; do \
+	  $(INSTALL) -D -m 755 $(INSTALL_OPTS) $$file $(DESTDIR)$(BINDIR)/$$file; \
 	done
-	
+
 # cleanup
 clean:
-	rm -f *.yml
+	rm -f *.pl
