@@ -1,0 +1,18 @@
+env-topic-product_or:
+  BP:
+    NAME: "OR-BP"
+    DESC: "This BP is an OR construct. It isn't my favorite sample"
+    TYPE: or
+    DISP: 0
+    MIND: 0
+  HOSTS:
+    host-nr1:
+      service_nr1:
+      service_nr2:
+      service_nr3:
+    host-nr2:
+      service_nr1:
+      service_nr2:
+    BPROC:
+      env-topic-prod:
+      env-topic-prod2:

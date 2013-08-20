@@ -1,0 +1,20 @@
+env-topic-product_and:
+  BP:
+    NAME: "AND-BP"
+    DESC: "This BP is an AND construct. It isn't my favorite sample"
+    TYPE: and
+    DISP: 0
+    MIND: 0
+  HOSTS:
+    host-nr1:
+      service_nr1:
+    host-nr2:
+      service_nr1:
+      service_nr2:
+      service_nr3:
+    host-nr3:
+      service_nr1:
+      service_nr2:
+    BPROC:
+      env-topic-prod:
+      env-topic-prod2:

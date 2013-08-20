@@ -1,0 +1,15 @@
+env-topic-product_min:
+  BP:
+    NAME: "The Name"
+    DESC: "This BP is my favorite sample"
+    TYPE: min
+    DISP: 0
+    MIND: 1
+  HOSTS:
+    host-nr1:
+      service_nr1:
+      service_nr2:
+      service_nr3:
+    BPROC:
+      env-topic-prod:
+      env-topic-prod2:

@@ -160,6 +160,7 @@ bp-addon:
 # You don't need to change it if you use the packages BP-Addon from our Repository.  
 #
 
+<<<<<<< HEAD
   bp_output_path: /etc/icinga/objects
 
 #
@@ -185,6 +186,33 @@ bp-addon:
 #
 # Name of the Monitoring check script located at icinga/nagios plugins directory
 #
+=======
+ #  bp_output_path: /etc/icinga/objects
+  bp_output_path: /tmp/haha
+
+#
+# The output file for the generated BP-Addon Config
+# You don't need to change it if you use the packages BP-Addon from our Repository.
+#
+
+  bp_output_cfg: bpview.conf
+
+#
+# The output dir for the generated Nagios and Icinga Config Config (without trailing slash)
+#
+
+#  ni_output_path: /etc/icinga/objects
+  ni_output_path: /tmp/haha
+
+#
+# The output file Nagios/Icinga
+# You don't need to change it if you use the packages BP-Addon from our Repository.
+#
+
+  ni_output_cfg: bpview_businessprocesses.cfg
+
+
+>>>>>>> refs/remotes/origin/dev_bp-config
 
   check_plugin: check_bp_status
 
