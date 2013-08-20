@@ -88,7 +88,7 @@ INSTALL_OPTS_WEB="-o $web_user -g $web_group"
 AC_SUBST(INSTALL_OPTS)
 AC_SUBST(INSTALL_OPTS_WEB)
 
-AC_CONFIG_FILES([Makefile cgi/Makefile etc/Makefile lib/Makefile log/Makefile share/Makefile])
+AC_CONFIG_FILES([Makefile bin/Makefile cgi/Makefile etc/Makefile lib/Makefile log/Makefile share/Makefile])
 AC_OUTPUT
 
 # Review options
