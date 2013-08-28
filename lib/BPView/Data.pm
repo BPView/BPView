@@ -42,7 +42,7 @@ use HTTP::Request;
 use HTTP::Request::Common qw(POST);
 
 # for debugging only
-#use Data::Dumper;
+use Data::Dumper;
 
 
 =head1 NAME
@@ -199,48 +199,50 @@ sub get_status {
   	}
   }
   
-  my $return = undef;
+  my $result = undef;
   # fetch data from Icinga/Nagios
   if ($self->{'provider'} eq "ido"){
   	
   	# construct SQL query
   	my $sql = $self->_query_ido( $service_names );
   	# get results
-  	my $result = $self->_get_ido( $sql );
-  	
-    # verify if status is given for all products
-    # note: if product is missing in Icinga/Nagios there's no state for it
-    # we use status code 99 for this (0-3 are reserved as Nagios plugin exit codes)
-    # this is ugly - can it be done better?
-    foreach my $environment (keys %{ $self->{ 'views' } }){
-  	  foreach my $groups (keys %{ $self->{ 'views' }{ $environment } }){
-  	    foreach my $product (keys %{ $self->{ 'views' }{ $environment }{ $groups } }){
-  	      # see _get_ido for example output!
-  	      my $service = $environment . "-" . $groups . "-" . $product;
-  	      # replace non-chars with _ except -, due to Nagios limitations
-          #$service =~ s/[^a-zA-Z0-9-]+/_/g;
-          $service =~ s/[^a-zA-Z0-9-]/_/g;
-  	  	  if (defined ($result->{ $service }{ 'state' })){
-  	  	  	# found status in IDO database
-	      	$self->{ 'views' }{ $environment }{ $groups }{ $product }{ 'state' } = $result->{ $service }{ 'state' };
-	      }else{
-	      	# didn't found status in IDO database
-	      	$self->{ 'views' }{ $environment }{ $groups }{ $product }{ 'state' } = 99;
-	      }
-	      # return also business process name
-	      $self->{ 'views' }{ $environment }{ $groups }{ $product }{ 'bpname' } = $service;
-  	    }
-  	  }
-    }
-    
+  	$result = $self->_get_ido( $sql );
   	
   }elsif ($self->{'provider'} eq "mk-livestatus"){
-  	# TODO: later!
+  	
+  	# construct query
+  	my $query = $self->_query_livestatus( $service_names );
+  	# get results
+  	$result = eval { $self->_get_livestatus( $query ) };
   	
   }else{
   	carp ("Unsupported provider: $self->{'provider'}!");
   }
   
+  # verify if status is given for all products
+  # note: if product is missing in Icinga/Nagios there's no state for it
+  # we use status code 99 for this (0-3 are reserved as Nagios plugin exit codes)
+  # this is ugly - can it be done better?
+  foreach my $environment (keys %{ $self->{ 'views' } }){
+    foreach my $groups (keys %{ $self->{ 'views' }{ $environment } }){
+  	  foreach my $product (keys %{ $self->{ 'views' }{ $environment }{ $groups } }){
+  	    # see _get_ido for example output!
+  	    my $service = $environment . "-" . $groups . "-" . $product;
+  	    # replace non-chars with _ except -, due to Nagios limitations
+        #$service =~ s/[^a-zA-Z0-9-]+/_/g;
+        $service =~ s/[^a-zA-Z0-9-]/_/g;
+  	    if (defined ($result->{ $service }{ 'state' })){
+  	      # found status in IDO database
+	      $self->{ 'views' }{ $environment }{ $groups }{ $product }{ 'state' } = $result->{ $service }{ 'state' };
+	    }else{
+	      # didn't found status in IDO database
+	      $self->{ 'views' }{ $environment }{ $groups }{ $product }{ 'state' } = 99;
+	    }
+	    # return also business process name
+	    $self->{ 'views' }{ $environment }{ $groups }{ $product }{ 'bpname' } = $service;
+  	  }
+  	}
+  }
   
   # produce json output
   my $json = JSON::PP->new->pretty;
@@ -390,6 +392,30 @@ sub _query_ido {
 
 #----------------------------------------------------------------
 
+# construct livetstatus query
+sub _query_livestatus {
+	
+  my $self			= shift;
+  my $service_names	= shift or croak ("Missing service_names!");
+  
+  # get service status for given host and services
+  # construct livestatus query
+  my $query = "GET services\n
+Columns: display_name state\n";
+  
+  # go through service array
+  for (my $i=0;$i< scalar @{ $service_names };$i++){
+   	$query .= "Filter: display_name = " . $service_names->[$i] . "\n";
+  }
+  $query .= "Or: " . scalar @{ $service_names } . "\n" if scalar @{ $service_names } > 1;
+  	  
+  return $query;
+  
+}
+
+
+#----------------------------------------------------------------
+
 # get service status from IDOutils
 sub _get_ido {
 	
@@ -438,6 +464,48 @@ sub _get_ido {
   return $result;
   
 }
+
+
+#----------------------------------------------------------------
+
+# get service status from mk-livestatus
+sub _get_livestatus {
+	
+  my $self	= shift;
+  my $query	= shift or croak ("Missing livestatus query!");
+  
+  my $result;
+  my $ml;
+  
+  use Monitoring::Livestatus;
+  
+  # use socket or hostname:port?
+  if ($self->{'provdata'}{'socket'}){
+    $ml = Monitoring::Livestatus->new( 	'socket' 	=> $self->{'provdata'}{'socket'},
+    									'keepalive' => 1 );
+  }else{
+    $ml = Monitoring::Livestatus->new( 	'server' 	=> $self->{'provdata'}{'server'} . ':' . $self->{'provdata'}{'port'},
+    									'keepalive'	=> 1 );
+  }
+  
+  $ml->errors_are_fatal(0);
+  $result = $ml->selectall_hashref($query, "display_name");
+  
+  if($Monitoring::Livestatus::ErrorCode) {
+    croak "Getting Monitoring checkresults failed: $Monitoring::Livestatus::ErrorMessage";
+  }
+  
+  foreach my $key (keys %{ $result }){
+  	
+    # rename columns
+    $result->{ $key }{ 'service' } = delete $result->{ $key }{ 'display_name' };
+    
+  }
+  
+  return $result;
+  
+}
+
 
 1;
 
