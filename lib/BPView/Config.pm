@@ -26,7 +26,7 @@
 package BPView::Config;
 
 BEGIN {
-    $VERSION = '1.100'; # Don't forget to set version and release
+    $VERSION = '1.110'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -284,7 +284,6 @@ sub validate {
   # check if directories exist
   $self->_check_dir( "src_dir", $config->{'bpview'}{'src_dir'} );
   $self->_check_dir( "data_dir", $config->{'bpview'}{'data_dir'} );
-  $self->_check_dir( "template", "$config->{'bpview'}{'src_dir'}/$config->{'bpview'}{'template'}" );
   
   # check data backend provider
   $self->_check_provider( "provider", $config->{'provider'}{'source'}, $config->{ $config->{'provider'}{'source'} } );
@@ -601,7 +600,7 @@ Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.002  (July 25 2013))
+Version 1.110  (August 28 2013))
 
 =head1 COPYRIGHT AND LICENSE
 
