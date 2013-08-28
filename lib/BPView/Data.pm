@@ -26,7 +26,7 @@
 package BPView::Data;
 
 BEGIN {
-    $VERSION = '1.100'; # Don't forget to set version and release
+    $VERSION = '1.200'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -208,11 +208,6 @@ sub get_status {
   	# get results
   	my $result = $self->_get_ido( $sql );
   	
-    if ($self->{'errors'}){
-      # TODO!!!
-      return 1;
-    }
-    
     # verify if status is given for all products
     # note: if product is missing in Icinga/Nagios there's no state for it
     # we use status code 99 for this (0-3 are reserved as Nagios plugin exit codes)
@@ -482,7 +477,7 @@ Rene Koch, E<lt>r.koch@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.100  (August 14 2013))
+Version 1.200  (August 28 2013))
 
 =head1 COPYRIGHT AND LICENSE
 
