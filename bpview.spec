@@ -22,6 +22,7 @@ BuildRequires: perl-libwww-perl
 
 Requires: perl
 Requires: perl-CGI
+Requires: perl-FCGI
 Requires: perl-Log-Log4perl
 Requires: perl-Template-Toolkit
 Requires: perl-JSON
