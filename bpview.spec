@@ -1,6 +1,6 @@
 Name: bpview
 Version: 0.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Business Process view for Nagios/Icinga 
 
 Group: Applications/System
@@ -31,6 +31,7 @@ Requires: perl-DBI
 Requires: perl-DBD-Pg
 Requires: perl-JSON-XS
 Requires: perl-libwww-perl
+Requires: mod_fcgid
 Requires: httpd
 
 %define apacheuser apache
@@ -82,5 +83,8 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Aug 29 2013 Rene Koch <r.koch@ovido.at> 0.1-2
+- added requirement for mod_fcgid and perl-FCGI
+
 * Sun Aug 18 2013 Rene Koch <r.koch@ovido.at> 0.1-1
 - Initial build.
