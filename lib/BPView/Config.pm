@@ -166,7 +166,7 @@ sub read_config {
 #  chomp $file;
   $YAML::Syck::ImplicitTyping = 1;
   my $yaml = eval { LoadFile( $self->{ 'file' } ) };
-  die ("Failed to parse config file $self->{ 'file' }\n") if $@;
+  croak ("Failed to parse config file $self->{ 'file' }\n") if $@;
   
   return $yaml;
   
