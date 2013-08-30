@@ -39,7 +39,22 @@ Make sure the following requirements are fulfilled:
 
 Installation of modules on RHEL 6:
 
-Note: You need RHEL Server Optional channel.
+Note: You need RHEL Server Optional and EPEL channels.
 
 # yum install httpd perl perl-CGI perl-CGI-Session perl-YAML-Syck perl-JSON perl-libwww-perl perl-Template-Toolkit perl-DBI perl-DBD-Pg
 
+When installing BPView via RPM package all dependencies are resolved automatically:
+# yum install bpview
+
+  Installation of mod_fcgid (recommended)
+
+  # yum install mod_fcgid
+  
+  Load mod_fcgid module
+  # vi /etc/httpd/conf/httpd.conf
+  LoadModule fcgid_module modules/mod_fcgid.so
+  
+  Restart Apache
+  # service httpd restart
+
+  
