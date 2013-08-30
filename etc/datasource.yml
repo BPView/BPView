@@ -63,7 +63,7 @@ ido:
 # host: Hostname of the IDOutils database server.
 #
 
-  host: localhost
+  host: 127.0.0.1
 
 #
 # port: Port of the database server.
