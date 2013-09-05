@@ -19,6 +19,7 @@ LOCALSTATEDIR=@localstatedir@
 INSTALL=@INSTALL@
 INSTALL_OPTS=@INSTALL_OPTS@
 CONF=bpview
+CONTACTGROUP=admins
 
 # compile
 all:
@@ -30,11 +31,14 @@ all:
 	cp datasource.yml.in datasource.yml
 	rm -f $(CONF).tmp
 
+
+
 # install
 install:
 	for file in *.yml views/*.yml bp-config/*.yml; do \
 	  $(INSTALL) -D -m 644 $(INSTALL_OPTS) $$file $(DESTDIR)$(SYSCONFDIR)/$$file; \
 	done
+
 	
 # cleanup
 clean:

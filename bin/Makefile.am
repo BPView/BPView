@@ -17,7 +17,7 @@ LIBDIR=@libdir@
 SYSCONFDIR=@sysconfdir@
 INSTALL=@INSTALL@
 INSTALL_OPTS=@INSTALL_OPTS@
-SCRIPT=bp-addon_config_writer
+SCRIPT=bpview_cfg_writer
 
 # compile
 all:

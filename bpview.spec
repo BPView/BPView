@@ -124,7 +124,7 @@ fi
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/bpview.conf
 %{_libdir}/perl5/vendor_perl
 %attr(0755,root,root) %{_libdir}/%{name}/bpview.pl
-%attr(0755,root,root) %{_bindir}/bp-addon_config_writer.pl
+%attr(0755,root,root) %{_bindir}/bpview_cfg_writer.pl
 %{_datarootdir}/%{name}/css
 %{_datarootdir}/%{name}/images
 %{_datarootdir}/%{name}/javascript
@@ -136,6 +136,9 @@ fi
 
 
 %changelog
+* Thu Sep 5 2013 Peter Stoeckl <r.stoeckl@ovido.at> 0.1-5
+- some changes
+
 * Thu Aug 29 2013 Rene Koch <r.koch@ovido.at> 0.1-4
 - added SELinux support
 

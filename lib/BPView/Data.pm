@@ -542,6 +542,7 @@ See BPView::Config for reading and parsing config files.
 =head1 AUTHOR
 
 Rene Koch, E<lt>r.koch@ovido.atE<gt>
+Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 

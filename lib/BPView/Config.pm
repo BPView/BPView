@@ -539,7 +539,7 @@ sub _check_provider {
    	 
     # mk-livestatus 
     # requires socket or server
-    if (! $config->{ $provider }{'socket'} && ! $config->{'server'}){
+    if (! $config->{'socket'} && ! $config->{'server'}){
      	
       croak "mk-livestatus: Missing server or socket!";
        
