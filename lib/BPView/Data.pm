@@ -300,61 +300,45 @@ sub get_details {
   	  croak "Unknown option: $key";
   	}
   }
-  
+
+  use lib "/usr/lib64/perl5/vendor_perl/BPView/BP-Addon/";
+
+  use ndodb;
+  use nagiosBp;
+
   # we only support business process addon api queries at the moment
   if (! $self->{ 'provider' } eq "bpaddon" ){
   	croak "Unsupported provider: " . $self->{ 'provider' };
   }
   
-  # set default timeout if missing
-  if (! defined $self->{ 'provdata' }{ 'timeout' }){ $self->{ 'provdata' }{ 'timeout' } = 10; };
-   
-  # connect to BP Addon API
+	my $detail = $self->{ 'bp' };
+	my $bp_conf = "/etc/bpview/" . $self->{ 'provdata' }{ 'conf' } . ".conf";
   
-  # construct URL
-  #https://localhost/nagiosbp/cgi-bin/nagios-bp.cgi?detail=production-mail-lb&conf=bpview&outformat=json
-  my $url = $self->{ 'provdata' }{ 'cgi_url' } . "/nagios-bp.cgi?detail=" . $self->{ 'bp' } . "&conf=" . $self->{ 'provdata' }{ 'conf' } . "&outformat=json";
-  
-  # connect to API
-  my $ra = LWP::UserAgent->new();
-  $ra->timeout( $self->{ 'provdata' }{ 'timeout' } );
-  
-  # skip SSL certificate verification
-  if (LWP::UserAgent->VERSION >= 6.0){
-    $ra->ssl_opts(verify_hostname => 0, SSL_verify_mode => 0x00);	# disable SSL cert verification
-  }
-  
-  my $rr = HTTP::Request->new(GET => $url);
-  
-  # Authentication
-  if (defined $self->{ 'provdata' }{ 'username' }){
-    $rr->authorization_basic($self->{ 'provdata' }{ 'username' }, $self->{ 'provdata' }{ 'password' });
-  }
-  
-  my $re = $ra->request($rr);
-  if (! $re->is_success){	
-    croak ("Can't connect to BP-Addon API: " . $re->error_as_HTML);
-  }
-  
-  my $result = $re->content;
-  my $json = JSON::PP->new->pretty;
-  my $decoded = $json->decode($result) or croak ("JSON data provided from BP-Addon are invalid!");
-  
-  my $return = {};
-  
-  # go through hash
-  # we only need host, service and hardstate
-  for (my $i=0;$i<scalar @{ $decoded->{ 'business_process' }{ 'components' } };$i++){
-  	my $hostname  = $decoded->{ 'business_process' }{ 'components' }[$i]{ 'host' };
-  	my $service   = $decoded->{ 'business_process' }{ 'components' }[$i]{ 'service' };
-  	my $output    = $decoded->{ 'business_process' }{ 'components' }[$i]{ 'plugin_output' };
-  	my $hardstate = $decoded->{ 'business_process' }{ 'components' }[$i]{ 'hardstate' };
-  	$return->{ $hostname }{ $service }{ 'output' } = $output;
-  	$return->{ $hostname }{ $service }{ 'hardstate' } = $hardstate;
-  }
+	my ($display, $display_status, $script_out, $info_url, $components, $hardstates);
+	my ($statusinfos, $key, $i, @fields_state, @defined_priorities, $host, $service);
+
+	($hardstates, $statusinfos) = &getStates();
+	($display, $display_status, $script_out, $info_url, $components) = &getBPs($bp_conf, $hardstates);
+
+	foreach $key (sort keys %$display) {
+		$defined_priorities[$display_status->{$key}] = 1 if ($display_status->{$key} != 0);
+	}
+
+	my @services = sort(&listAllComponentsOf($detail, $components));
+	my $return = {};
+
+	for ($i=0; $i<@services; $i++) {
+		($host, $service) = split(/;/, $services[$i]);
+		if ( $services[$i] =~ m/;/ ) {
+			# this output, if it is a single service
+			($host, $service) = split(/;/, $services[$i]);
+		}
+		$return->{ $host }{ $service }{ 'output' } = $statusinfos->{$services[$i]};
+		$return->{ $host }{ $service }{ 'hardstate' } = $hardstates->{$services[$i]};
+	}
   
   # produce json output
-  $json = JSON::PP->new->pretty;
+  my  $json = JSON::PP->new->pretty;
   $json = $json->sort_by(sub { $JSON::PP::a cmp $JSON::PP::b })->encode($return);
   
   return $json;
@@ -556,3 +540,4 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as BPView itself.
 
 =cut
+

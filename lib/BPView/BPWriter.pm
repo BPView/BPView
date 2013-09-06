@@ -144,13 +144,13 @@ sub gen_bpaddoncfg {
 		my $type_var;
 		
 		if ($yaml->{$bp_host}{'BP'}{'TYPE'} eq "or") {
-			$type_var = "|";
+			$type_var = "||";
 		}
 		elsif ($yaml->{$bp_host}{'BP'}{'TYPE'} eq "and") {
-			$type_var = "&";
+			$type_var = "&&";
 		}
 		elsif ($yaml->{$bp_host}{'BP'}{'TYPE'} eq "min") {
-			$type_var = "+";
+			$type_var = "++";
 		}
 		else {
 	#TODO!: Error-Handling für TYPE Deklaration
