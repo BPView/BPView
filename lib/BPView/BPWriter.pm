@@ -81,28 +81,24 @@ business process related data
 
 
 sub new {
-	
-  my $invocant 	= shift;
-  my $class 	= ref($invocant) || $invocant;
-  my %options	= @_;
-  
-  my $self 		= {
-  		config	=> undef,	# config
-  		bpcfg	=> undef,	# business process config 
-  		time	=> strftime('%A, %d-%b-%Y %H:%M',localtime), ## outputs 17-Dec-2008 10:08
-  };
-
-  for my $key (keys %options){
-  	if (exists $self->{ $key }){
-  	  $self->{ $key } = $options{ $key };
-  	}else{
-  	  croak "Unknown option: $key";
-  	}
-  }
-  
-  bless $self, $class;
-  return $self;
-  
+	my $invocant 	= shift;
+	my $class 	= ref($invocant) || $invocant;
+	my %options	= @_;
+	my $self 		= {
+		config	=> undef,	# config
+		bpcfg	=> undef,	# business process config 
+		time	=> strftime('%A, %d-%b-%Y %H:%M',localtime), ## outputs 17-Dec-2008 10:08
+	};
+	for my $key (keys %options) {
+		if (exists $self->{ $key }) {
+			$self->{ $key } = $options{ $key };
+		}
+		else {
+		croak "Unknown option: $key";
+		}
+	}
+	bless $self, $class;
+	return $self;
 }
 
 

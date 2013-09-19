@@ -18,17 +18,15 @@
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-package BPView::BP-Addon::ndodb;
-
 use Exporter;
 use strict;
 use DBI;
 use IO::Socket;
 use LWP::UserAgent;
-use JSON::XS;
+#use JSON::XS;
 #use Data::Dumper;
 use Fcntl qw(:DEFAULT :flock);
-use lib ('/usr/lib64/nagios-business-process-addon');
+use lib ('/usr/lib64/perl5/vendor_perl');
 #use bsutils;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(getStates getLastUpdateServiceStatus getDbParam);
@@ -347,138 +345,138 @@ sub getLastUpdateServiceStatus()
 	        $sth->finish();
 	        $dbh->disconnect();
 	}
-	elsif ($dbparam{'ndo'} eq "fs")
-	{
-		$servicelist = $dbparam{'ndofs_basedir'} . "/VOLATILE/"  . $dbparam{'ndofs_instance_name'} . "/VIEWS/SERVICELIST";
-		$parentdirname="$dbparam{'ndofs_basedir'}/VOLATILE/$dbparam{'ndofs_instance_name'}/HOSTS";
-
-		open (LIST, "<$servicelist") or die "unable to read from file $servicelist\n";
-		flock(LIST, LOCK_SH);
-
-		while ($line = <LIST>)
-		{
-			chomp($line);
-			# print "DEBUG: servicelist: $in\n";
-			# DEBUG: servicelist:    "internetconnection":[
-			# DEBUG: servicelist:       "Provider 1",
-			# DEBUG: servicelist:       "Provider 2"
-			# DEBUG: servicelist:    ],
-			if ($line =~ m/"(.+)":\[/)
-			{
-				$hostname = cleanup_for_ndo2fs($1);
-				#print "DEBUG: hostname:    $hostname\n";
-			}
-			if ($line =~ m/"(.+)",?\s*$/)
-			{
-				$servicename = cleanup_for_ndo2fs($1);
-				#print "DEBUG: servicename: $hostname:$servicename\n";
-				
-				if (-e "$parentdirname/$hostname/$servicename/STATUS")
-				{
-					open (IN, "<$parentdirname/$hostname/$servicename/STATUS") or die "unable to read file $parentdirname/$hostname/$servicename/STATUS: $!\n";
-					flock(IN, LOCK_SH);
-					while ($in = <IN>)
-						{
-							if ($in =~ m/"LASTSERVICECHECK":\s*"(.*)"/)
-							{
-								#print "$1\n";
-								if ($1 > $lastservicecheck)
-								{
-									$lastservicecheck = $1;
-									#print "$lastservicecheck\n";
-								}
-							}
-						}
-					close(IN);
-				}
-			}
-		}
-		close(LIST);
-
-		@lastservicecheck_local = localtime($lastservicecheck);
-		$lastservicecheck_local[5]+=1900;
-		$lastservicecheck_local[4] = sprintf("%02d", ++$lastservicecheck_local[4]);
-		$lastservicecheck_local[3] = sprintf("%02d", $lastservicecheck_local[3]);
-		$lastservicecheck_local[2] = sprintf("%02d", $lastservicecheck_local[2]);
-		$lastservicecheck_local[1] = sprintf("%02d", $lastservicecheck_local[1]);
-		$lastservicecheck_local[0] = sprintf("%02d", $lastservicecheck_local[0]);
-
-		$return = "$lastservicecheck_local[5]-$lastservicecheck_local[4]-$lastservicecheck_local[3] $lastservicecheck_local[2]:$lastservicecheck_local[1]:$lastservicecheck_local[0]";
-	}
-	elsif ($dbparam{'ndo'} eq "merlin")
-	{
-        	$db_prefix = $dbparam{'ndodb_prefix'};
-        	$dbh = DBI->connect("DBI:mysql:$dbparam{'ndodb_database'}:$dbparam{'ndodb_host'}:$dbparam{'ndodb_port'}", $dbparam{'ndodb_username'}, $dbparam{'ndodb_password'});
-	        die "Error: $DBI::errstr\n" unless $dbh;
-
-	        #$sql = "select max(last_check) from ${db_prefix}service";
-	        $sql = "select max(last_check) from service";
-
-	        $sth = $dbh->prepare($sql);
-	        die "Error: $DBI::errstr\n" if $DBI::err;
-
-	        $sth->execute();
-	        die "Error: $DBI::errstr\n" if $DBI::err;
-
-	        while (@fields = $sth->fetchrow_array())
-	        {
-	                #print join("\t", @fields), "\n";
-			$return = $fields[0];
-		}
-
-	        $sth->finish();
-	        $dbh->disconnect();
-	}
-	elsif ($dbparam{'ndo'} eq "mk_livestatus")
-	{
-		$socket = IO::Socket::UNIX->new ("Peer" => $dbparam{'ndo_livestatus_socket'}, "Type" => SOCK_STREAM, "Timeout" => 15) or die "unable to connect to unix socket \"" . $dbparam{'ndo_livestatus_socket'} . "\": $!\n";
-
-		print $socket "GET services\n";
-		print $socket "Stats: max last_check\n\n";
-
-		$return = <$socket> || 0;
-		chomp($return);
-		#print STDERR "DEBUG: $return\n";
-	}
-	elsif ($dbparam{'ndo'} eq "icinga-web")
-	{
-		$return = 0;
-		my $maxConnectionTime = 10;
-		my ($ua, $request, $result, $content);
-		if(substr($dbparam{'ndo_icinga_web_url_prefix'}, -1) eq "/")
-		{
-			$dbparam{'ndo_icinga_web_url_prefix'} = substr($dbparam{'ndo_icinga_web_url_prefix'}, 0, length($dbparam{'ndo_icinga_web_url_prefix'}) -1);
-		}
-	        my $services_url = $dbparam{'ndo_icinga_web_url_prefix'} . "/web/api/service/columns%5BSERVICE_LAST_CHECK%5D/authkey=" . $dbparam{'ndo_icinga_web_auth_key'} . "/json";
-
-		#print STDERR "URL: $services_url\n";
-		$ua = new LWP::UserAgent ( 'timeout' => $maxConnectionTime );
-		$request = new HTTP::Request ('GET' => "$services_url");
-		$result = $ua->request($request);
-
-		if ($result->code() >= 400)
-		{
-			die "Error when requesting service information from icinga API, response code: " . $result->code() . ", message: " . $result->message() . "\n";
-		}
-
-		#print STDERR "Response Services: " . $result->code() . " " . $result->message() . "\n";
-		$content = $result->decoded_content();
-		$content =~ s/\r\n/\n/g;
-		#print STDERR "Content: $content\n";
-
-		$jsonref = decode_json($content);
-
-		#print "DEBUG: $jsonref\n";
-		#print "DEBUG: " . Dumper($jsonref) . "\n";
-		foreach $subhash (@$jsonref)
-		{
-			#print "DEBUG update: $subhash->{'SERVICE_LAST_CHECK'}\n";
-			if ($subhash->{'SERVICE_LAST_CHECK'} gt $return)
-			{
-				$return = $subhash->{'SERVICE_LAST_CHECK'};
-			}
-		}
-	}
+#	elsif ($dbparam{'ndo'} eq "fs")
+#	{
+#		$servicelist = $dbparam{'ndofs_basedir'} . "/VOLATILE/"  . $dbparam{'ndofs_instance_name'} . "/VIEWS/SERVICELIST";
+#		$parentdirname="$dbparam{'ndofs_basedir'}/VOLATILE/$dbparam{'ndofs_instance_name'}/HOSTS";
+#
+#		open (LIST, "<$servicelist") or die "unable to read from file $servicelist\n";
+#		flock(LIST, LOCK_SH);
+#
+#		while ($line = <LIST>)
+#		{
+#			chomp($line);
+#			# print "DEBUG: servicelist: $in\n";
+#			# DEBUG: servicelist:    "internetconnection":[
+#			# DEBUG: servicelist:       "Provider 1",
+#			# DEBUG: servicelist:       "Provider 2"
+#			# DEBUG: servicelist:    ],
+#			if ($line =~ m/"(.+)":\[/)
+#			{
+#				$hostname = cleanup_for_ndo2fs($1);
+#				#print "DEBUG: hostname:    $hostname\n";
+#			}
+#			if ($line =~ m/"(.+)",?\s*$/)
+#			{
+#				$servicename = cleanup_for_ndo2fs($1);
+#				#print "DEBUG: servicename: $hostname:$servicename\n";
+#				
+#				if (-e "$parentdirname/$hostname/$servicename/STATUS")
+#				{
+#					open (IN, "<$parentdirname/$hostname/$servicename/STATUS") or die "unable to read file $parentdirname/$hostname/$servicename/STATUS: $!\n";
+#					flock(IN, LOCK_SH);
+#					while ($in = <IN>)
+#						{
+#							if ($in =~ m/"LASTSERVICECHECK":\s*"(.*)"/)
+#							{
+#								#print "$1\n";
+#								if ($1 > $lastservicecheck)
+#								{
+#									$lastservicecheck = $1;
+#									#print "$lastservicecheck\n";
+#								}
+#							}
+#						}
+#					close(IN);
+#				}
+#			}
+#		}
+#		close(LIST);
+#
+#		@lastservicecheck_local = localtime($lastservicecheck);
+#		$lastservicecheck_local[5]+=1900;
+#		$lastservicecheck_local[4] = sprintf("%02d", ++$lastservicecheck_local[4]);
+#		$lastservicecheck_local[3] = sprintf("%02d", $lastservicecheck_local[3]);
+#		$lastservicecheck_local[2] = sprintf("%02d", $lastservicecheck_local[2]);
+#		$lastservicecheck_local[1] = sprintf("%02d", $lastservicecheck_local[1]);
+#		$lastservicecheck_local[0] = sprintf("%02d", $lastservicecheck_local[0]);
+#
+#		$return = "$lastservicecheck_local[5]-$lastservicecheck_local[4]-$lastservicecheck_local[3] $lastservicecheck_local[2]:$lastservicecheck_local[1]:$lastservicecheck_local[0]";
+#	}
+#	elsif ($dbparam{'ndo'} eq "merlin")
+#	{
+#        	$db_prefix = $dbparam{'ndodb_prefix'};
+#        	$dbh = DBI->connect("DBI:mysql:$dbparam{'ndodb_database'}:$dbparam{'ndodb_host'}:$dbparam{'ndodb_port'}", $dbparam{'ndodb_username'}, $dbparam{'ndodb_password'});
+#	        die "Error: $DBI::errstr\n" unless $dbh;
+#
+#	        #$sql = "select max(last_check) from ${db_prefix}service";
+#	        $sql = "select max(last_check) from service";
+#
+#	        $sth = $dbh->prepare($sql);
+#	        die "Error: $DBI::errstr\n" if $DBI::err;
+#
+#	        $sth->execute();
+#	        die "Error: $DBI::errstr\n" if $DBI::err;
+#
+#	        while (@fields = $sth->fetchrow_array())
+#	        {
+#	                #print join("\t", @fields), "\n";
+#			$return = $fields[0];
+#		}
+#
+#	        $sth->finish();
+#	        $dbh->disconnect();
+#	}
+#	elsif ($dbparam{'ndo'} eq "mk_livestatus")
+#	{
+#		$socket = IO::Socket::UNIX->new ("Peer" => $dbparam{'ndo_livestatus_socket'}, "Type" => SOCK_STREAM, "Timeout" => 15) or die "unable to connect to unix socket \"" . $dbparam{'ndo_livestatus_socket'} . "\": $!\n";
+#
+#		print $socket "GET services\n";
+#		print $socket "Stats: max last_check\n\n";
+#
+#		$return = <$socket> || 0;
+#		chomp($return);
+#		#print STDERR "DEBUG: $return\n";
+#	}
+#	elsif ($dbparam{'ndo'} eq "icinga-web")
+#	{
+#		$return = 0;
+#		my $maxConnectionTime = 10;
+#		my ($ua, $request, $result, $content);
+#		if(substr($dbparam{'ndo_icinga_web_url_prefix'}, -1) eq "/")
+#		{
+#			$dbparam{'ndo_icinga_web_url_prefix'} = substr($dbparam{'ndo_icinga_web_url_prefix'}, 0, length($dbparam{'ndo_icinga_web_url_prefix'}) -1);
+#		}
+#	        my $services_url = $dbparam{'ndo_icinga_web_url_prefix'} . "/web/api/service/columns%5BSERVICE_LAST_CHECK%5D/authkey=" . $dbparam{'ndo_icinga_web_auth_key'} . "/json";
+#
+#		#print STDERR "URL: $services_url\n";
+#		$ua = new LWP::UserAgent ( 'timeout' => $maxConnectionTime );
+#		$request = new HTTP::Request ('GET' => "$services_url");
+#		$result = $ua->request($request);
+#
+#		if ($result->code() >= 400)
+#		{
+#			die "Error when requesting service information from icinga API, response code: " . $result->code() . ", message: " . $result->message() . "\n";
+#		}
+#
+#		#print STDERR "Response Services: " . $result->code() . " " . $result->message() . "\n";
+#		$content = $result->decoded_content();
+#		$content =~ s/\r\n/\n/g;
+#		#print STDERR "Content: $content\n";
+#
+#		$jsonref = decode_json($content);
+#
+#		#print "DEBUG: $jsonref\n";
+#		#print "DEBUG: " . Dumper($jsonref) . "\n";
+#		foreach $subhash (@$jsonref)
+#		{
+#			#print "DEBUG update: $subhash->{'SERVICE_LAST_CHECK'}\n";
+#			if ($subhash->{'SERVICE_LAST_CHECK'} gt $return)
+#			{
+#				$return = $subhash->{'SERVICE_LAST_CHECK'};
+#			}
+#		}
+#	}
 
 	return($return);
 }
@@ -505,13 +503,13 @@ sub getDbParam()
 
 	# set defaults, if we did not get values form config
 	$dbparam{'ndo'}="db" if ($dbparam{'ndo'} eq "");
-	$dbparam{'ndofs_basedir'}="/tmp/ndo2fs" if ($dbparam{'ndofs_basedir'} eq "");
-	$dbparam{'ndofs_instance_name'}="default" if ($dbparam{'ndofs_instance_name'} eq "");
+#	$dbparam{'ndofs_basedir'}="/tmp/ndo2fs" if ($dbparam{'ndofs_basedir'} eq "");
+#	$dbparam{'ndofs_instance_name'}="default" if ($dbparam{'ndofs_instance_name'} eq "");
 	$dbparam{'ndodb_host'}="localhost" if ($dbparam{'ndodb_host'} eq "");
 	$dbparam{'ndodb_port'}="3306" if ($dbparam{'ndodb_port'} eq "");
 	$dbparam{'ndodb_database'}="nagios" if ($dbparam{'ndodb_database'} eq "");
-	$dbparam{'cache_time'}=0 if ($dbparam{'cache_time'} !~ m/^\d+$/);
-	$dbparam{'cache_file'}="/tmp/ndo_backend_cache" if ($dbparam{'cache_file'} eq "");
+#	$dbparam{'cache_time'}=0 if ($dbparam{'cache_time'} !~ m/^\d+$/);
+#	$dbparam{'cache_file'}="/tmp/ndo_backend_cache" if ($dbparam{'cache_file'} eq "");
 
 	return (%dbparam);
 }

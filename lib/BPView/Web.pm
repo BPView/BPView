@@ -112,7 +112,10 @@ sub new {
   	"template"			=> "default",	# template to use
   	"page"				=> "main",		# page to display
   	"content"			=> undef,		# various content to pass to template toolkit (like dashboards)
-  	"refresh"			=> 15000,			# refresh interval
+  	"refresh"			=> 15000,		# refresh interval
+  	"reloadit"			=> undef,		# should be the reload button displayed?
+  	"site_name"			=> "a universal <b>B</b>usiness <b>P</b>rocess <b>View</b> UI",
+  	"round"				=> undef,
   };
   
   for my $key (keys %options){
@@ -169,15 +172,20 @@ sub display_page {
 	
   # page to display ( e.g. main )
   my $tt_template	= $self->{ 'src_dir' } . "/global/" . $self->{ 'page' } . ".tt";
+  my $reloadit = "yes" if ($self->{ 'reloadit' } eq "yes");
+
   my $tt_vars		= { 
   	'templ' 		=> $self->{ 'template' },
   	'src_dir'		=> $self->{ 'src_dir' },
   	'data_dir'		=> $self->{ 'data_dir' },
-  	'site_url'		=> $self->{ 'site_url' }, 
+  	'site_url'		=> $self->{ 'site_url' },
+  	'reloadit'		=> $reloadit,
+  	'sitename'		=> $self->{ 'site_name' },
+  	'round'			=> $self->{ 'round' },
   };
   
   if (defined $self->{ 'content' }){
-  	$tt_vars->{ 'content' } = $self->{ 'content' };
+  	$tt_vars->{ 'select_content' } = $self->{ 'content' };
   }
   
   if (defined $self->{ 'refresh' }){
@@ -248,6 +256,7 @@ See BPView::Config for reading and parsing configuration files.
 =head1 AUTHOR
 
 Rene Koch, E<lt>r.koch@ovido.atE<gt>
+Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 

@@ -35,11 +35,7 @@ use YAML::Syck;
 use Carp;
 use File::Spec;
 use JSON::PP;
-
-# required for BP-Addon
-use LWP::UserAgent;
-use HTTP::Request;
-use HTTP::Request::Common qw(POST);
+use Tie::IxHash;
 
 # for debugging only
 use Data::Dumper;
@@ -120,6 +116,8 @@ sub new {
   	"bp"		=> undef,	# name of business process
   	"provider"	=> "ido",	# provider (ido | mk-livestatus)
   	"provdata"	=> undef,	# provider details like hostname, username,... 
+  	"config"	=> undef,
+  	"bps"		=> undef,
   };
   
   for my $key (keys %options){
@@ -188,14 +186,15 @@ sub get_status {
   # go through views hash
   # name required for BP is -> environment-group-product
   foreach my $environment (keys %{ $self->{ 'views' } }){
-  	foreach my $groups (keys %{ $self->{ 'views' }{ $environment } }){
-      foreach my $product (keys %{ $self->{ 'views' }{ $environment }{ $groups } }){
-      	my $bp = $environment . "-" . $groups . "-" . $product;
-      	# replace non-chars with _ except -, due to Nagios limitations
-        #$bp =~ s/[^a-zA-Z0-9-]+/_/g;
-        $bp =~ s/[^a-zA-Z0-9-]/_/g;
-  	  	push @{ $service_names }, $bp;
-  	  }
+  	foreach my $topic (keys %{ $self->{ 'views' }{ $environment } }){
+		next if ($topic =~ m/^__display*/);
+		foreach my $product (keys %{ $self->{ 'views' }{ $environment }{ $topic } }){
+			my $bp = $environment . "-" . $topic . "-" . $product;
+			# replace non-chars with _ except -, due to Nagios limitations
+			#$bp =~ s/[^a-zA-Z0-9-]+/_/g;
+			$bp =~ s/[^a-zA-Z0-9-]/_/g;
+			push @{ $service_names }, $bp;
+		}
   	}
   }
   
@@ -214,40 +213,69 @@ sub get_status {
   	my $query = $self->_query_livestatus( $service_names );
   	# get results
   	$result = eval { $self->_get_livestatus( $query ) };
-  	
+#  	print STDERR Dumper $result;
   }else{
   	carp ("Unsupported provider: $self->{'provider'}!");
   }
   
+	# sorting the hash 
+	my $views = $self->{ 'views' };
+	while(my($view_key, $view) = each %$views) {
+		while(my($topic, $prods) = each %$view) {
+			next if $topic =~ m/^__display/;
+			tie my %new_prods, 'Tie::IxHash', (map { ($_ => $prods->{$_}) } sort { lc($a) cmp lc($b) } keys %$prods);
+			$view->{$topic} = \%new_prods;
+		}
+		tie my %new_view, 'Tie::IxHash', (map { ($_ => $view->{$_}) } sort { lc($a) cmp lc($b) } keys %$view);
+		$views->{$view_key} = \%new_view;
+	}
+	tie my %new_views, 'Tie::IxHash', (map { ($_ => $views->{$_}) } sort { $views->{$a}->{__displayorder} <=> $views->{$b}->{__displayorder} } keys %$views);
+	$self->{ 'views' } = \%new_views;
+
   # verify if status is given for all products
   # note: if product is missing in Icinga/Nagios there's no state for it
   # we use status code 99 for this (0-3 are reserved as Nagios plugin exit codes)
   # this is ugly - can it be done better?
+
   foreach my $environment (keys %{ $self->{ 'views' } }){
-    foreach my $groups (keys %{ $self->{ 'views' }{ $environment } }){
-  	  foreach my $product (keys %{ $self->{ 'views' }{ $environment }{ $groups } }){
-  	    # see _get_ido for example output!
-  	    my $service = $environment . "-" . $groups . "-" . $product;
-  	    # replace non-chars with _ except -, due to Nagios limitations
-        #$service =~ s/[^a-zA-Z0-9-]+/_/g;
-        $service =~ s/[^a-zA-Z0-9-]/_/g;
-  	    if (defined ($result->{ $service }{ 'state' })){
-  	      # found status in IDO database
-	      $self->{ 'views' }{ $environment }{ $groups }{ $product }{ 'state' } = $result->{ $service }{ 'state' };
-	    }else{
-	      # didn't found status in IDO database
-	      $self->{ 'views' }{ $environment }{ $groups }{ $product }{ 'state' } = 99;
-	    }
-	    # return also business process name
-	    $self->{ 'views' }{ $environment }{ $groups }{ $product }{ 'bpname' } = $service;
-  	  }
-  	}
+    foreach my $topic (keys %{ $self->{ 'views' }{ $environment } }){
+      if ($topic eq "__displayorder") {
+#        delete $self->{ 'views' }{ $environment }{__displayorder};
+      }
+      elsif ($topic eq "__displayinrow") {
+#        #TODO!: anything for the javascript output? or empty
+#		delete $self->{ 'views' }{ $environment }{__displayinrow};
+      }
+      else {
+    	  foreach my $product (keys %{ $self->{ 'views' }{ $environment }{ $topic } }){
+    	    # see _get_ido for example output!
+  	      my $service = lc($environment . "-" . $topic . "-" . $product);
+  	      # replace non-chars with _ except -, due to Nagios limitations
+          #$service =~ s/[^a-zA-Z0-9-]+/_/g;
+          $service =~ s/[^a-zA-Z0-9-]/_/g;
+    	    if (defined ($result->{ $service }{ 'state' })){
+  	        # found status in IDO database
+	        $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'state' } = $result->{ $service }{ 'state' };
+	      }else{
+	        # didn't found status in IDO database
+  	        $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'state' } = 99;
+	      }
+	      # return also business process name
+	      $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'bpname' } = $service;
+	      $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'name' } = $self->{ 'bps' }{$service}{BP}{NAME};
+
+
+        }
+      }
+    }
   }
-  
+
   # produce json output
   my $json = JSON::PP->new->pretty;
-  $json = $json->sort_by(sub { $JSON::PP::a cmp $JSON::PP::b })->encode($self->{ 'views' });
-  
+  $json->utf8('true');
+#  $json = $json->sort_by(sub { $JSON::PP::a cmp $JSON::PP::b })->encode($self->{ 'views' });   # old sorting method
+  $json = $json->encode($self->{ 'views' });
+#  print STDERR $json;
   return $json;
   
 }
@@ -301,18 +329,14 @@ sub get_details {
   	}
   }
 
-  use lib "/usr/lib64/perl5/vendor_perl/BPView/BP-Addon/";
+  use lib "/usr/lib64/perl5/vendor_perl/BPView/BP-Addon";
 
   use ndodb;
   use nagiosBp;
-
-  # we only support business process addon api queries at the moment
-  if (! $self->{ 'provider' } eq "bpaddon" ){
-  	croak "Unsupported provider: " . $self->{ 'provider' };
-  }
   
+    my $config = $self->{'config'};
 	my $detail = $self->{ 'bp' };
-	my $bp_conf = "/etc/bpview/" . $self->{ 'provdata' }{ 'conf' } . ".conf";
+	my $bp_conf = $config->{ 'bp-addon' }{ 'bp_output_path' } . "/" . $config->{ 'bp-addon' }{ 'bp_output_cfg' };
   
 	my ($display, $display_status, $script_out, $info_url, $components, $hardstates);
 	my ($statusinfos, $key, $i, @fields_state, @defined_priorities, $host, $service);
@@ -361,7 +385,7 @@ sub _query_ido {
   my $sql = "SELECT name2 AS service, current_state AS state FROM " . $self->{'provdata'}{'prefix'} . "objects, " . $self->{'provdata'}{'prefix'} . "servicestatus ";
     $sql .= "WHERE object_id = service_object_id AND is_active = 1 AND name2 IN (";
   # go trough service_names array
-  for (my $i=0;$i<scalar @{ $service_names };$i++){
+  for (my $i=0;$i<scalar @{ lc($service_names) };$i++){
   	$sql .= "'" . $service_names->[$i] . "', ";
   }
   # remove trailing ', '
@@ -386,10 +410,9 @@ sub _query_livestatus {
   # construct livestatus query
   my $query = "GET services\n
 Columns: display_name state\n";
-  
   # go through service array
   for (my $i=0;$i< scalar @{ $service_names };$i++){
-   	$query .= "Filter: display_name = " . $service_names->[$i] . "\n";
+   	$query .= "Filter: display_name = " . lc($service_names->[$i]) . "\n";
   }
   $query .= "Or: " . scalar @{ $service_names } . "\n" if scalar @{ $service_names } > 1;
   	  
@@ -540,4 +563,3 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as BPView itself.
 
 =cut
-

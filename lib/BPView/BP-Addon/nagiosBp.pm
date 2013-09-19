@@ -24,10 +24,9 @@
 
 package nagiosBp;
 
-use lib ('/usr/lib64/nagios-business-process-addon');
+use lib ('/usr/lib64/perl5/vendor_perl');
 use Exporter;
 use strict;
-use bsutils;
 our %i18n;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(getBPs and listAllComponentsOf);
@@ -41,7 +40,7 @@ sub getBPs()
 
 	my (@fields, @fields_state, $in, $formula, $num_of_operators, $result, %display_status, %display, %script_out, %info_url, %components, $description, $i, $min_ok, $name_ext, $name, $script, $status, $url, $var);
 
-	open (IN, "<$nagios_bp_conf") or nagdie("unable to read $nagios_bp_conf");
+	open (IN, "<$nagios_bp_conf") or nagdie("fuu unable to read $nagios_bp_conf");
 	while ($in = <IN>)
 	{
 		# filter comments (starting with #) and blank lines
@@ -305,5 +304,16 @@ sub listAllComponentsOf()
 	
 	return(keys %result_list);
 }
+
+sub cutOffSpaces
+{
+        my $string = shift;
+        $string =~ s/^\s*//;
+        $string =~ s/\s*$//;
+        # does the same as the two lines above, but takes twice as long
+        #$string =~ s/^\s*(.*?)\s*$/$1/;
+        return ($string);
+}
+
 
 1;

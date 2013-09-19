@@ -37,6 +37,8 @@ Requires: perl-Time-HiRes
 Requires: perl-Crypt-SSLeay
 Requires: mod_fcgid
 Requires: httpd
+Requires: perl-suidperl
+Requires: perl-Tie-IxHash
 
 Requires(post):   /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
 Requires(postun): /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles

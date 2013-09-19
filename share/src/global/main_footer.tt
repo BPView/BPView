@@ -14,12 +14,10 @@
 #   If not, see <http://www.gnu.org/licenses/>.
 %]
 
-[% INCLUDE main_header.tt %]
-
-      <div class="main">
-        
-          [%# Business Process DIV #%]
-          <div class="bpsContainer" id="bps"></div>
-      </div>
-
-[% INCLUDE main_footer.tt %]
+	</div>
+	<div class="footer topBar">
+		<div id="copyr">&copy; 2013, ovido gmbh</div>
+		<div id="refresh">Last refresh</div>
+	</div>
+  </body>
+</html>

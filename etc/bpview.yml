@@ -22,6 +22,11 @@
 bpview:
 
 #
+# site_name: The name of your site or company
+#
+  site_name: "a universal Business Process View UI"
+
+#
 # src_dir: path to Template Toolkit source directory.
 #    This directory contains templates for displaying BPView main
 #    webpage.

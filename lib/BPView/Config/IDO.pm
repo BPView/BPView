@@ -1,4 +1,5 @@
-[%#
+#!/usr/bin/perl -w
+#
 # COPYRIGHT:
 #
 # This software is Copyright (c) 2013 by ovido
@@ -20,11 +21,55 @@
 # You should have received a copy of the GNU General Public License
 # along with BPView.  
 # If not, see <http://www.gnu.org/licenses/>.
-%]
-	</div>
-	<div class="footer topBar">
-		<div id="copyr">&copy; 2013, ovido gmbh</div>
-		<div id="refresh">Last refresh</div>
-	</div>
-  </body>
-</html>
+
+
+=head1 NAME
+
+  BPView::Config - Initialize the config parameter
+
+=head1 SYNOPSIS
+
+  use BPView::Config;
+  my $ReadConfig = BPView::Config->read("FILENAME");
+
+=head1 DESCRIPTION
+
+
+=head1 METHODS
+
+
+=cut
+
+
+package BPView::Config::IDO;
+use strict;
+use warnings;
+use Carp;
+
+
+# create an empty BPView::Config::IDO object
+sub new {
+  my $class = shift;
+  my $self = {};
+  
+  bless $self, $class;
+  
+  return $self;
+}
+
+
+sub verify {
+  
+  my $self	= shift;
+  my $conf	= shift;
+  
+  if (! $conf->{ 'host' }){
+  	croak "Missing host for ido!";
+  }
+  
+  return 0;
+  
+}
+
+
+1;

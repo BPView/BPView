@@ -19,13 +19,18 @@ body {
 .environment {
 /*  padding-top: 25px; */
   font-size: 24px;
-  padding: 8px;
+  padding: 8px 8px 15px 8px;
   margin: 3px;
   margin-right: 0px;
-  margin-bottom: 20px;
+  margin-bottom: 35px;
   border-radius: 4px;
   border: 1px solid black;
   box-shadow: rgb(102, 102, 102) 0px 3px 3px;
+  background: rgb(240, 240, 240);
+}
+
+.environmentTitle {
+  margin-bottom: 8px;
 }
 
 .groups {
@@ -36,11 +41,57 @@ body {
 
 .groupTiles {
   padding: 6px;
-  margin: 10px 10px 20px 10px;
   border-radius: 4px;
   border: 1px solid black;
   overflow: auto;
-  background: rgb(238, 238, 238);
+  background: rgb(220, 220, 220);
+}
+
+.groupTilesEmpty {
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  overflow: auto;
+}
+
+.groupTilesRow {
+margin: 0px 5px 0px 10px;
+padding: 0px;
+overflow: auto;
+}
+
+.groupTilesRowEmpty {
+height: 15px;
+}
+
+.groupTilesRow1 {
+  margin: 10px;
+}
+.groupTilesRow2 {
+  margin: 10px;
+  padding: 35px 0px 0px 0px;
+}
+
+.groupTilesLeft50 {
+  width: 50%;
+  float: left;
+  margin: 0px 20px 0px 0px;
+}
+
+.groupTilesLeft33 {
+  width: 31%;
+  float: left;
+  margin: 0px 20px 0px 0px;
+}
+
+.groupTilesLeft25 {
+  width: 23%;
+  float: left;
+  margin: 0px 20px 0px 0px;
+}
+
+.groupTilesRight {
+  margin: 0px;
 }
 
 .tile {
@@ -229,8 +280,9 @@ display: block;
 
 
 #dashboard_select {
-        float: right;
-	margin: 12px 5px 0px 0px;
+    float: right;
+        margin: 12px 5px 0px 0px;
+        padding-right: 5px;
 }
 
 .dashboard_subject {
@@ -242,7 +294,7 @@ margin-right: 10px;
 
 
 .form-select {
-	float: right;
+        float: left;
 overflow: hidden;
 /* width: 250px; */
 /* background: url("/bpview/share/images/global/arrow_orange_down.png") no-repeat #999 225px 0px; */
@@ -256,6 +308,11 @@ height: 24px;
 border: 1px solid #fff; /*#d8d8d8 */
 width: 250px;
 /*-webkit-appearance: none; */
+}
+
+.reloadbutton {
+        float: left;
+        margin: 0px 0px 0px 20px;
 }
 
 
@@ -302,12 +359,12 @@ margin: 0px 0px 0px 0px;
 }
 
 .details_data_error {
-	height: 250px;
+        height: 250px;
 }
 
 .details {
     border-spacing: 0;
-    border-collapse:collapse; 
+    border-collapse:collapse;
 }
 
 .detail_system {
@@ -379,8 +436,8 @@ table{
 }
 
 .details_data_error_content_image {
-	float: right;
-	padding: 20px 0px 0px 0px;
+        float: right;
+        padding: 20px 0px 0px 0px;
 }
 
 .details_data_error_content {
@@ -651,7 +708,7 @@ button::-moz-focus-inner {
   width: 100%;
   height: 100%;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
-  background: black; }
+  background: white; }
 
 .mfp-iframe-holder .mfp-close {
   top: -40px; }

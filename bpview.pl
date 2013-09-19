@@ -72,10 +72,6 @@ my $log = Log::Log4perl::get_logger("BPView::Log");
 eval { $conf->validate( 'config' => $config ) };
 $log->error_die($@) if $@;
 
-# open config file directory and push configs into hash
-my $bps = eval {$conf->read_dir( dir => $cfg_path . "/bp-config" )};
-$log->error_die($@) if $@;
-
 my $views = eval { $conf->read_dir( dir	=> $cfg_path . "/views" ) };
 $log->error_die($@) if $@;
 # replaces possible arrays in views with hashes
@@ -103,36 +99,29 @@ while ( my $q = new CGI::Fast ){
     use BPView::Operations;
 	my $operations = BPView::Operations->new(
     	   config	=> $config,
-    	   cfg_path	=> $cfg_path,
          );
     my $round = "0";
     $round = param("round") if (defined param("round"));
 	if ($round eq "1") {
 		sleep 3;
-		eval { $operations->import_cmdb() };
-		eval { $operations->write_cfgs() };
-		eval { $operations->reload() };
-		$log->info("\n>>>>>>\n>>>>>> Restarting the BPView Instance ...\n>>>>>>\n>>>>>>\n");
-	}
+#		eval { $operations->import_cmdb() };
+#		eval { $operations->write_cfgs() };
+#		eval { $operations->reload() };
 
-    my $page = BPView::Web->new(
- 	  src_dir	=> $config->{ 'bpview' }{ 'src_dir' },
- 	  data_dir	=> $config->{ 'bpview' }{ 'data_dir' },
- 	  site_url	=> $config->{ 'bpview' }{ 'site_url' },
- 	  template	=> $config->{ 'bpview' }{ 'template' },
- 	  site_name => $config->{ 'bpview' }{ 'site_name' },
-    );
-	#   $page->login();
-	eval{ $page->display_page(
-		page		=> "iframe",
-		round		=> $round,
-		reloadit	=> $reloadit,
-	)};
-	$log->error_die($@) if $@;
-	if ($round eq "1") {
+		$log->info("\n>>>>>>\n>>>>>> Restarting the BPView Instance ...\n>>>>>>\n>>>>>>\n");
+
+		print "<html><head><script src=\"/bpview/share/javascript/reload.js\">\n</script><script src=\"/bpview/share/javascript/jquery-1.10.1.js\"></script></head>\n";
+		print "<p>&nbsp;</p><h2 style=\"color:green\">All finisished, going back to BPView in 3 seconds .....</h2>";
+		print "<script type=\"text/javascript\">goback();</script>\n</body>\n</html>\n";
+
 		exit;
 	}
 	else {
+		print "<html><head><script src=\"/bpview/share/javascript/reload.js\">\n</script><script src=\"/bpview/share/javascript/jquery-1.10.1.js\"></script></head>\n";
+		print "<h1 style=\"color:red\">Restarting the BPView Instance ...</h1>\n<div id=\"iframeContent\"></div>\n";
+		print "<iframe width=\"90%\" src=\"bpview.pl?reloadit=yes&reloadnow=yes&round=1\" name=\"reloadthis\" frameBorder=\"0\">Browser not compatible.</iframe>\n";
+		print "<script type=\"text/javascript\">reloadone();</script><br/>\n</body>\n</html>\n";
+
 		last;
 	}
   }
@@ -144,24 +133,24 @@ while ( my $q = new CGI::Fast ){
     my $json = undef;
 
     if (defined param("dashboard")){
-    print "Content-type: application/json; charset=utf-8\n\n";
+    print "Content-type: application/json charset=iso-8859-1\n\n";
   	
       # get dashboard data
       my $dashboard = BPView::Data->new(
     	   views	=> $views->{ param("dashboard") }{ 'views' },
     	   provider	=> $config->{ 'provider' }{ 'source' },
     	   provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
-    	   bps		=> $bps,
          );
       $json = eval { $dashboard->get_status() };
 	  $log->error_die($@) if $@;
        
     }elsif (defined param("details")){
-    print "Content-type: application/json; charset=utf-8\n\n";
+    print "Content-type: application/json charset=iso-8859-1\n\n";
   	
   	  # get details for this business process
   	  my $details = BPView::Data->new(
-  		  config	=> $config,
+  		  provider	=> 'bpaddon',
+  		  provdata	=> $config->{ 'bpaddon' },
   		  bp		=> param("details"),
   	     );
   	  $json = eval { $details->get_details() };

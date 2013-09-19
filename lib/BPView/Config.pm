@@ -287,8 +287,6 @@ sub validate {
   
   # check data backend provider
   $self->_check_provider( "provider", $config->{'provider'}{'source'}, $config->{ $config->{'provider'}{'source'} } );
-  # check bpaddon API
-  $self->_check_provider( "provider", "bpaddon", $config->{'bpaddon'} ); 
   
 }
 
@@ -493,6 +491,7 @@ sub validate_bpconfig {
 	}
 	return 0;
 }
+
 
 
 
