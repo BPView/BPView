@@ -29,6 +29,8 @@ all:
 	sed -i -e 's!^  logfile:.*!  logfile: $(LOCALSTATEDIR)/log/bpview.log!' $(CONF).tmp
 	cp $(CONF).tmp $(CONF).yml
 	cp datasource.yml.in datasource.yml
+	cp bpview.conf.in bpview.conf
+	cp bp-addon.cfg.in bp-addon.cfg
 	rm -f $(CONF).tmp
 
 
