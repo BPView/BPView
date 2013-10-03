@@ -19,6 +19,7 @@ LOCALSTATEDIR=@localstatedir@
 INSTALL=@INSTALL@
 INSTALL_OPTS=@INSTALL_OPTS@
 CONF=bpview
+BPCONF=bp-addon
 CONTACTGROUP=admins
 
 # compile
@@ -30,9 +31,12 @@ all:
 	cp $(CONF).tmp $(CONF).yml
 	cp datasource.yml.in datasource.yml
 	cp bpview.conf.in bpview.conf
-	cp bp-addon.cfg.in bp-addon.cfg
 	rm -f $(CONF).tmp
 
+	cp $(BPCONF).yml.in $(BPCONF).tmp
+	sed -i -e 's!^cache_file=.*!cache_file=$(LOCALSTATEDIR)/cache/bpview/ndo_backend_cache!' $(BPCONF).tmp
+	cp $(BPCONF).tmp $(BPCONF).yml
+	rm -f $(BPCONF).tmp
 
 
 # install
