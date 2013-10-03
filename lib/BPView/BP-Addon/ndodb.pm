@@ -53,7 +53,7 @@ sub getStates()
 	#print STDERR "DEBUG: num of statusinfos " . scalar %statusinfos . "\n";
 	if ($dbparam{'cache_time'} > 0)
 	{
-		#checkCache();
+		checkCache();
 		#print STDERR "DEBUG: num of hardstates " . scalar %hardstates . "\n";
 		#print STDERR "DEBUG: num of statusinfos " . scalar %statusinfos . "\n";
 		if (scalar %hardstates ne "0")
@@ -607,55 +607,55 @@ sub cleanup_for_ndo2fs {
 	return($host_or_service_name);
 } 
 
-#sub checkCache()
-#{
-#	my %dbparam = &getDbParam();
-#	my $actDate=time();
-#	my ($fileAge, @stat, $in, @tokens, $host, $service, $hardstate);
-#
-#	if ( -f $dbparam{'cache_file'} )
-#	{
-#		# ok, we have a cache file already
-#		# print STDERR "cache_file exists\n";
-#		@stat=stat($dbparam{'cache_file'});
-#		$fileAge=$actDate-$stat[9];
-#		# print STDERR "actDate: $actDate\n";
-#		# print STDERR "FileModificationDate: $stat[9]\n";
-#		# print STDERR "FileAge: $fileAge\n";
-#
-#		if ($fileAge <= $dbparam{'cache_time'})
-#		{
-#			# print STDERR "cache_file new enough, delivering from cache\n"; 
-#			open(IN, "<$dbparam{'cache_file'}") or die "unable to read cachefile $dbparam{'cache_file'}\n";
-#				flock(IN, LOCK_SH);
-#				while ($in = <IN>)
-#				{
-#print STDERR "$in\n";
-#					@tokens=split(/;/, $in);
-#					$host=shift(@tokens);
-#					$service=shift(@tokens);
-#					$hardstate=shift(@tokens);
-#					$hardstates{"$host;$service"} = $hardstate;
-#					$statusinfos{"$host;$service"} = join(/;/, @tokens);
-#					chomp($statusinfos{"$host;$service"});
-#				}
-#			close(IN);
-#			return(\%hardstates, \%statusinfos);
-#		}
-#		else
-#		{
-#			# print STDERR "cache_file too old\n";
-#			return('');
-#		}
-#	}
-#	else
-#	{
-#		# print STDERR "cache_file does not exist\n";
-#		return('');
-#	}
-#
-#	return('');
-#}
+sub checkCache()
+{
+	my %dbparam = &getDbParam();
+	my $actDate=time();
+	my ($fileAge, @stat, $in, @tokens, $host, $service, $hardstate);
+
+	if ( -f $dbparam{'cache_file'} )
+	{
+		# ok, we have a cache file already
+		# print STDERR "cache_file exists\n";
+		@stat=stat($dbparam{'cache_file'});
+		$fileAge=$actDate-$stat[9];
+		# print STDERR "actDate: $actDate\n";
+		# print STDERR "FileModificationDate: $stat[9]\n";
+		# print STDERR "FileAge: $fileAge\n";
+
+		if ($fileAge <= $dbparam{'cache_time'})
+		{
+			# print STDERR "cache_file new enough, delivering from cache\n"; 
+			open(IN, "<$dbparam{'cache_file'}") or die "unable to read cachefile $dbparam{'cache_file'}\n";
+				flock(IN, LOCK_SH);
+				while ($in = <IN>)
+				{
+					#print STDERR "$in\n";
+					@tokens=split(/;/, $in);
+					$host=shift(@tokens);
+					$service=shift(@tokens);
+					$hardstate=shift(@tokens);
+					$hardstates{"$host;$service"} = $hardstate;
+					$statusinfos{"$host;$service"} = join(/;/, @tokens);
+					chomp($statusinfos{"$host;$service"});
+				}
+			close(IN);
+			return(\%hardstates, \%statusinfos);
+		}
+		else
+		{
+			# print STDERR "cache_file too old\n";
+			return('');
+		}
+	}
+	else
+	{
+		# print STDERR "cache_file does not exist\n";
+		return('');
+	}
+
+	return('');
+}
 
 # call with parameters \%hardstates, \%statusinfos
 sub updateCache()
