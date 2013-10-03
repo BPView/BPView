@@ -22,6 +22,11 @@
 bpview:
 
 #
+# site_name: The name of your site or company
+#
+  site_name: "a universal Business Process View UI"
+
+#
 # src_dir: path to Template Toolkit source directory.
 #    This directory contains templates for displaying BPView main
 #    webpage.
@@ -137,10 +142,6 @@ businessprocess:
 
   provider: bp-addon
 
-#
-# This is the config block for the BP-Addon. 
-
-bp-addon:
 
 #
 # The name for the generic service names at Nagios and Icinga Config.
@@ -160,7 +161,7 @@ bp-addon:
 # You don't need to change it if you use the packages BP-Addon from our Repository.  
 #
 
-  bp_output_path: /etc/icinga/objects
+  bp_output_path: /etc/bpview
 
 #
 # The output file for the generated BP-Addon Config
@@ -173,7 +174,7 @@ bp-addon:
 # The output dir for the generated Nagios and Icinga Config Config (without trailing slash)
 #
 
-  ni_output_path: /etc/icinga/objects
+  ni_output_path: /etc/bpview/icinga
 
 #
 # The output file Nagios/Icinga
@@ -183,10 +184,17 @@ bp-addon:
   ni_output_cfg: bpview_businessprocesses.cfg
 
 #
-# Name of the Monitoring check script located at icinga/nagios plugins directory
+# Path and name of the Monitoring check script
 #
 
-  check_plugin: check_bp_status
+  check_plugin_path: /usr/lib64/bpview/plugins
+  check_plugin: check_bp_status.pl
+
+#
+# name and path from the cmdb exporter program (system call)
+#
+
+  cmdb_exporter: 
 
 #
 # Also make sure to end this file with a newline!
