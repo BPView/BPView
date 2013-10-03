@@ -61,53 +61,88 @@ $(document).on('click', 'div.tile', function(){
 
 
 function getDbOverview(){
-        var dashboard = $("#dashboards option:selected").val();
-        $.getJSON( "?dashboard=" + dashboard, function(data){
-          var jsonData = "";
-          
-          // error handling
-          if (data == 1){
-        	  showErrorMessage();
-          }
-          
-          $.each(data, function(environment, envval){
+	var dashboard = $("#dashboards option:selected").val();
+	$.getJSON( "?dashboard=" + dashboard, function(data){
+		var jsonData = "";
+        if (data == 1){
+			showErrorMessage();
+        }
+        $.each(data, function(environment, envval){
+			// main environments
+            jsonData += "<div class=\"environment\"><div class=\"environmentTitle\">" + environment + "</div>\n";
 
-            // main environments
-            jsonData += "<div class=\"environment\">" + environment + "\n";
+			var inrow_val;
+			var helper_val;
+			var helper_keys = Object.keys(envval).length-2;
+			var inrow_count = 1;
+			$.each(envval, function(topic, topicval){
 
-                $.each(envval, function(groups, groupval){
+			if (topic == "__displayorder") return true;// {
+				if (topic == "__displayinrow") {
+					inrow_val = topicval;
+					return true;
+				}
+				if 	(inrow_count == 1) {
+				console.log(helper_keys/inrow_val);				
 
-                  // product groups
-//                jsonData += "  <div class=\"groups\">" + groups + "</div>\n";
-                  jsonData += "    <div class=\"groupTiles\"><div id=\"" + groups + "\" class=\"groups\">" + groups + "</div>\n";
+					if (inrow_val == 1) jsonData += "    <div class=\"groupTilesRow\">\n";
+//					else if  (helper_keys/inrow_val < 1) jsonData += "    <div class=\"groupTilesRow2\">\n";
+					else jsonData += "    <div class=\"groupTilesRow\">\n";
+					helper_val = inrow_val;
+				}
+				var groupTiles;
+				switch (inrow_val) {
+					case 2:		groupTiles = " groupTilesLeft50"; break;
+					case 3:		groupTiles = " groupTilesLeft33"; break;
+					case 4:		groupTiles = " groupTilesLeft25"; break;
+					default:	groupTiles = ""; break;
+				}
+				helper_val--; 
+				if (helper_val == 0 && inrow_val > 1) groupTiles = " groupTilesRight";
+				jsonData += "      <div class=\"groupTiles" + groupTiles + "\">\n      <div id=\"" + topic + "\" class=\"groups\">" + topic + "</div>\n";
 
-                  $.each(groupval, function(products, productval){
+				$.each(topicval, function(products, productval){
+					// set class for status code
+					var statusClass = "state" + productval.state;
+					var bpName      = productval.bpname;
+					var name		= productval.name;
+					var name_short = (name.length > 20) ? name.substr(0,20) + " ..." : name;
+					//products
+					jsonData += "          <div id=\"" + bpName +"\" class=\"tile " + statusClass + "\" title=\"" + name + "\">" + name_short + "</div>\n";
+				});
 
-                        // set class for status code
-                        var statusClass = "state" + productval.state;
-                        var bpName      = productval.bpname;
+				jsonData += "    </div>\n";
+
+				helper_keys--;
+				if 	(inrow_count == inrow_val) {
+					jsonData += "      </div>\n";
+					if (helper_keys != 0) jsonData += "      <div class=\"groupTilesRowEmpty\"></div>\n";
+					inrow_count = 1;
+					 return true;
+				}
+				if (helper_keys == 0 && inrow_count != inrow_val && inrow_val != 1) {
+						inrow_count++;
+					while (inrow_count != inrow_val) {
+//					if (inrow_count == inrow_val) continue;
+						jsonData += "      <div class=\"groupTilesEmpty" + groupTiles + "\">\n      <div class=\"groups\">&nbsp;</div>\n</div>\n";
+						inrow_count++;
+
+					}
+					if 	(inrow_count == inrow_val) {
+						jsonData += "      <div class=\"groupTilesEmpty groupTilesRight\">&nbsp;</div>\n";
+						jsonData += "      </div>\n";
+//						inrow_count = -1;
+					}					
+				}
+				inrow_count++;
+					
+            });
+//while (inrow_count != inrow_val && )
 
 
 
-                        var products_short = (products.length > 20) ? products.substr(0,20) + " ..." : products;
 
-
-
-
-                        //products
-                    jsonData += "      <div id=\"" + bpName +"\" class=\"tile " + statusClass + "\" title=\"" + products + "\">" + products_short + "</div>\n";
-                    //?details=" + $(this).attr("id") + "\
-
-
-                        //products
-//                  jsonData += "      <div id=\"" + bpName +"\" class=\"tile " + statusClass + "\">" + products + "</div>\n";
-
-                  });
-
-                jsonData += "    </div>\n";
-
-                });
-                jsonData += "  </div>\n";
+            jsonData += "  </div>\n";
           })
 
           // display error message on empty returns
@@ -124,7 +159,7 @@ function getDbOverview(){
           $('#bps').empty();
           $('#bps').append(jsonData);
 
-        })
+       })
         .fail(function(){
           // Open DIV popup and inform user about error
           showErrorMessage();
@@ -141,6 +176,8 @@ function getDetails(businessProcess) {
             if (data == 1){
               showErrorMessage();
             }
+
+
             
             $.each(data, function(host, hostval){
 
@@ -176,10 +213,9 @@ function getDetails(businessProcess) {
         })
 }
 
-
-
 function showErrorMessage(){
-	
+
+	$.magnificPopup.close();
 	$.magnificPopup.open({
 		enableEscapeKey: false,
 		closeOnBgClick: false,
@@ -188,6 +224,24 @@ function showErrorMessage(){
 				src: '<div class="error-popup"><div id="details_subject" class="topBar">An error occured!</div><div id="details_data" class="details_data_error"><div class="details_data_error_content">Please check error_log of your webserver or try to reload this webapp!<br/><span style="font-size:13px;">&nbsp;<br/>(press &lt;F5\&gt; or &lt;CTRL-R&gt;)</span></div><div class="details_data_error_content_image"><img src="../share/images/global/exclamation_mark_red.png"></div></div</div>',
                 type: 'inline'
         }
-});
-	
+	});
+}
+
+function reloadconfig() {
+	var reloadit=confirm("Attention:\n\nA config reload enforce a data import, a config generation, and a reload of BPView. This operation could be decrease the performance from connected systems.\nIf you are unsure cancel the operation.\nDo you want to proceed?");
+	if (reloadit==true) {
+		var Address = 'bpview.pl?reloadit=yes&reloadnow=yes&round=0';
+		$.magnificPopup.open({
+			enableEscapeKey: false,
+			closeOnBgClick: false,
+			showCloseBtn: false,
+			markup: '<div class="mfp-iframe-scaler">'+
+				'<iframe class="mfp-iframe" frameborder="0" allowfullscreen></iframe>'+
+			  '</div>',
+			items: {
+				src: Address
+			},
+			type: 'iframe'
+		});
+	}
 }

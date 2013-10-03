@@ -1,5 +1,5 @@
 Name: bpview
-Version: 0.1
+Version: 0.4
 Release: 4%{?dist}
 Summary: Business Process view for Nagios/Icinga 
 
@@ -37,6 +37,8 @@ Requires: perl-Time-HiRes
 Requires: perl-Crypt-SSLeay
 Requires: mod_fcgid
 Requires: httpd
+Requires: perl-suidperl
+Requires: perl-Tie-IxHash
 
 Requires(post):   /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
 Requires(postun): /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
@@ -119,12 +121,18 @@ fi
 %defattr(-,root,root)
 %config(noreplace) %{_sysconfdir}/%{name}/bpview.yml
 %config(noreplace) %{_sysconfdir}/%{name}/datasource.yml
+%config(noreplace) %{_sysconfdir}/%{name}/bp-addon.cfg
 %config(noreplace) %{_sysconfdir}/%{name}/views
 %config(noreplace) %{_sysconfdir}/%{name}/bp-config
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/bpview.conf
 %{_libdir}/perl5/vendor_perl
+%attr(0755,root,root) %{_libdir}/%{name}/plugins/check_bp_status
 %attr(0755,root,root) %{_libdir}/%{name}/bpview.pl
-%attr(0755,root,root) %{_bindir}/bp-addon_config_writer.pl
+%attr(0755,root,root) %{_bindir}/bpview_cfg_writer.pl
+%attr(0775,root,apache) %{_sysconfdir}/%{name}/bp-config
+%attr(0775,root,apache) %{_sysconfdir}/%{name}/views
+%attr(0664,root,apache) %{_sysconfdir}/%{name}/bpview.conf
+%attr(0664,root,apache) %{_sysconfdir}/%{name}/icinga/bpview_businessprocesses.cfg
 %{_datarootdir}/%{name}/css
 %{_datarootdir}/%{name}/images
 %{_datarootdir}/%{name}/javascript
@@ -136,6 +144,9 @@ fi
 
 
 %changelog
+* Thu Sep 5 2013 Peter Stoeckl <r.stoeckl@ovido.at> 0.1-5
+- some changes
+
 * Thu Aug 29 2013 Rene Koch <r.koch@ovido.at> 0.1-4
 - added SELinux support
 

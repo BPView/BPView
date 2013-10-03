@@ -29,14 +29,14 @@ use File::Spec;
 use Log::Log4perl;
 
 # for debugging only
-use Data::Dumper;
+#use Data::Dumper;
 
 # define default paths required to read config files
 my ($lib_path, $cfg_path, $dir);
 BEGIN {
-  $lib_path = "../lib";		# path to BPView lib directory
-  $cfg_path = "../etc";		# path to BPView etc directory
-  $dir		= $cfg_path . "/bp-config";
+  $lib_path = "/usr/lib64/perl5/vendor_perl";   # path to BPView lib directory
+  $cfg_path = "/etc/bpview";                    # path to BPView etc directory
+  $dir          = $cfg_path . "/bp-config";
 }
 
 use lib "$lib_path";

@@ -1,0 +1,54 @@
+[%#
+#   BPView is free software: you can redistribute it and/or modify it 
+#   under the terms of the GNU General Public License as published by 
+#   the Free Software Foundation, either version 3 of the License, or 
+#   any later version.
+#
+#   BPView is distributed in the hope that it will be useful, but WITHOUT 
+#   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+#   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+#   for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with BPView.  
+#   If not, see <http://www.gnu.org/licenses/>.
+%]
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="Title" content="BPView">
+    <meta name="Description" content="a universal Business Process View UI">
+    <meta name="author" content="Peter Stöckl">
+    <meta http-equiv="expires" content="Sat, 01 Dec 2001 00:00:00 GMT">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="cache-control" content="no-cache">
+    <title>BPView | [% sitename %]</title>
+    <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/bpview.css">
+    
+    [%# set default timeout %]
+    <script type="text/javascript">
+      var refreshInterval = [% refresh_interval %];
+    </script>
+    <script src="[% site_url %]/share/javascript/jquery-1.10.1.js"></script>
+    <script src="[% site_url %]/share/javascript/moment.min.js"></script>
+    <script src="[% site_url %]/share/javascript/bpview.js"></script>
+    <script src="[% site_url %]/share/javascript/magnific-popup.js"></script>
+  </head>
+  <body>
+	<div class="topContainer topBar">
+		<div id="nametag">
+        	<span id="appname">BPView</span>
+        	<span id="appdesc">[% sitename %]</span>
+    	</div>
+		<div id="dashboard_select"><div class="dashboard_subject">Dashboard: </div><div class="form-select"><select name="dashboards" id="dashboards" size="1">
+				          [% FOR db = select_content %]
+				            <option>[% db %]</option>
+				          [% END %]
+				          </select></div>
+[% IF reloadit == 'yes' %]
+   <div class="reloadbutton"><a href="javascript:reloadconfig();"><img src="[% site_url %]/share/images/global/refresh_orange.png" height="23" weight="23" alt="Reload Config!" title="Reload Config!"></a></div>
+[% END %]
+		</div>
+	</div>

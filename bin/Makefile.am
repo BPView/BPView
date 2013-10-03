@@ -14,25 +14,37 @@
 # compiler settings
 BINDIR=@bindir@
 LIBDIR=@libdir@
+CGIDIR=@sbindir@
 SYSCONFDIR=@sysconfdir@
 INSTALL=@INSTALL@
 INSTALL_OPTS=@INSTALL_OPTS@
-SCRIPT=bp-addon_config_writer
+SCRIPT1=bpview_cfg_writer
+SCRIPT2=check_bp_status
 
 # compile
 all:
-	cp $(SCRIPT).pl.in $(SCRIPT).tmp
-	sed -i -e 's!lib_path = .*!lib_path = "$(LIBDIR)";!' $(SCRIPT).tmp
-	sed -i -e 's!cfg_path = .*!cfg_path = "$(SYSCONFDIR)";!' $(SCRIPT).tmp
-	cp $(SCRIPT).tmp $(SCRIPT).pl
-	rm -f $(SCRIPT).tmp
+	cp $(SCRIPT1).pl.in $(SCRIPT1).tmp
+	sed -i -e 's!lib_path = .*!lib_path = "$(LIBDIR)";!' $(SCRIPT1).tmp
+	sed -i -e 's!cfg_path = .*!cfg_path = "$(SYSCONFDIR)";!' $(SCRIPT1).tmp
+	cp $(SCRIPT1).tmp $(SCRIPT1).pl
+	rm -f $(SCRIPT1).tmp
+
+	cp $(SCRIPT2).pl.in $(SCRIPT2).tmp
+	cp $(SCRIPT2).tmp $(SCRIPT2).pl
+	rm -f $(SCRIPT2).tmp
+
+
 
 # install
 install:
-	for file in *.pl; do \
+	for file in bpview.pl; do \
 	  $(INSTALL) -D -m 755 $(INSTALL_OPTS) $$file $(DESTDIR)$(BINDIR)/$$file; \
+	done
+	for file in check_bp_status.pl; do \
+	  $(INSTALL) -D -m 755 $(INSTALL_OPTS) $$file $(DESTDIR)$(CGIDIR)/$$file; \
 	done
 
 # cleanup
 clean:
 	rm -f *.pl
+

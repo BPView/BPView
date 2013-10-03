@@ -287,8 +287,6 @@ sub validate {
   
   # check data backend provider
   $self->_check_provider( "provider", $config->{'provider'}{'source'}, $config->{ $config->{'provider'}{'source'} } );
-  # check bpaddon API
-  $self->_check_provider( "provider", "bpaddon", $config->{'bpaddon'} ); 
   
 }
 
@@ -496,6 +494,7 @@ sub validate_bpconfig {
 
 
 
+
 #----------------------------------------------------------------
 
 # internal methods
@@ -539,7 +538,7 @@ sub _check_provider {
    	 
     # mk-livestatus 
     # requires socket or server
-    if (! $config->{ $provider }{'socket'} && ! $config->{'server'}){
+    if (! $config->{'socket'} && ! $config->{'server'}){
      	
       croak "mk-livestatus: Missing server or socket!";
        

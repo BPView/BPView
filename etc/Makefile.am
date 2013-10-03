@@ -19,6 +19,7 @@ LOCALSTATEDIR=@localstatedir@
 INSTALL=@INSTALL@
 INSTALL_OPTS=@INSTALL_OPTS@
 CONF=bpview
+CONTACTGROUP=admins
 
 # compile
 all:
@@ -28,13 +29,18 @@ all:
 	sed -i -e 's!^  logfile:.*!  logfile: $(LOCALSTATEDIR)/log/bpview.log!' $(CONF).tmp
 	cp $(CONF).tmp $(CONF).yml
 	cp datasource.yml.in datasource.yml
+	cp bpview.conf.in bpview.conf
+	cp bp-addon.cfg.in bp-addon.cfg
 	rm -f $(CONF).tmp
+
+
 
 # install
 install:
 	for file in *.yml views/*.yml bp-config/*.yml; do \
 	  $(INSTALL) -D -m 644 $(INSTALL_OPTS) $$file $(DESTDIR)$(SYSCONFDIR)/$$file; \
 	done
+
 	
 # cleanup
 clean:

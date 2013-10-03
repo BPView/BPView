@@ -1,0 +1,43 @@
+[%#
+#   BPView is free software: you can redistribute it and/or modify it 
+#   under the terms of the GNU General Public License as published by 
+#   the Free Software Foundation, either version 3 of the License, or 
+#   any later version.
+#
+#   BPView is distributed in the hope that it will be useful, but WITHOUT 
+#   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+#   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+#   for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with BPView.  
+#   If not, see <http://www.gnu.org/licenses/>.
+%]
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="Title" content="BPView">
+    <meta name="Description" content="a universal Business Process View UI">
+    <meta name="author" content="Peter Stöckl">
+    <meta http-equiv="expires" content="Sat, 01 Dec 2001 00:00:00 GMT">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="cache-control" content="no-cache">
+    <title>BPView | [% sitename %]</title>
+    <script src="[% site_url %]/share/javascript/reload.js"></script>
+    <script src="[% site_url %]/share/javascript/jquery-1.10.1.js"></script>
+  </head>
+  <body style="background:white;">
+[% IF round == '1' %]
+   	<h2 style="color:green">All finisished, going back to BPView in 3 seconds .....</h2>
+	<script type="text/javascript">goback();</script>
+[% ELSE %]
+    <h1 style="color:red">Restarting the BPView Instance ...</h1>
+    <div id="iframeContent"></div>
+    <iframe width="90%" src="bpview.pl?reloadit=yes&reloadnow=yes&round=1" name="reloadthis" frameBorder="0">Browser not compatible.</iframe>
+    <script type="text/javascript">reloadone();</script><br/>
+[% END %]
+
+  </body>
+</html>

@@ -5,25 +5,21 @@ Dashboard 1:
     - groups: testgroup
 
   views:
-    prod:
-      Test 1:
-        Test 1.1:
-        Test 1.2:
-        Test 1.3:
-      Test 2:
-        Test 2.1:
-        Test 2.2:
-        Test 2.3:
-    test:
-      Test 1:
-         Test 1.3:
-      Test 2:
-        Test 2.1:
-        Test 2.3:
-
-Dashboard 2:
-  views:
-    prod:
-      My View 1:
-        My View 1.1:
-        My View 1.2:
+    "environment":
+      "topic":
+        "product 1":
+        "product 2":
+    "production":
+      "Trading":
+        "DAX":
+        "NASDAQ":
+        "AIX":
+        "ASE":
+        "TASE":
+      "Sales":
+        "Online-Shop":
+        "POS at Store Wien":
+        "POS at Store St. Andrä-Wördern":
+        "POS at Store München":
+        "POS at Store Lahnsattel":
+        "POS at Store Graz":

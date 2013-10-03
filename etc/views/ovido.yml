@@ -6,6 +6,8 @@ ovido:
 
   views:
     production:
+      __displayorder: 1
+      __displayinrow: 2
       mail:
         lb:
         zarafa:
@@ -14,6 +16,8 @@ ovido:
         otrs:
         webserver:
     Produktion:
+      __displayorder: 2
+      __displayinrow: 1
       Handel:
         Topic with Umlauts öäuÖÄÜß -&gt; oau!:
         otrs:

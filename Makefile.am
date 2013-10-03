@@ -21,7 +21,7 @@ SHARE_DIR=@srcdir@/share
 SELINUX_DIR=@srcdir@/selinux
 DOCDIR=@docdir@
 WEBCONF=@web_conf@
-CONF=httpd
+HTTPCONF=httpd
 CGIDIR=@sbindir@
 DATAROOTDIR=@datarootdir@
 
@@ -46,11 +46,11 @@ all:
 	cd $(LOG_DIR) && $(MAKE) $@
 	cd $(SHARE_DIR) && $(MAKE) $@
 	
-	cp sample-config/$(CONF).conf.in sample-config/$(CONF).tmp
-	sed -i 's!/data/www/BPView/cgi!$(CGIDIR)!' sample-config/$(CONF).tmp
-	sed -i 's!/data/www/BPView/share!$(DATAROOTDIR)!' sample-config/$(CONF).tmp
-	cp sample-config/$(CONF).tmp sample-config/$(CONF).conf
-	rm -f sample-config/$(CONF).tmp
+	cp sample-config/$(HTTPCONF).conf.in sample-config/$(HTTPCONF).tmp
+	sed -i 's!/data/www/BPView/cgi!$(CGIDIR)!' sample-config/$(HTTPCONF).tmp
+	sed -i 's!/data/www/BPView/share!$(DATAROOTDIR)!' sample-config/$(HTTPCONF).tmp
+	cp sample-config/$(HTTPCONF).tmp sample-config/$(HTTPCONF).conf
+	rm -f sample-config/$(HTTPCONF).tmp
 
 # Install
 install:
