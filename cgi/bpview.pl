@@ -144,7 +144,26 @@ while ( my $q = new CGI::Fast ){
     my $json = undef;
 
     if (defined param("dashboard")){
-    print "Content-type: application/json; charset=utf-8\n\n";
+      print "Content-type: application/json; charset=utf-8\n\n";
+    
+      # use filters to display only certain states or hosts
+      my $filter = undef;
+      # we expect the GET information in the following form:
+      # bpview.pl?dashboard=db&filter=state+ok
+      # bpview.pl?dashboard=db&filter=name+loadbalancer
+      
+      if (defined param("filter")){
+      	$log->error_die("Unsupported parameter options: " . param("filter")) unless param("filter") =~ /^state/;
+      	my @filterval = split / /, param("filter");
+      	# check for invalid options
+      	
+      	if ($filterval[1] ne "ok" && $filterval[1] ne "warning" && $filterval[1] ne "critical" && $filterval[1] ne "unknown"){
+      	  $log->error_die("Invalid filter option: " . $filterval[1]);
+      	}else{
+      	  $filter = { $filterval[0] => $filterval[1] };	
+      	}
+      	
+      }
   	
       # get dashboard data
       my $dashboard = BPView::Data->new(
@@ -152,17 +171,38 @@ while ( my $q = new CGI::Fast ){
     	   provider	=> $config->{ 'provider' }{ 'source' },
     	   provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
     	   bps		=> $bps,
+    	   filter	=> $filter,
          );
       $json = eval { $dashboard->get_status() };
 	  $log->error_die($@) if $@;
        
     }elsif (defined param("details")){
-    print "Content-type: application/json; charset=utf-8\n\n";
+      print "Content-type: application/json; charset=utf-8\n\n";
   	
+  	  # use filters to display only certain states or hosts
+      my $filter = undef;
+      # we expect the GET information in the following form:
+      # bpview.pl?dashboard=db&filter=state+ok
+      # bpview.pl?dashboard=db&filter=name+loadbalancer
+      
+      if (defined param("filter")){
+      	$log->error_die("Unsupported parameter options: " . param("filter")) unless param("filter") =~ /^state/;
+      	my @filterval = split / /, param("filter");
+      	# check for invalid options
+      	
+      	if ($filterval[1] ne "ok" && $filterval[1] ne "warning" && $filterval[1] ne "critical" && $filterval[1] ne "unknown"){
+      	  $log->error_die("Invalid filter option: " . $filterval[1]);
+      	}else{
+      	  $filter = { $filterval[0] => $filterval[1] };	
+      	}
+      	
+      }
+      
   	  # get details for this business process
   	  my $details = BPView::Data->new(
   		  config	=> $config,
   		  bp		=> param("details"),
+   	      filter	=> $filter,
   	     );
   	  $json = eval { $details->get_details() };
 	  $log->error_die($@) if $@;
