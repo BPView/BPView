@@ -237,7 +237,7 @@ sub get_status {
   # note: if product is missing in Icinga/Nagios there's no state for it
   # we use status code 99 for this (0-3 are reserved as Nagios plugin exit codes)
   # this is ugly - can it be done better?
-
+  
   foreach my $environment (keys %{ $self->{ 'views' } }){
     foreach my $topic (keys %{ $self->{ 'views' }{ $environment } }){
       
@@ -352,8 +352,11 @@ sub get_details {
   }
 
   # BP-Addon libraries
-  use BPView::BPAddon::ndodb;
-  use BPView::BPAddon::nagiosBp;
+  use lib "/usr/lib64/perl5/vendor_perl/BPView/BPAddon";
+#  use BPView::BPAddon::ndodb;
+#  use BPView::BPAddon::nagiosBp;
+  use ndodb;
+  use nagiosBp;
   
     my $config = $self->{'config'};
 	my $detail = $self->{ 'bp' };
@@ -380,6 +383,23 @@ sub get_details {
 		}
 		$return->{ $host }{ $service }{ 'output' } = $statusinfos->{$services[$i]};
 		$return->{ $host }{ $service }{ 'hardstate' } = $hardstates->{$services[$i]};
+		
+		# filter objects
+	    if (defined $self->{ 'filter' }{ 'state' }){
+	      	
+	      # filter OK results
+	      if (lc( $self->{ 'filter' }{ 'state' } ) eq "ok"){
+	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "ok";
+	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "warning"){
+	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "warning";
+	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "critical"){
+	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "critical";
+	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "unknown"){
+	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "unknown";
+	      }
+	      
+	    }
+	    
 	}
   
   # produce json output
