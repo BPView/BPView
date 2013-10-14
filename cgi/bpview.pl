@@ -207,6 +207,31 @@ while ( my $q = new CGI::Fast ){
   	  $json = eval { $details->get_details() };
 	  $log->error_die($@) if $@;
   	
+    }elsif (defined param("template")){
+  	
+  	  # override default template using GET variable 
+  	  print "Content-type: text/html\n\n";
+  	  $log->error_die("Invalid character in template variable: " . param("template")) unless param("template") =~ /^[a-zA-Z0-9_-]*$/;
+
+      # display web page
+      my $page = BPView::Web->new(
+ 	    src_dir		=> $config->{ 'bpview' }{ 'src_dir' },
+ 	    data_dir	=> $config->{ 'bpview' }{ 'data_dir' },
+ 	    site_url	=> $config->{ 'bpview' }{ 'site_url' },
+ 	    template	=> param("template"),
+ 	    site_name 	=> $config->{ 'bpview' }{ 'site_name' },
+      );
+
+      #   $page->login();
+      eval{ $page->display_page(
+         page		=> "main",
+         content	=> $dashboards,
+         refresh	=> $config->{ 'refresh' }{ 'interval' },
+         reloadit	=> $reloadit,
+      ) };
+      $log->error_die($@) if $@;
+
+    
     }else{
 		my $query=new CGI;
 		print $query->redirect("$ENV{'HTTP_HOST'}$config->{ 'bpview' }{ 'site_url' }");
@@ -214,9 +239,11 @@ while ( my $q = new CGI::Fast ){
   	
     }
   
-    print $json;
-  
+    print $json unless defined param("template");
+  	
   }else{
+  	
+  	# use default template specified in bpview.yml
     print "Content-type: text/html\n\n";
 
     # display web page
