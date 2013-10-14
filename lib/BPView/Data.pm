@@ -351,10 +351,9 @@ sub get_details {
   	}
   }
 
-  use lib "/usr/lib64/perl5/vendor_perl/BPView/BP-Addon";
-
-  use ndodb;
-  use nagiosBp;
+  # BP-Addon libraries
+  use BPView::BPAddon::ndodb;
+  use BPView::BPAddon::nagiosBp;
   
     my $config = $self->{'config'};
 	my $detail = $self->{ 'bp' };
