@@ -118,6 +118,7 @@ sub new {
   	"provdata"	=> undef,	# provider details like hostname, username,... 
   	"config"	=> undef,
   	"bps"		=> undef,
+  	"filter"	=> undef,	# filter states (e.g. don't display bps with state ok)
   };
   
   for my $key (keys %options){
@@ -263,9 +264,32 @@ sub get_status {
 	    $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'bpname' } = $service;
 	    $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'name' } = $self->{ 'bps' }{$service}{BP}{NAME};
 
+	    # filter objects
+	    if (defined $self->{ 'filter' }{ 'state' }){
+	      	
+	      # filter OK results
+	      if (lc( $self->{ 'filter' }{ 'state' } ) eq "ok"){
+	        delete $self->{ 'views' }{ $environment }{ $topic }{ $product } if $result->{ $service }{ 'state' } == 0;
+	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "warning"){
+	        delete $self->{ 'views' }{ $environment }{ $topic }{ $product } if $result->{ $service }{ 'state' } == 1;
+	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "critical"){
+	        delete $self->{ 'views' }{ $environment }{ $topic }{ $product } if $result->{ $service }{ 'state' } == 2;
+	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "unknown"){
+	        delete $self->{ 'views' }{ $environment }{ $topic }{ $product } if $result->{ $service }{ 'state' } == 3;
+	      }
+	      
+	    }
+	      
       }
       
+      # delete empty topics
+      delete $self->{ 'views' }{ $environment }{ $topic} if scalar keys %{ $self->{ 'views' }{ $environment }{ $topic } } == 0;
+      
     }
+    
+    # delete empty environments
+    delete $self->{ 'views' }{ $environment } if scalar keys %{ $self->{ 'views' }{ $environment } } == 0;
+    
   }
 
   # produce json output
@@ -526,6 +550,19 @@ Get business process status from IDO backend
    	 provdata	=> $provdata,
   );	
   $json = $dashboard->get_status();
+  
+
+Get business process status from IDO backend with all states except ok
+
+  use BPView::Data;
+  my $filter = { "state" => "ok" };
+  my $dashboard = BPView::Data->new(
+  	 views		=> $views,
+   	 provider	=> "ido",
+   	 provdata	=> $provdata,
+   	 filter		=> $filter,
+  );	
+  $json = $dashboard->get_status
     
     
 Get business process details from BPAddon API for business process
