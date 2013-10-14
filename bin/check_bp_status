@@ -19,7 +19,7 @@
 
 
 #Load modules
-	use lib ('/usr/lib64/perl5/vendor_perl/BPView/BP-Addon');
+	use lib ('/usr/lib64/perl5/vendor_perl/BPView/BPAddon');
         #require a good programming
         use strict;
 	#db connection module
