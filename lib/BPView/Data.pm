@@ -26,7 +26,7 @@
 package BPView::Data;
 
 BEGIN {
-    $VERSION = '1.200'; # Don't forget to set version and release
+    $VERSION = '1.300'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -239,34 +239,32 @@ sub get_status {
 
   foreach my $environment (keys %{ $self->{ 'views' } }){
     foreach my $topic (keys %{ $self->{ 'views' }{ $environment } }){
-      if ($topic eq "__displayorder") {
-#        delete $self->{ 'views' }{ $environment }{__displayorder};
-      }
-      elsif ($topic eq "__displayinrow") {
-#        #TODO!: anything for the javascript output? or empty
-#		delete $self->{ 'views' }{ $environment }{__displayinrow};
-      }
-      else {
-    	  foreach my $product (keys %{ $self->{ 'views' }{ $environment }{ $topic } }){
-    	    # see _get_ido for example output!
-  	      my $service = lc($environment . "-" . $topic . "-" . $product);
-  	      # replace non-chars with _ except -, due to Nagios limitations
-          #$service =~ s/[^a-zA-Z0-9-]+/_/g;
-          $service =~ s/[^a-zA-Z0-9-]/_/g;
-    	    if (defined ($result->{ $service }{ 'state' })){
-  	        # found status in IDO database
-	        $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'state' } = $result->{ $service }{ 'state' };
-	      }else{
-	        # didn't found status in IDO database
-  	        $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'state' } = 99;
-	      }
-	      # return also business process name
-	      $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'bpname' } = $service;
-	      $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'name' } = $self->{ 'bps' }{$service}{BP}{NAME};
+      
+      # don't process order information
+      next if ( $topic eq "__displayorder" || $topic eq "__displayinrow" );
+      
+      foreach my $product (keys %{ $self->{ 'views' }{ $environment }{ $topic } }){
+      	
+    	# see _get_ido for example output!
+  	    my $service = lc($environment . "-" . $topic . "-" . $product);
+  	    # replace non-chars with _ except -, due to Nagios limitations
+        #$service =~ s/[^a-zA-Z0-9-]+/_/g;
+        $service =~ s/[^a-zA-Z0-9-]/_/g;
+        
+    	if (defined ($result->{ $service }{ 'state' })){
+  	      # found status in IDO database
+	      $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'state' } = $result->{ $service }{ 'state' };
+	    }else{
+	      # didn't found status in IDO database
+  	      $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'state' } = 99;
+	    }
+	    
+	    # return also business process name
+	    $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'bpname' } = $service;
+	    $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'name' } = $self->{ 'bps' }{$service}{BP}{NAME};
 
-
-        }
       }
+      
     }
   }
 
@@ -553,7 +551,7 @@ Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.200  (August 28 2013))
+Version 1.300  (October 14 2013))
 
 =head1 COPYRIGHT AND LICENSE
 
