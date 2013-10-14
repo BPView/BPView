@@ -21,7 +21,7 @@ all:
 
 # install
 install:
-	for file in BPView/*.pm Monitoring/*.pm Monitoring/Livestatus/*.pm BP-Addon/*.pm; do \
+	for file in BPView/*.pm Monitoring/*.pm Monitoring/Livestatus/*.pm BPAddon/*.pm; do \
 	  $(INSTALL) -D -m 644 $(INSTALL_OPTS) $$file $(DESTDIR)$(LIBDIR)/$$file; \
 	done
 # cleanup
