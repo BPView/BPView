@@ -26,7 +26,7 @@
     <meta http-equiv="cache-control" content="no-cache">
     <title>BPView | [% sitename %]</title>
     <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/bpview.css">
-[% IF templ != css %]
+[% IF css != "bpview" %]
     <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/[% css %].css">
 [% END %]
     

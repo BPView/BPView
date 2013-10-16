@@ -110,6 +110,7 @@ sub new {
   	"data_dir"			=> undef,		# static html directory
   	"site_url"			=> "/bpview",	# site url
   	"template"			=> "default",	# template to use
+    "css"				=> "bpview",	# CSS file to use
   	"page"				=> "main",		# page to display
   	"content"			=> undef,		# various content to pass to template toolkit (like dashboards)
   	"refresh"			=> 15000,		# refresh interval
@@ -176,6 +177,7 @@ sub display_page {
 
   my $tt_vars		= { 
   	'templ' 		=> $self->{ 'template' },
+  	'css'			=> $self->{ 'css' },
   	'src_dir'		=> $self->{ 'src_dir' },
   	'data_dir'		=> $self->{ 'data_dir' },
   	'site_url'		=> $self->{ 'site_url' },

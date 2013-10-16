@@ -207,7 +207,7 @@ while ( my $q = new CGI::Fast ){
   	  $json = eval { $details->get_details() };
 	  $log->error_die($@) if $@;
   	
-    }elsif (defined param("template")){
+    }elsif (defined param("css")){
   	
   	  # override default template using GET variable 
   	  print "Content-type: text/html\n\n";
@@ -218,7 +218,8 @@ while ( my $q = new CGI::Fast ){
  	    src_dir		=> $config->{ 'bpview' }{ 'src_dir' },
  	    data_dir	=> $config->{ 'bpview' }{ 'data_dir' },
  	    site_url	=> $config->{ 'bpview' }{ 'site_url' },
- 	    template	=> param("template"),
+ 	    template	=> $config->{ 'bpview' }{ 'template' },
+ 	    css			=> param("css"),
  	    site_name 	=> $config->{ 'bpview' }{ 'site_name' },
       );
 
