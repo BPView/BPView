@@ -62,6 +62,7 @@ $(document).on('click', 'div.tile', function(){
 
 function getDbOverview(){
 	var dashboard = $("#dashboards option:selected").val();
+	var watermark = 0;
 	$.getJSON( "?dashboard=" + dashboard, function(data){
 		var jsonData = "";
         if (data == 1){
@@ -83,10 +84,8 @@ function getDbOverview(){
 					return true;
 				}
 				if 	(inrow_count == 1) {
-				console.log(helper_keys/inrow_val);				
 
 					if (inrow_val == 1) jsonData += "    <div class=\"groupTilesRow\">\n";
-//					else if  (helper_keys/inrow_val < 1) jsonData += "    <div class=\"groupTilesRow2\">\n";
 					else jsonData += "    <div class=\"groupTilesRow\">\n";
 					helper_val = inrow_val;
 				}
@@ -112,6 +111,7 @@ function getDbOverview(){
 				});
 
 				jsonData += "    </div>\n";
+				if (watermark == 0) watermark = 1;
 
 				helper_keys--;
 				if 	(inrow_count == inrow_val) {
@@ -137,14 +137,10 @@ function getDbOverview(){
 				inrow_count++;
 					
             });
-//while (inrow_count != inrow_val && )
-
-
-
-
             jsonData += "  </div>\n";
           })
-
+		  // change css to display watermark with BP content
+		  if (watermark == 1) $('#watermark').css({"height":"35%"});
           // display error message on empty returns
           if (jsonData == ""){
         	showErrorMessage();

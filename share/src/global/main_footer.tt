@@ -15,6 +15,7 @@
 %]
 
 	</div>
+    <div id="watermark" class="contentBottom"></div>
 	<div class="footer topBar">
 		<div id="copyr">&copy; 2013, ovido gmbh</div>
 		<div id="refresh">Last refresh</div>

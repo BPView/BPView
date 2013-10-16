@@ -180,12 +180,12 @@ sub gen_bpaddoncfg {
 	
 	
 	}
-	eval { _write_file($config->{'bp-addon'}{'bp_output_path'}, $config->{'bp-addon'}{'bp_output_cfg'}, $output) };
+	eval { _write_file($config->{'businessprocess'}{'bp_output_path'}, $config->{'businessprocess'}{'bp_output_cfg'}, $output) };
 	if ($@) {
 		if ($config->{'logging'}{'level'} eq "debug") {
 			print $@;
 		}
-		croak "Do you have a permission problem? Unable to write to $config->{'bp-addon'}{'bp_output_path'}, $config->{'bp-addon'}{'bp_output_cfg'}";
+		croak "Do you have a permission problem? Unable to write to $config->{'businessprocess'}{'bp_output_path'}, $config->{'businessprocess'}{'bp_output_cfg'}";
 		return 1;
 	}
 	else {
@@ -231,22 +231,22 @@ sub gen_nicfg {
 		$output .= "define service {\n";
 
 		if ($yaml->{$bp_host}{'BP'}{'DISP'} > 0) {
-			$output .= "                 use                      ". $config->{'bp-addon'}{'generic_service_top'} ."\n";
+			$output .= "                 use                      ". $config->{'businessprocess'}{'generic_service_top'} ."\n";
 		}
 		else {
-			$output .= "                 use                      ". $config->{'bp-addon'}{'generic_service_minor'} ."\n";
+			$output .= "                 use                      ". $config->{'businessprocess'}{'generic_service_minor'} ."\n";
 		}
 
 		$output .= "                 service_description      ". $bp_host ."\n";
-		$output .= "                 check_command            ". $config->{'bp-addon'}{'check_plugin'} . "!". $bp_host ."!". $config->{'bp-addon'}{'bp_output_cfg'} ."\n}\n\n";
+		$output .= "                 check_command            ". $config->{'businessprocess'}{'check_plugin'} . "!". $bp_host ."!". $config->{'businessprocess'}{'bp_output_cfg'} ."\n}\n\n";
 
 	}
-	eval { _write_file($config->{'bp-addon'}{'ni_output_path'}, $config->{'bp-addon'}{'ni_output_cfg'}, $output) };
+	eval { _write_file($config->{'businessprocess'}{'ni_output_path'}, $config->{'businessprocess'}{'ni_output_cfg'}, $output) };
 	if ($@) {
 		if ($config->{'logging'}{'level'} eq "debug") {
 			print $@;
 		}
-		croak "Do you have a permission problem? Unable to write to $config->{'bp-addon'}{'ni_output_path'}/$config->{'bp-addon'}{'ni_output_cfg'}";
+		croak "Do you have a permission problem? Unable to write to $config->{'businessprocess'}{'ni_output_path'}/$config->{'businessprocess'}{'ni_output_cfg'}";
 		return 1;
 	}
 	else {
