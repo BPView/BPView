@@ -39,7 +39,7 @@
   <body>
 	<div class="topContainer topBar">
 		<div id="nametag">
-        	<span id="appname">BPView</span>
+        	<span id="appname"><img src="[% site_url %]/share/images/global/bpview_logo.png" width="271" height="47" alt="BPView"></span>
         	<span id="appdesc">[% sitename %]</span>
     	</div>
 		<div id="dashboard_select"><div class="dashboard_subject">Dashboard: </div><div class="form-select"><select name="dashboards" id="dashboards" size="1">

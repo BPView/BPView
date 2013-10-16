@@ -1,8 +1,8 @@
 html, body {
-        font-size: 13px;
-        font-family: Frutiger, "Frutiger Linotype", Univers, Calibri, "Gill Sans", "Gill Sans MT", "Myriad Pro", Myriad, "DejaVu Sans Condensed", "Liberation Sans", "Nimbus Sans L", Tahoma, Helvetica, Arial, sans-serif;
-        background: white;
-        height: 100%;
+	font-size: 13px;
+	font-family: Frutiger, "Frutiger Linotype", Univers, Calibri, "Gill Sans", "Gill Sans MT", "Myriad Pro", Myriad, "DejaVu Sans Condensed", "Liberation Sans", "Nimbus Sans L", Tahoma, Helvetica, Arial, sans-serif;
+	background: white;
+	height: 100%;
 }
 body {
   margin: 0px;
@@ -151,7 +151,7 @@ white-space: nowrap;
 
 .topContainer {
   width: 100%;
-  height: 45px;
+  height: 50px;
   position: fixed;
   top: 0;
   line-height: 1.4;
@@ -173,6 +173,10 @@ white-space: nowrap;
   bottom: 0;
   width: 100%;
   position: fixed;
+}
+
+.contentBottom {
+  height: 250px;
 }
 
 .bpsContainer, .detailsContainer {
@@ -255,8 +259,9 @@ display: block;
 }
 
 #appdesc {
-  margin-left: 10px;
-  font-size: 14px;
+  margin-left: 15px;
+  font-size: 24px;
+  vertical-align: 8px;
 }
 
 .tooltip {
@@ -283,6 +288,14 @@ display: block;
     float: right;
         margin: 12px 5px 0px 0px;
         padding-right: 5px;
+}
+
+#watermark {
+	background-image: url(/bpview/share/images/global/bpview_watermark.png);
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-position: 100% 90%;
+	height: 90%;
 }
 
 .dashboard_subject {

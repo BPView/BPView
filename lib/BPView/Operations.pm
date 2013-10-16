@@ -102,11 +102,11 @@ sub import_cmdb {
 			croak "Unknown option: $key";
 		}
 	}
-	
+	my $cmdbscript = $self->{'cfg_path'}{'businessprocess'}{'cmdb_exporter'};
 	my $cfg_path = $self->{ 'cfg_path' };
 	
 #	system("/bin/rm -f $cfg_path/views/*.yml;/bin/rm -f $cfg_path/bp-config/*.yml") or croak ("ERROR: Can't execute delete commands (/bin/rm -f $cfg_path/views/*.yml;/bin/rm -f $cfg_path/bp-config/*.yml)");
-	system("/bin/rm -f $cfg_path/views/*.yml;/bin/rm -f $cfg_path/bp-config/*.yml;/usr/local/bin/moss.pl") or croak ("ERROR: Can't import data from CMDB. See logfile for more information.");
+	system("/bin/rm -f $cfg_path/views/*.yml;/bin/rm -f $cfg_path/bp-config/*.yml;" . $cmdbscript) or croak ("ERROR: Can't import data from CMDB. See logfile for more information.");
 	return;
 }
 
@@ -130,8 +130,8 @@ sub write_cfgs {
 			croak "Unknown option: $key";
 		}
 	}
-	system("/usr/bin/bpview_cfg_writer.pl;/bin/cp /etc/bpview/views/ovido.yml.bak /etc/bpview/views/ovido.yml") or croak ("ERROR: Can't import data from CMDB. See logfile for more information.");
-	return;
+	system("/usr/bin/bpview_cfg_writer.pl;") or croak ("ERROR: Can't import data from CMDB. See logfile for more information.");
+	return; #/bin/cp /etc/bpview/views/ovido.yml.bak /etc/bpview/views/ovido.yml
 }
 
 =head1 METHODS	
