@@ -295,9 +295,7 @@ sub get_status {
   # produce json output
   my $json = JSON::PP->new->pretty;
   $json->utf8('true');
-#  $json = $json->sort_by(sub { $JSON::PP::a cmp $JSON::PP::b })->encode($self->{ 'views' });   # old sorting method
   $json = $json->encode($self->{ 'views' });
-#  print STDERR $json;
   return $json;
   
 }
@@ -360,7 +358,7 @@ sub get_details {
   
     my $config = $self->{'config'};
 	my $detail = $self->{ 'bp' };
-	my $bp_conf = $config->{ 'bp-addon' }{ 'bp_output_path' } . "/" . $config->{ 'bp-addon' }{ 'bp_output_cfg' };
+	my $bp_conf = $config->{ 'businessprocess' }{ 'bp_output_path' } . "/" . $config->{ 'businessprocess' }{ 'bp_output_cfg' };
   
 	my ($display, $display_status, $script_out, $info_url, $components, $hardstates);
 	my ($statusinfos, $key, $i, @fields_state, @defined_priorities, $host, $service);
