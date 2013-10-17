@@ -17,32 +17,32 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="Title" content="BPView">
-    <meta name="Description" content="a universal Business Process View UI">
-    <meta name="author" content="Peter Stöckl">
-    <meta http-equiv="expires" content="Sat, 01 Dec 2001 00:00:00 GMT">
-    <meta name="robots" content="noindex, nofollow">
-    <meta http-equiv="pragma" content="no-cache">
-    <meta http-equiv="cache-control" content="no-cache">
+    <meta name="Title" content="BPView" />
+    <meta name="Description" content="a universal Business Process View UI" />
+    <meta name="author" content="Peter Stöckl" />
+    <meta http-equiv="expires" content="Sat, 01 Dec 2001 00:00:00 GMT" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta http-equiv="pragma" content="no-cache" />
+    <meta http-equiv="cache-control" content="no-cache" />
     <title>BPView | [% sitename %]</title>
-    <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/bpview.css">
+    <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/bpview.css" />
 [% IF css != "bpview" %]
-    <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/[% css %].css">
+    <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/[% css %].css" />
 [% END %]
     
     [%# set default timeout %]
     <script type="text/javascript">
       var refreshInterval = [% refresh_interval %];
     </script>
-    <script src="[% site_url %]/share/javascript/jquery-1.10.1.js"></script>
-    <script src="[% site_url %]/share/javascript/moment.min.js"></script>
-    <script src="[% site_url %]/share/javascript/bpview.js"></script>
-    <script src="[% site_url %]/share/javascript/magnific-popup.js"></script>
+    <script type="text/javascript" src="[% site_url %]/share/javascript/jquery-1.10.1.js"></script>
+    <script type="text/javascript" src="[% site_url %]/share/javascript/moment.min.js"></script>
+    <script type="text/javascript" src="[% site_url %]/share/javascript/bpview.js"></script>
+    <script type="text/javascript" src="[% site_url %]/share/javascript/magnific-popup.js"></script>
   </head>
   <body>
 	<div class="topContainer topBar">
 		<div id="nametag">
-        	<span id="appname"><img src="[% site_url %]/share/images/global/bpview_logo.png" width="271" height="47" alt="BPView"></span>
+        	<span id="appname"><img src="[% site_url %]/share/images/global/bpview_logo.png" width="271" height="47" alt="BPView" /></span>
         	<span id="appdesc">[% sitename %]</span>
     	</div>
 		<div id="dashboard_select"><div class="dashboard_subject">Dashboard: </div><div class="form-select"><select name="dashboards" id="dashboards" size="1">
@@ -51,7 +51,7 @@
 				          [% END %]
 				          </select></div>
 [% IF reloadit == 'yes' %]
-   <div class="reloadbutton"><a href="javascript:reloadconfig();"><img src="[% site_url %]/share/images/global/refresh_orange.png" height="23" weight="23" alt="Reload Config!" title="Reload Config!"></a></div>
+   <div class="reloadbutton"><a href="javascript:reloadconfig();"><img src="[% site_url %]/share/images/global/refresh_orange.png" height="23" width="23" alt="Reload Config!" title="Reload Config!" /></a></div>
 [% END %]
 		</div>
 	</div>
