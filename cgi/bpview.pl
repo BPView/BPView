@@ -147,23 +147,38 @@ while ( my $q = new CGI::Fast ){
       print "Content-type: application/json; charset=utf-8\n\n";
     
       # use filters to display only certain states or hosts
-      my $filter = undef;
+      my $filter = {};
       # we expect the GET information in the following form:
       # bpview.pl?dashboard=db&filter=state+ok
       # bpview.pl?dashboard=db&filter=name+loadbalancer
       
       if (defined param("filter")){
-      	$log->error_die("Unsupported parameter options: " . param("filter")) unless param("filter") =~ /^state/;
+      	$log->error_die("Unsupported parameter options: " . param("filter")) unless ( param("filter") =~ /^state/ || param("filter") =~  /^name/);
       	my @filterval = split / /, param("filter");
-      	# check for invalid options
       	
-      	if ($filterval[1] ne "ok" && $filterval[1] ne "warning" && $filterval[1] ne "critical" && $filterval[1] ne "unknown"){
-      	  $log->error_die("Invalid filter option: " . $filterval[1]);
-      	}else{
-      	  $filter = { $filterval[0] => $filterval[1] };	
+      	for (my $i=0;$i<=$#filterval; $i++){
+      	  if ($filterval[$i] eq "state"){
+      		
+      	    # state filter
+      	    if ($filterval[$i+1] ne "ok" && $filterval[$i+1] ne "warning" && $filterval[$i+1] ne "critical" && $filterval[$i+1] ne "unknown"){
+      	      $log->error_die("Invalid filter option: " . $filterval[$i+1]);
+      	    }else{
+      	      $filter->{ $filterval[$i] } = $filterval[$i+1];	
+      	    }
+      	  
+      	  }elsif ($filterval[$i] eq "name"){
+      	  
+      	    # hostname filter
+      	    if ($filterval[$i+1] !~ /^[a-zA-Z0-9_-]*$/){
+      	  	  $log->error_die("Invalid filter characters option: " . $filterval[$i+1]);
+      	    }else{
+      	  	  $filter->{ $filterval[$i]} = $filterval[$i+1];
+      	    } 
+      	  } 
       	}
       	
       }
+      
   	
       # get dashboard data
       my $dashboard = BPView::Data->new(
@@ -185,15 +200,29 @@ while ( my $q = new CGI::Fast ){
       # bpview.pl?dashboard=db&filter=state+ok
       # bpview.pl?dashboard=db&filter=name+loadbalancer
       
-      if (defined param("filter")){
-      	$log->error_die("Unsupported parameter options: " . param("filter")) unless param("filter") =~ /^state/;
+       if (defined param("filter")){
+      	$log->error_die("Unsupported parameter options: " . param("filter")) unless ( param("filter") =~ /^state/ || param("filter") =~  /^name/);
       	my @filterval = split / /, param("filter");
-      	# check for invalid options
       	
-      	if ($filterval[1] ne "ok" && $filterval[1] ne "warning" && $filterval[1] ne "critical" && $filterval[1] ne "unknown"){
-      	  $log->error_die("Invalid filter option: " . $filterval[1]);
-      	}else{
-      	  $filter = { $filterval[0] => $filterval[1] };	
+      	for (my $i=0;$i<=$#filterval; $i++){
+      	  if ($filterval[$i] eq "state"){
+      		
+      	    # state filter
+      	    if ($filterval[$i+1] ne "ok" && $filterval[$i+1] ne "warning" && $filterval[$i+1] ne "critical" && $filterval[$i+1] ne "unknown"){
+      	      $log->error_die("Invalid filter option: " . $filterval[$i+1]);
+      	    }else{
+      	      $filter->{ $filterval[$i] } = $filterval[$i+1];	
+      	    }
+      	  
+      	  }elsif ($filterval[$i] eq "name"){
+      	  
+      	    # hostname filter
+      	    if ($filterval[$i+1] !~ /^[a-zA-Z0-9_-]*$/){
+      	  	  $log->error_die("Invalid filter characters option: " . $filterval[$i+1]);
+      	    }else{
+      	  	  $filter->{ $filterval[$i]} = $filterval[$i+1];
+      	    } 
+      	  } 
       	}
       	
       }

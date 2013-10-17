@@ -262,7 +262,7 @@ sub get_status {
 	    
 	    # return also business process name
 	    $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'bpname' } = $service;
-	    $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'name' } = $self->{ 'bps' }{$service}{BP}{NAME};
+	    $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'name' } = $self->{ 'bps' }{ $service }{ 'BP' }{ 'NAME' };
 
 	    # filter objects
 	    if (defined $self->{ 'filter' }{ 'state' }){
@@ -279,6 +279,16 @@ sub get_status {
 	      }
 	      
 	    }
+	    
+	    # filter hostnames
+	    if (defined $self->{ 'filter' }{ 'name' }){
+	    	
+	      # loop through hostname hash
+	      foreach my $hostname (keys %{ $self->{ 'bps' }{ $service }{ 'HOSTS' } }){
+	        delete $self->{ 'views' }{ $environment }{ $topic }{ $product } unless lc( $hostname ) =~ lc ( $self->{ 'filter' }{ 'name' });
+	      }
+	    	
+	    }
 	      
       }
       
@@ -288,7 +298,8 @@ sub get_status {
     }
     
     # delete empty environments
-    delete $self->{ 'views' }{ $environment } if scalar keys %{ $self->{ 'views' }{ $environment } } == 0;
+    delete $self->{ 'views' }{ $environment } if scalar keys %{ $self->{ 'views' }{ $environment } } <= 2;
+    #print STDERR Dumper $self->{ 'views' }{ $environment };
     
   }
 
@@ -396,6 +407,11 @@ sub get_details {
 	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "unknown";
 	      }
 	      
+	    }
+	    
+	    # filter hostnames
+	    if (defined $self->{ 'filter' }{ 'name' }){
+	      delete $return->{ $host }{ $service } unless lc( $host ) =~ lc ( $self->{ 'filter' }{ 'name' });
 	    }
 	    
 	}
