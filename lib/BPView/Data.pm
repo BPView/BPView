@@ -325,6 +325,15 @@ Returns hash.
 
   my $hash = $details->get_status();                               	
 
+$VAR1 = {
+  'loadbalancer' => {
+    'name2' => 'Service State Check',
+    'last_hard_state' => '0',
+    'hostname' => 'loadbalancer',
+    'output' => 'OK: All services are in their appropriate state.'
+  },
+}  
+
 =cut
 
 sub get_bpstatus {
