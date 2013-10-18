@@ -602,16 +602,19 @@ sub _get_ido {
   }elsif ($fetch eq "row"){
   	# fetch all data and return array
   	while (my $row = $query->fetchrow_hashref()){
-  	  push @{ $result }, $row;
+  	  push @{ $result->{ $row->{ 'hostname' } } }, $row;
   
   # example output:
   # $VAR1 = {
-  #          'name2' => 'PING',
-  #          'last_hard_state' => '0',
-  #          'hostname' => 'ovido-ovirt-engine.lab.ovido.at',
-  #          'output' => ''
-  #        },
-  
+  #         'loadbalancer' => [
+  #           {
+  #             'name2' => 'PING',
+  #             'last_hard_state' => '0',
+  #             'hostname' => 'loadbalancer',
+  #             'output' => ''
+  #           },
+  #         ]
+  #         },
   	}
   	
   }else{
