@@ -348,7 +348,7 @@ sub get_bpstatus {
   	# construct SQL query
   	my $sql = $self->_query_ido( '__all' );
   	# get results
-  	$result = $self->_get_ido( $sql );
+  	$result = $self->_get_ido( $sql, "hostname" );
   	
   }elsif ($self->{'provider'} eq "mk-livestatus"){
   	
@@ -496,7 +496,7 @@ sub _query_ido {
   # construct SQL query
   # query all host and service data
   if ($service_names eq "__all"){
-  	$sql = "SELECT " . $self->{'provdata'}{'prefix'} . "objects.name1, " . $self->{'provdata'}{'prefix'} . "objects.name2 AS service, " . $self->{'provdata'}{'prefix'};
+  	$sql = "SELECT " . $self->{'provdata'}{'prefix'} . "objects.name1 AS hostname, " . $self->{'provdata'}{'prefix'} . "objects.name2, " . $self->{'provdata'}{'prefix'};
   	$sql .= "servicestatus.last_hard_state, " . $self->{'provdata'}{'prefix'} . "servicestatus.output FROM " . $self->{'provdata'}{'prefix'} . "objects,";
   	$sql .= $self->{'provdata'}{'prefix'} . "servicestatus WHERE " . $self->{'provdata'}{'prefix'} . "objects.objecttype_id=2 AND " . $self->{'provdata'}{'prefix'};
   	$sql .= "objects.is_active=1 AND " . $self->{'provdata'}{'prefix'} . "objects.object_id=" . $self->{'provdata'}{'prefix'} . "servicestatus.service_object_id";
@@ -551,6 +551,8 @@ sub _get_ido {
 	
   my $self	= shift;
   my $sql	= shift or croak ("Missing SQL query!");
+  my $ref	= undef;
+     $ref	= shift or $ref = "service";		# default reference
   
   my $result;
   
@@ -578,7 +580,7 @@ sub _get_ido {
   }
   
   # prepare return
-  $result = $query->fetchall_hashref('service');
+  $result = $query->fetchall_hashref($ref);
   
   # example output:
   # $VAR1 = {
@@ -603,6 +605,7 @@ sub _get_livestatus {
 	
   my $self	= shift;
   my $query	= shift or croak ("Missing livestatus query!");
+  # TODO: Ref!
   
   my $result;
   my $ml;
