@@ -316,6 +316,60 @@ sub get_status {
 
 =head1 METHODS	
 
+=head2 get_bpstatus
+
+ get_bpstatus ( )
+
+Connects to backend and queries status of all host and service checks.
+Returns hash.
+
+  my $hash = $details->get_status();                               	
+
+=cut
+
+sub get_bpstatus {
+	
+  my $self		= shift;
+  my %options 	= @_;
+  
+  for my $key (keys %options){
+  	if (exists $self->{ $key }){
+  	  $self->{ $key } = $options{ $key };
+  	}else{
+  	  croak "Unknown option: $key";
+  	}
+  }
+  
+  my $result = undef;
+  
+  # fetch data from Icinga/Nagios
+  if ($self->{'provider'} eq "ido"){
+  	
+  	# construct SQL query
+  	my $sql = $self->_query_ido( '__all' );
+  	# get results
+  	$result = $self->_get_ido( $sql );
+  	
+  }elsif ($self->{'provider'} eq "mk-livestatus"){
+  	
+  	# construct query
+  	my $query = $self->_query_livestatus( '__all' );
+  	# get results
+  	$result = eval { $self->_get_livestatus( $query ) };
+#  	print STDERR Dumper $result;
+  }else{
+  	carp ("Unsupported provider: $self->{'provider'}!");
+  }
+  
+  return $result;
+  
+}
+
+
+#----------------------------------------------------------------
+
+=head1 METHODS	
+
 =head2 get_details
 
  get_details ( 'bp' => $business_process )
@@ -361,7 +415,8 @@ sub get_details {
   }
 
   # BP-Addon libraries
-  use lib "/usr/lib64/perl5/vendor_perl/BPView/BPAddon";
+#  use lib "/usr/lib64/perl5/vendor_perl/BPView/BPAddon";
+  use lib "/home/users/r.koch/git/BPView/lib/BPView/BPAddon";
 #  use BPView::BPAddon::ndodb;
 #  use BPView::BPAddon::nagiosBp;
   use ndodb;
@@ -436,17 +491,28 @@ sub _query_ido {
   my $self			= shift;
   my $service_names	= shift or croak ("Missing service_names!");
   
+  my $sql = undef;
+  
   # construct SQL query
-  my $sql = "SELECT name2 AS service, current_state AS state FROM " . $self->{'provdata'}{'prefix'} . "objects, " . $self->{'provdata'}{'prefix'} . "servicestatus ";
+  # query all host and service data
+  if ($service_names eq "__all"){
+  	$sql = "SELECT " . $self->{'provdata'}{'prefix'} . "objects.name1, " . $self->{'provdata'}{'prefix'} . "objects.name2 AS service, " . $self->{'provdata'}{'prefix'};
+  	$sql .= "servicestatus.last_hard_state, " . $self->{'provdata'}{'prefix'} . "servicestatus.output FROM " . $self->{'provdata'}{'prefix'} . "objects,";
+  	$sql .= $self->{'provdata'}{'prefix'} . "servicestatus WHERE " . $self->{'provdata'}{'prefix'} . "objects.objecttype_id=2 AND " . $self->{'provdata'}{'prefix'};
+  	$sql .= "objects.is_active=1 AND " . $self->{'provdata'}{'prefix'} . "objects.object_id=" . $self->{'provdata'}{'prefix'} . "servicestatus.service_object_id";
+  }else{
+    # query data for specified service
+    $sql = "SELECT name2 AS service, current_state AS state FROM " . $self->{'provdata'}{'prefix'} . "objects, " . $self->{'provdata'}{'prefix'} . "servicestatus ";
     $sql .= "WHERE object_id = service_object_id AND is_active = 1 AND name2 IN (";
-  # go trough service_names array
-  for (my $i=0;$i<scalar @{ lc($service_names) };$i++){
-  	$sql .= "'" . $service_names->[$i] . "', ";
+    # go trough service_names array
+    for (my $i=0;$i<scalar @{ lc($service_names) };$i++){
+  	  $sql .= "'" . $service_names->[$i] . "', ";
+    }
+    # remove trailing ', '
+    chop $sql;
+    chop $sql;
+    $sql .= ") ORDER BY name1";
   }
-  # remove trailing ', '
-  chop $sql;
-  chop $sql; 
-  $sql .= ") ORDER BY name1";
   
   return $sql;
   
@@ -460,6 +526,8 @@ sub _query_livestatus {
 	
   my $self			= shift;
   my $service_names	= shift or croak ("Missing service_names!");
+  
+  # TODO: BP-Addon query!!!
   
   # get service status for given host and services
   # construct livestatus query
