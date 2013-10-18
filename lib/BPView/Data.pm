@@ -357,7 +357,7 @@ sub get_bpstatus {
   	# construct SQL query
   	my $sql = $self->_query_ido( '__all' );
   	# get results
-  	$result = $self->_get_ido( $sql, "hostname" );
+  	$result = $self->_get_ido( $sql, "row" );
   	
   }elsif ($self->{'provider'} eq "mk-livestatus"){
   	
@@ -560,8 +560,7 @@ sub _get_ido {
 	
   my $self	= shift;
   my $sql	= shift or croak ("Missing SQL query!");
-  my $ref	= undef;
-     $ref	= shift or $ref = "service";		# default reference
+  my $fetch	= shift;	# how to handle results
   
   my $result;
   
@@ -589,7 +588,9 @@ sub _get_ido {
   }
   
   # prepare return
-  $result = $query->fetchall_hashref($ref);
+  if (! defined $fetch || $fetch eq "all"){
+  	# use hashref to fetch results
+    $result = $query->fetchall_hashref("service");
   
   # example output:
   # $VAR1 = {
@@ -597,6 +598,25 @@ sub _get_ido {
   #                                      'service' => 'production-mail-zarafa',
   #                                      'state' => '0'
   #                                    },
+  
+  }elsif ($fetch eq "row"){
+  	# fetch all data and return array
+  	while (my $row = $query->fetchrow_hashref()){
+  	  push @{ $result }, $row;
+  
+  # example output:
+  # $VAR1 = {
+  #          'name2' => 'PING',
+  #          'last_hard_state' => '0',
+  #          'hostname' => 'ovido-ovirt-engine.lab.ovido.at',
+  #          'output' => ''
+  #        },
+  
+  	}
+  	
+  }else{
+  	croak "Unsupported fetch method: " . $fetch;
+  }
   
   
   # disconnect from database
