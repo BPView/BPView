@@ -37,8 +37,10 @@ use Data::Dumper;
 # define default paths required to read config files
 my ($lib_path, $cfg_path);
 BEGIN {
-  $lib_path = "/usr/lib64/perl5/vendor_perl";   # path to BPView lib directory
-  $cfg_path = "/etc/bpview";                    # path to BPView etc directory
+#  $lib_path = "/usr/lib64/perl5/vendor_perl";   # path to BPView lib directory
+#  $cfg_path = "/etc/bpview";                    # path to BPView etc directory
+  $lib_path = "/home/users/r.koch/git/BPView/lib";   # path to BPView lib directory
+  $cfg_path = "/home/users/r.koch/git/BPView/etc";                    # path to BPView etc directory
 }
 
 
@@ -183,8 +185,8 @@ while ( my $q = new CGI::Fast ){
       # get dashboard data
       my $dashboard = BPView::Data->new(
     	   views	=> $views->{ param("dashboard") }{ 'views' },
-    	   provider	=> $config->{ 'provider' }{ 'source' },
-    	   provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
+    	   provider	=> $config->{ 'bpview' }{ 'datasource' },
+    	   provdata	=> $config->{ 'bpview'}{ $config->{ 'bpview' }{ 'datasource' } },
     	   bps		=> $bps,
     	   filter	=> $filter,
          );
