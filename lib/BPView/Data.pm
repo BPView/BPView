@@ -494,39 +494,37 @@ sub get_details {
   my $return = eval { $self->get_bpdetails( $self->{ 'bp' } ) };
   croak "Failed to fetch BP details.\nReason: $@" if $@;
   
-#
-#	for ($i=0; $i<@services; $i++) {
-#		($host, $service) = split(/;/, $services[$i]);
-#		if ( $services[$i] =~ m/;/ ) {
-#			# this output, if it is a single service
-#			($host, $service) = split(/;/, $services[$i]);
-#		}
-#		$return->{ $host }{ $service }{ 'output' } = $statusinfos->{$services[$i]};
-#		$return->{ $host }{ $service }{ 'hardstate' } = $hardstates->{$services[$i]};
-#		
-#		# filter objects
-#	    if (defined $self->{ 'filter' }{ 'state' }){
-#	      	
-#	      # filter OK results
-#	      if (lc( $self->{ 'filter' }{ 'state' } ) eq "ok"){
-#	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "ok";
-#	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "warning"){
-#	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "warning";
-#	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "critical"){
-#	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "critical";
-#	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "unknown"){
-#	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "unknown";
-#	      }
-#	      
-#	    }
-#	    
-#	    # filter hostnames
-#	    if (defined $self->{ 'filter' }{ 'name' }){
-#	      delete $return->{ $host }{ $service } unless lc( $host ) =~ lc ( $self->{ 'filter' }{ 'name' });
-#	    }
-#	    
-#	}
-  
+  # filter objects
+  if (defined $self->{ 'filter' }{ 'state' }){
+  	
+  	foreach my $host (keys %{ $return }){
+  	  foreach my $service (keys %{ $return->{ $host } }){
+	      	
+        # filter OK results
+        if (lc( $self->{ 'filter' }{ 'state' } ) eq "ok"){
+          delete $return->{ $host }{ $service } if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "ok";
+        }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "warning"){
+          delete $return->{ $host }{ $service } if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "warning";
+        }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "critical"){
+          delete $return->{ $host }{ $service } if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "critical";
+        }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "unknown"){
+          delete $return->{ $host }{ $service } if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "unknown";
+        }
+    
+  	  }
+    }
+	      
+  }
+	    
+  # filter hostnames
+  if (defined $self->{ 'filter' }{ 'name' }){
+  	foreach my $host (keys %{ $return }){
+  	  foreach my $service (keys %{ $return->{ $host } }){
+        delete $return->{ $host }{ $service } unless lc( $host ) =~ lc ( $self->{ 'filter' }{ 'name' });
+  	  }
+  	}
+  }
+	    
   # produce json output
   my  $json = JSON::PP->new->pretty;
   $json = $json->sort_by(sub { $JSON::PP::a cmp $JSON::PP::b })->encode($return);
