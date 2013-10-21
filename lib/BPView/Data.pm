@@ -26,7 +26,7 @@
 package BPView::Data;
 
 BEGIN {
-    $VERSION = '1.300'; # Don't forget to set version and release
+    $VERSION = '1.400'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -58,7 +58,7 @@ use Data::Dumper;
 =head1 DESCRIPTION
 
 This module fetches business process data from various backends like
-IDOutils and BPaddon-API.
+IDOutils and mk-livestatus.
 
 =head1 CONSTRUCTOR
 
@@ -87,12 +87,6 @@ IDO:
   password: database password (e.g. icinga)
   prefix: database prefix (e.g. icinga_)
   
-BPAddon:
-  cgi_url: url to BPAddon-CGIs (e.g. https://localhost/nagiosbp/cgi-bin)
-  conf: BPAddon config file name (e.g. nagios-bp)
-  username: CGI username (if url is protected)
-  password: CGI password (if url is protected)
-
 =item views
 
 hash reference of view config
@@ -214,7 +208,10 @@ sub get_status {
   	my $query = $self->_query_livestatus( $service_names );
   	# get results
   	$result = eval { $self->_get_livestatus( $query ) };
-#  	print STDERR Dumper $result;
+  	
+  	# mk-livestatus error handling
+  	croak "No data received via mk-livestatus." unless $result;
+  	
   }else{
   	carp ("Unsupported provider: $self->{'provider'}!");
   }
@@ -326,12 +323,14 @@ Returns hash.
   my $hash = $details->get_status();                               	
 
 $VAR1 = {
-  'loadbalancer' => {
-    'name2' => 'Service State Check',
-    'last_hard_state' => '0',
-    'hostname' => 'loadbalancer',
-    'output' => 'OK: All services are in their appropriate state.'
-  },
+  'loadbalancer' => [
+    {
+      'name2' => 'Service State Check',
+      'last_hard_state' => '0',
+      'hostname' => 'loadbalancer',
+      'output' => 'OK: All services are in their appropriate state.'
+    },
+  ],
 }  
 
 =cut
@@ -365,7 +364,7 @@ sub get_bpstatus {
   	my $query = $self->_query_livestatus( '__all' );
   	# get results
   	$result = eval { $self->_get_livestatus( $query ) };
-#  	print STDERR Dumper $result;
+
   }else{
   	carp ("Unsupported provider: $self->{'provider'}!");
   }
@@ -379,33 +378,96 @@ sub get_bpstatus {
 
 =head1 METHODS	
 
+=head2 get_bpdetails
+
+ get_bpdetails ( $bp_name )
+
+Returns service details for given business process.
+Returns hash.
+
+  my $hash = $details->get_bpdetails( $bp_name );                               	
+
+$VAR1 = {
+   "mailserver": {
+      "Amavisd-new Virus Check" : {
+         "hardstate" : "OK",
+         "output" : "Amavisd-New Virusscanning OK - server returned 2.7.0 Ok, discarded, id=00848-16 - INFECTED: Eicar-Test-Signature"
+      },
+   },
+}
+
+=cut
+
+sub get_bpdetails {
+	
+  my $self		= shift;
+  my $bp_name	= shift or croak "Missing business process name!";
+  my %options 	= @_;
+  
+  for my $key (keys %options){
+  	if (exists $self->{ $key }){
+  	  $self->{ $key } = $options{ $key };
+  	}else{
+  	  croak "Unknown option: $key";
+  	}
+  }
+  
+  my $status = eval { $self->get_bpstatus() };
+  croak "Failed to receive BP stati.\nReason: $@" if $@;
+  
+  my $return = {};
+  
+  foreach my $host (keys %{ $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' } }){
+    foreach my $service (keys %{ $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' }{ $host } }){
+    	
+      # loop through host array
+      for (my $i=0; $i< scalar @{ $status->{ $host } }; $i++){
+      	if ($status->{ $host }->[ $i ]->{ 'name2' } eq $service){
+      	  # service found
+      	  my $state = "UNKNOWN";
+      	  if    ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 0 ){ $state = "OK"; }
+      	  elsif ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 1 ){ $state = "WARNING"; }
+      	  elsif ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 2 ){ $state = "CRITICAL"; } 
+      	  elsif ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 3 ){ $state = "UNKNOWN"; }; 
+      	  $return->{ $host }{ $service }{ 'hardstate' } = $state;
+     	  $return->{ $host }{ $service }{ 'output' } = $status->{ $host }->[ $i ]->{ 'output' };
+      	}
+      }
+      # service not found
+      if (! defined $return->{ $host }{ $service }{ 'hardstate' } ){
+      	# service missing in data source
+      	$return->{ $host }{ $service }{ 'hardstate' } = "UNKNOWN";
+      	$return->{ $host }{ $service }{ 'output' } = "Service $service not found in Monitoring system!";
+      }
+    }
+  }
+  
+  return $return;
+  
+}
+
+
+#----------------------------------------------------------------
+
+=head1 METHODS	
+
 =head2 get_details
 
  get_details ( 'bp' => $business_process )
 
-Connects to BPAddon API and fetches service status details for all
+Connects to data backend and fetches service status details for all
 services of this business process.
 Returns JSON data.
 
   my $json = $get_details( 'bp' => $business_process );
   
 $VAR1 = {
-   "priority_definitions" : {},
-   "business_process" : {
-      "hardstate" : "OK",
-      "components" : [
-         {
-            "hardstate" : "OK",
-            "plugin_output" : "HTTP OK: HTTP/1.1 302 Moved Temporarily - 351 bytes in 0.187 second response time",
-            "service" : "HTTPS Check",
-            "host" : "localhost"
-         }
-      ],
-      "bp_id" : "production-mail-lb",
-      "display_name" : "Loadbalancer",
-      "display_prio" : "0"
+   "mailserver": {
+      "Amavisd-new Virus Check" : {
+         "hardstate" : "OK",
+         "output" : "Amavisd-New Virusscanning OK - server returned 2.7.0 Ok, discarded, id=00848-16 - INFECTED: Eicar-Test-Signature"
+      },
    },
-   "json_created" : "2013-07-23 15:41:19"
 }
 
 =cut
@@ -423,62 +485,47 @@ sub get_details {
   	}
   }
 
-  # BP-Addon libraries
-#  use lib "/usr/lib64/perl5/vendor_perl/BPView/BPAddon";
-  use lib "/home/users/r.koch/git/BPView/lib/BPView/BPAddon";
-#  use BPView::BPAddon::ndodb;
-#  use BPView::BPAddon::nagiosBp;
-  use ndodb;
-  use nagiosBp;
+  use BPView::BP;
   
-    my $config = $self->{'config'};
-	my $detail = $self->{ 'bp' };
-	my $bp_conf = $config->{ 'businessprocess' }{ 'bp_output_path' } . "/" . $config->{ 'businessprocess' }{ 'bp_output_cfg' };
+  # Die if no hosts are defined
+  croak "No host defined for given business process " . $self->{ 'bp' } unless defined $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' };
   
-	my ($display, $display_status, $script_out, $info_url, $components, $hardstates);
-	my ($statusinfos, $key, $i, @fields_state, @defined_priorities, $host, $service);
-
-	($hardstates, $statusinfos) = &getStates();
-	($display, $display_status, $script_out, $info_url, $components) = &getBPs($bp_conf, $hardstates);
-
-	foreach $key (sort keys %$display) {
-		$defined_priorities[$display_status->{$key}] = 1 if ($display_status->{$key} != 0);
-	}
-
-	my @services = sort(&listAllComponentsOf($detail, $components));
-	my $return = {};
-
-	for ($i=0; $i<@services; $i++) {
-		($host, $service) = split(/;/, $services[$i]);
-		if ( $services[$i] =~ m/;/ ) {
-			# this output, if it is a single service
-			($host, $service) = split(/;/, $services[$i]);
-		}
-		$return->{ $host }{ $service }{ 'output' } = $statusinfos->{$services[$i]};
-		$return->{ $host }{ $service }{ 'hardstate' } = $hardstates->{$services[$i]};
-		
-		# filter objects
-	    if (defined $self->{ 'filter' }{ 'state' }){
-	      	
-	      # filter OK results
-	      if (lc( $self->{ 'filter' }{ 'state' } ) eq "ok"){
-	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "ok";
-	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "warning"){
-	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "warning";
-	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "critical"){
-	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "critical";
-	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "unknown"){
-	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "unknown";
-	      }
-	      
-	    }
-	    
-	    # filter hostnames
-	    if (defined $self->{ 'filter' }{ 'name' }){
-	      delete $return->{ $host }{ $service } unless lc( $host ) =~ lc ( $self->{ 'filter' }{ 'name' });
-	    }
-	    
-	}
+  # get details for given business process 
+  my $return = eval { $self->get_bpdetails( $self->{ 'bp' } ) };
+  croak "Failed to fetch BP details.\nReason: $@" if $@;
+  
+#
+#	for ($i=0; $i<@services; $i++) {
+#		($host, $service) = split(/;/, $services[$i]);
+#		if ( $services[$i] =~ m/;/ ) {
+#			# this output, if it is a single service
+#			($host, $service) = split(/;/, $services[$i]);
+#		}
+#		$return->{ $host }{ $service }{ 'output' } = $statusinfos->{$services[$i]};
+#		$return->{ $host }{ $service }{ 'hardstate' } = $hardstates->{$services[$i]};
+#		
+#		# filter objects
+#	    if (defined $self->{ 'filter' }{ 'state' }){
+#	      	
+#	      # filter OK results
+#	      if (lc( $self->{ 'filter' }{ 'state' } ) eq "ok"){
+#	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "ok";
+#	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "warning"){
+#	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "warning";
+#	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "critical"){
+#	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "critical";
+#	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "unknown"){
+#	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "unknown";
+#	      }
+#	      
+#	    }
+#	    
+#	    # filter hostnames
+#	    if (defined $self->{ 'filter' }{ 'name' }){
+#	      delete $return->{ $host }{ $service } unless lc( $host ) =~ lc ( $self->{ 'filter' }{ 'name' });
+#	    }
+#	    
+#	}
   
   # produce json output
   my  $json = JSON::PP->new->pretty;
@@ -514,8 +561,8 @@ sub _query_ido {
     $sql = "SELECT name2 AS service, current_state AS state FROM " . $self->{'provdata'}{'prefix'} . "objects, " . $self->{'provdata'}{'prefix'} . "servicestatus ";
     $sql .= "WHERE object_id = service_object_id AND is_active = 1 AND name2 IN (";
     # go trough service_names array
-    for (my $i=0;$i<scalar @{ lc($service_names) };$i++){
-  	  $sql .= "'" . $service_names->[$i] . "', ";
+    for (my $i=0;$i<scalar @{ $service_names };$i++){
+  	  $sql .= "'" . lc($service_names->[$i]) . "', ";
     }
     # remove trailing ', '
     chop $sql;
@@ -724,7 +771,7 @@ Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.300  (October 14 2013))
+Version 1.400  (October 18 2013))
 
 =head1 COPYRIGHT AND LICENSE
 
