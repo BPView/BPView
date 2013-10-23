@@ -26,7 +26,7 @@
 package BPView::Data;
 
 BEGIN {
-    $VERSION = '1.300'; # Don't forget to set version and release
+    $VERSION = '1.310'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -267,26 +267,34 @@ sub get_status {
 	    # filter objects
 	    if (defined $self->{ 'filter' }{ 'state' }){
 	      	
-	      # filter OK results
-	      if (lc( $self->{ 'filter' }{ 'state' } ) eq "ok"){
-	        delete $self->{ 'views' }{ $environment }{ $topic }{ $product } if $result->{ $service }{ 'state' } == 0;
-	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "warning"){
-	        delete $self->{ 'views' }{ $environment }{ $topic }{ $product } if $result->{ $service }{ 'state' } == 1;
-	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "critical"){
-	        delete $self->{ 'views' }{ $environment }{ $topic }{ $product } if $result->{ $service }{ 'state' } == 2;
-	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "unknown"){
-	        delete $self->{ 'views' }{ $environment }{ $topic }{ $product } if $result->{ $service }{ 'state' } == 3;
+	      my $del = 1;
+	      # filter results
+	      for (my $i=0;$i< scalar @{ $self->{ 'filter' }{ 'state' } }; $i++){
+	        if (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "ok"){
+	          $del = 0 if $result->{ $service }{ 'state' } == 0;
+	        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "warning"){
+	          $del = 0 if $result->{ $service }{ 'state' } == 1;
+	        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "critical"){
+	          $del = 0 if $result->{ $service }{ 'state' } == 2;
+	        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "unknown"){
+	          $del = 0 if $result->{ $service }{ 'state' } == 3;
+	        }
 	      }
+	      delete $self->{ 'views' }{ $environment }{ $topic }{ $product } if $del == 1;
 	      
 	    }
 	    
 	    # filter hostnames
 	    if (defined $self->{ 'filter' }{ 'name' }){
 	    	
+	      my $del = 1;
 	      # loop through hostname hash
 	      foreach my $hostname (keys %{ $self->{ 'bps' }{ $service }{ 'HOSTS' } }){
-	        delete $self->{ 'views' }{ $environment }{ $topic }{ $product } unless lc( $hostname ) =~ lc ( $self->{ 'filter' }{ 'name' });
+	      	for (my $i=0;$i< scalar @{ $self->{ 'filter' }{ 'name' } }; $i++){
+	          $del = 0 if lc( $hostname ) =~ lc ( $self->{ 'filter' }{ 'name' }->[ $i ]);
+	      	}
 	      }
+	      delete $self->{ 'views' }{ $environment }{ $topic }{ $product } if $del == 1;
 	    	
 	    }
 	      
@@ -362,6 +370,7 @@ sub get_details {
 
   # BP-Addon libraries
   use lib "/usr/lib64/perl5/vendor_perl/BPView/BPAddon";
+#  use lib "/home/users/r.koch/git/BPView/lib/BPView/BPAddon";
 #  use BPView::BPAddon::ndodb;
 #  use BPView::BPAddon::nagiosBp;
   use ndodb;
@@ -393,25 +402,38 @@ sub get_details {
 		$return->{ $host }{ $service }{ 'output' } = $statusinfos->{$services[$i]};
 		$return->{ $host }{ $service }{ 'hardstate' } = $hardstates->{$services[$i]};
 		
-		# filter objects
+	    # filter objects
 	    if (defined $self->{ 'filter' }{ 'state' }){
 	      	
-	      # filter OK results
-	      if (lc( $self->{ 'filter' }{ 'state' } ) eq "ok"){
-	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "ok";
-	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "warning"){
-	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "warning";
-	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "critical"){
-	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "critical";
-	      }elsif (lc( $self->{ 'filter' }{ 'state' } ) eq "unknown"){
-	        delete $return->{ $host }{ $service } if lc( $hardstates->{ $services[$i] } ) eq "unknown";
+	      my $del = 1;
+	      # filter results
+	      for (my $i=0;$i< scalar @{ $self->{ 'filter' }{ 'state' } }; $i++){
+	        if (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "ok"){
+	          $del = 0 if lc( $hardstates->{ $services[$i] } ) eq "ok";
+	        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "warning"){
+	          $del = 0 if lc( $hardstates->{ $services[$i] } ) eq "warning";
+	        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "critical"){
+	          $del = 0 if lc( $hardstates->{ $services[$i] } ) eq "critical";
+	        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "unknown"){
+	          $del = 0 if lc( $hardstates->{ $services[$i] } ) eq "unknown";
+	        }
 	      }
+	      delete $return->{ $host }{ $service } if $del == 1;
 	      
 	    }
 	    
 	    # filter hostnames
 	    if (defined $self->{ 'filter' }{ 'name' }){
-	      delete $return->{ $host }{ $service } unless lc( $host ) =~ lc ( $self->{ 'filter' }{ 'name' });
+	    	
+	      my $del = 1;
+	      # loop through hostname hash
+	      foreach my $hostname (keys %{ $self->{ 'bps' }{ $service }{ 'HOSTS' } }){
+	      	for (my $i=0;$i< scalar @{ $self->{ 'filter' }{ 'name' } }; $i++){
+	          $del = 0 if lc( $host ) =~ lc ( $self->{ 'filter' }{ 'name' }->[ $i ]);
+	      	}
+	      }
+	      delete $return->{ $host }{ $service } if $del == 1;
+	    	
 	    }
 	    
 	}
@@ -440,7 +462,7 @@ sub _query_ido {
   my $sql = "SELECT name2 AS service, current_state AS state FROM " . $self->{'provdata'}{'prefix'} . "objects, " . $self->{'provdata'}{'prefix'} . "servicestatus ";
     $sql .= "WHERE object_id = service_object_id AND is_active = 1 AND name2 IN (";
   # go trough service_names array
-  for (my $i=0;$i<scalar @{ lc($service_names) };$i++){
+  for (my $i=0;$i<scalar @{ $service_names };$i++){
   	$sql .= "'" . $service_names->[$i] . "', ";
   }
   # remove trailing ', '
@@ -621,7 +643,7 @@ Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.300  (October 14 2013))
+Version 1.310  (October 23 2013))
 
 =head1 COPYRIGHT AND LICENSE
 

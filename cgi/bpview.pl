@@ -39,6 +39,8 @@ my ($lib_path, $cfg_path);
 BEGIN {
   $lib_path = "/usr/lib64/perl5/vendor_perl";   # path to BPView lib directory
   $cfg_path = "/etc/bpview";                    # path to BPView etc directory
+#  $lib_path = "/home/users/r.koch/git/BPView/lib";   # path to BPView lib directory
+#  $cfg_path = "/home/users/r.koch/git/BPView/etc";                    # path to BPView etc directory
 }
 
 
@@ -156,25 +158,33 @@ while ( my $q = new CGI::Fast ){
       	$log->error_die("Unsupported parameter options: " . param("filter")) unless ( param("filter") =~ /^state/ || param("filter") =~  /^name/);
       	my @filterval = split / /, param("filter");
       	
+     	my $filtername = undef;
       	for (my $i=0;$i<=$#filterval; $i++){
-      	  if ($filterval[$i] eq "state"){
       		
-      	    # state filter
-      	    if ($filterval[$i+1] ne "ok" && $filterval[$i+1] ne "warning" && $filterval[$i+1] ne "critical" && $filterval[$i+1] ne "unknown"){
-      	      $log->error_die("Invalid filter option: " . $filterval[$i+1]);
-      	    }else{
-      	      $filter->{ $filterval[$i] } = $filterval[$i+1];	
-      	    }
-      	  
+      	  # get name for filter
+      	  if ($filterval[$i] eq "state"){
+      	  	$filtername = $filterval[$i];
+      	  	next;
       	  }elsif ($filterval[$i] eq "name"){
+      	  	$filtername = $filterval[$i];
+      	  	next;
+      	  }
+      		
+    	  # state filter
+      	  if ( ( $filtername eq "state" ) && ( $filterval[$i] ne "ok" && $filterval[$i] ne "warning" && $filterval[$i] ne "critical" && $filterval[$i] ne "unknown" ) ){
+      	    $log->error_die("Invalid filter option: " . $filterval[$i]);
+      	  }elsif ($filtername eq "state"){
+      	    push @{ $filter->{ $filtername } }, $filterval[$i];	
+      	  }
       	  
-      	    # hostname filter
-      	    if ($filterval[$i+1] !~ /^[a-zA-Z0-9_-]*$/){
-      	  	  $log->error_die("Invalid filter characters option: " . $filterval[$i+1]);
-      	    }else{
-      	  	  $filter->{ $filterval[$i]} = $filterval[$i+1];
-      	    } 
+      	  
+      	  # hostname filter
+      	  if ( ( $filtername eq "name" ) && ( $filterval[$i] !~ /^[a-zA-Z0-9_-]*$/ ) ){
+      	   $log->error_die("Invalid filter characters option: " . $filterval[$i]);
+      	  }elsif ($filtername eq "name"){
+      	   push @{ $filter->{ $filtername } }, $filterval[$i];
       	  } 
+      	   
       	}
       	
       }
