@@ -350,6 +350,9 @@ sub get_bpstatus {
   
   my $result = undef;
   
+  # verify if we cache data 
+  # TODO
+  
   # fetch data from Icinga/Nagios
   if ($self->{'provider'} eq "ido"){
   	
@@ -485,7 +488,7 @@ sub get_details {
   	}
   }
 
-  use BPView::BP;
+  #use BPView::BP;
   
   # Die if no hosts are defined
   croak "No host defined for given business process " . $self->{ 'bp' } unless defined $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' };
