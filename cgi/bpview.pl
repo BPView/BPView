@@ -233,6 +233,9 @@ while ( my $q = new CGI::Fast ){
   	  my $details = BPView::Data->new(
   		  config	=> $config,
   		  bp		=> param("details"),
+  		  provider	=> $config->{ 'provider' }{ 'source' },
+    	  provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
+		  bps		=> $bps,
    	      filter	=> $filter,
   	     );
   	  $json = eval { $details->get_details() };
