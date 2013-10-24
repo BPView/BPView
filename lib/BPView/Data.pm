@@ -749,12 +749,16 @@ sub _open_cache {
   	
   	# open cache file
     my $yaml = eval { LoadFile( $cache_file ) };
-    carp ("Failed to parse config file $cache_file\n") if $@;
-    return $yaml;
+    if ($@){
+      carp ("Failed to parse config file $cache_file\n");
+      return 1;
+    }else{
+      return $yaml;
+    }
     
-  }else{
-	carp ("File age too old - not using cached data.");
   }
+  
+  return 1;
   
 }
 
@@ -769,11 +773,6 @@ sub _write_cache {
   my $cache_file = shift or croak ("Missing cache file!");
   my $data = shift or croak ("Missing data to write to cache file!");
   
-#  	# open cache file
-#    my $yaml = eval { LoadFile( $cache_file ) };
-#    carp ("Failed to parse config file $cache_file\n") if $@;
-#    return $yaml;
-
   my $yaml = Dump ( $data );
   # write into YAML file
   open (CACHE, "> $cache_file") or croak ("Can't open file $cache_file for writing: $!");
