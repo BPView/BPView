@@ -58,7 +58,6 @@ my $o_verbose	= undef;			# verbosity
 my $o_help		= undef;			# help
 my $o_version	= undef;			# check_bp_status version
 my $o_bp		= undef;			# business process name
-my $o_config	= "bpview.conf";	# business process config file	
 my $o_timeout	= undef;			# timeout
 
 my %status	= ( ok => "OK", warning => "WARNING", critical => "CRITICAL", unknown => "UNKNOWN");
@@ -77,7 +76,6 @@ sub parse_options(){
 	'v+'	=> \$o_verbose,	'verbose+'	=> \$o_verbose,
 	'h'		=> \$o_help,	'help'		=> \$o_help,
 	'b:s'	=> \$o_bp,		'bp:s'		=> \$o_bp,
-	'f:s'	=> \$o_config,	'config:s'	=> \$o_config,
 	'V'		=> \$o_version,	'version'	=> \$o_version,
 	't:i'	=> \$o_timeout,	'timeout:i'	=> \$o_timeout
   );
@@ -107,7 +105,7 @@ sub parse_options(){
 #                                                   #
 #***************************************************#
 sub print_usage(){
-  print "Usage: $0 [-v] -b <business_process> [-f <config>] [-t <timeout>] [-V] \n";
+  print "Usage: $0 [-v] -b <business_process> [-t <timeout>] [-V] \n";
 }
 
 
@@ -130,8 +128,6 @@ Options:
     Print version information
  -b, --bp
     Short name of the business process to check
- -f, --config
-    Path to business process config file (default: $o_config)
  -t, --timeout=INTEGER
     Seconds before connection times out (default: $timeout)
  -v, --verbose
@@ -188,7 +184,6 @@ if ($@) {
 #}
 
 # Read status data from database
-# TODO: add caching into Data!
 my $data = BPView::Data->new(
 			provider	=> $config->{ 'provider' }{ 'source' },
 			provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
