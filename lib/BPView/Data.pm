@@ -407,14 +407,14 @@ sub get_details {
 	      	
 	      my $del = 1;
 	      # filter results
-	      for (my $i=0;$i< scalar @{ $self->{ 'filter' }{ 'state' } }; $i++){
-	        if (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "ok"){
+	      for (my $x=0;$x< scalar @{ $self->{ 'filter' }{ 'state' } }; $x++){
+	        if (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "ok"){
 	          $del = 0 if lc( $hardstates->{ $services[$i] } ) eq "ok";
-	        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "warning"){
+	        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "warning"){
 	          $del = 0 if lc( $hardstates->{ $services[$i] } ) eq "warning";
-	        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "critical"){
+	        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "critical"){
 	          $del = 0 if lc( $hardstates->{ $services[$i] } ) eq "critical";
-	        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "unknown"){
+	        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "unknown"){
 	          $del = 0 if lc( $hardstates->{ $services[$i] } ) eq "unknown";
 	        }
 	      }
@@ -428,8 +428,8 @@ sub get_details {
 	      my $del = 1;
 	      # loop through hostname hash
 	      foreach my $hostname (keys %{ $self->{ 'bps' }{ $service }{ 'HOSTS' } }){
-	      	for (my $i=0;$i< scalar @{ $self->{ 'filter' }{ 'name' } }; $i++){
-	          $del = 0 if lc( $host ) =~ lc ( $self->{ 'filter' }{ 'name' }->[ $i ]);
+	      	for (my $x=0;$x< scalar @{ $self->{ 'filter' }{ 'name' } }; $x++){
+	          $del = 0 if lc( $host ) =~ lc ( $self->{ 'filter' }{ 'name' }->[ $x ]);
 	      	}
 	      }
 	      delete $return->{ $host }{ $service } if $del == 1;
