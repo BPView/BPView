@@ -34,6 +34,7 @@ use warnings;
 use YAML::Syck;
 use Carp;
 use File::Spec;
+use File::stat;
 use JSON::PP;
 use Tie::IxHash;
 
@@ -351,7 +352,14 @@ sub get_bpstatus {
   my $result = undef;
   
   # verify if we cache data 
-  # TODO
+  if (defined $self->{ 'provdata' }{ 'cache_file' }){
+  	# caching disabled if 0 or no cache time defined
+    next if (! defined $self->{ 'provdata' }{ 'cache_time' } || $self->{ 'provdata' }{ 'cache_time' } == 0);
+    $result = $self->_open_cache( $self->{ 'provdata' }{ 'cache_time' }, $self->{ 'provdata' }{ 'cache_file' } );
+    
+    # return cached data
+    return $result unless $result == 1;
+  }
   
   # fetch data from Icinga/Nagios
   if ($self->{'provider'} eq "ido"){
@@ -370,6 +378,13 @@ sub get_bpstatus {
 
   }else{
   	carp ("Unsupported provider: $self->{'provider'}!");
+  }
+  
+  # write cache
+  if (defined $self->{ 'provdata' }{ 'cache_file' }){
+  	# caching disabled if 0 or no cache time defined
+    next if (! defined $self->{ 'provdata' }{ 'cache_time' } || $self->{ 'provdata' }{ 'cache_time' } == 0);
+    $self->_write_cache ( $self->{ 'provdata' }{ 'cache_time' }, $self->{ 'provdata' }{ 'cache_file' }, $result );
   }
   
   return $result;
@@ -716,6 +731,54 @@ sub _get_livestatus {
   }
   
   return $result;
+  
+}
+
+
+#----------------------------------------------------------------
+
+# read cached data
+sub _open_cache {
+
+  my $self = shift;
+  my $cache_time = shift or croak ("Missing cache time!");
+  my $cache_file = shift or croak ("Missing cache file!");
+  
+  # check file age
+  if ( ( time() - $cache_time ) < ( stat( $cache_file )->mtime ) ){
+  	
+  	# open cache file
+    my $yaml = eval { LoadFile( $cache_file ) };
+    carp ("Failed to parse config file $cache_file\n") if $@;
+    return $yaml;
+    
+  }else{
+	carp ("File age too old - not using cached data.");
+  }
+  
+}
+
+
+#----------------------------------------------------------------
+
+# write cache
+sub _write_cache {
+
+  my $self = shift;
+  my $cache_time = shift or croak ("Missing cache time!");
+  my $cache_file = shift or croak ("Missing cache file!");
+  my $data = shift or croak ("Missing data to write to cache file!");
+  
+#  	# open cache file
+#    my $yaml = eval { LoadFile( $cache_file ) };
+#    carp ("Failed to parse config file $cache_file\n") if $@;
+#    return $yaml;
+
+  my $yaml = Dump ( $data );
+  # write into YAML file
+  open (CACHE, "> $cache_file") or croak ("Can't open file $cache_file for writing: $!");
+  print CACHE $yaml;
+  close CACHE;
   
 }
 
