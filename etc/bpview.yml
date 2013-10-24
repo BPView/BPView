@@ -36,7 +36,7 @@ bpview:
 #    modified from global folder to your template name folder. 
 #
 
-  src_dir: /data/www/BPView/src
+  src_dir: /home/users/r.koch/git/BPView/share/src
   
 #
 # data_dir: path to the data directory.
@@ -52,7 +52,7 @@ bpview:
 #    the template specified in this configuration file.
 #
   
-  data_dir: /data/www/BPView/share
+  data_dir: /home/users/r.koch/git/BPView/share
   
 #
 # site_url: site URL of BPView webpage (default: /bpview)
@@ -82,6 +82,38 @@ bpview:
   
   template: default
 
+#
+# data backend of local Icinga installation
+#
+
+# datasource
+#    valid values are: ido | mk-livestatus
+
+  datasource: mk-livestatus
+  
+#
+# IDO utils
+# 
+
+  ido:
+    host: 127.0.0.1
+    port: 3306
+    type: mysql
+    database: icinga
+    username: icinga
+    password: icinga
+    prefix: icinga_
+    timeout: 10
+
+#  
+# mk-livestatus
+#
+    
+  mk-livestatus:
+  
+   socket: /var/spool/icinga/rw/live
+#   server: 127.0.0.1
+#   port: 6557
     
 # ---
   

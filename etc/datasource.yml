@@ -114,6 +114,19 @@ ido:
   
   timeout: 10
   
+#
+# cache_time: Cache results in file for $cache_time seconds
+#  
+  
+  cache_time: 30
+
+#
+# cache_file: Write results of this provider in this file to
+#   cache it for $cache_time seconds.
+#
+
+  cache_file: "/var/cache/bpview/ndo.cache"
+  
   
 # ---
   
@@ -172,68 +185,6 @@ mk-livestatus:
   
 #  port:
   
-  
-# ---
-  
-#
-# This is the bpaddon provider configuration block which defines 
-# connections to Business Process Addon API. The configuration 
-# format is YAML.
-#
-# Make sure to use correct YAML syntax and especially don't use
-# tabs instead of spaces!
-#
-# The structure and shifting hast to be:
-# bpaddon:
-#   cgi_url: <cgi_url>
-#   conf: <conffile>
-#   username: <username>
-#   password: <password>
-#   timeout: <timeout>
-#
-# For further details on how to integrate BP Addon in your
-# monitoring system visit: http://bp-addon.monitoringexchange.org/
-#
-  
-bpaddon:
-
-#
-# cgi_url: URL pointing to Business Process Addon CGI scripts.
-#
-
-  cgi_url: https://localhost/nagiosbp/cgi-bin
-  
-#
-# conf: Name of the BP Addon configuration file which contains
-#   business processes used by BPView. (default: nagios-bp)
-#
-#   Note that you can only use one configuration file!
-#
-  
-  conf: nagios-bp
-  
-#
-# username: Username to connect to the CGIs.
-#   A username is only required if you have secured access to CGIs
-#   using htpasswd.
-#
-  
-#  username: user
-  
-#
-# password: Password to connect to the CGIs.
-#   A password is only required if you have secured access to CGIs
-#   using htpasswd.
-#
-  
-#  password: password
-  
-#
-# timeout: Timeout in seconds when BP Addon API connection shall
-#   be closed if no data are received.
-#
-  
-  timeout: 10
   
 # ---
 
