@@ -374,7 +374,7 @@ sub get_bpstatus {
   	# construct query
   	my $query = $self->_query_livestatus( '__all' );
   	# get results
-  	$result = eval { $self->_get_livestatus( $query ) };
+  	$result = eval { $self->_get_livestatus( $query, "row" ) };
 
   }else{
   	carp ("Unsupported provider: $self->{'provider'}!");
@@ -434,6 +434,8 @@ sub get_bpdetails {
   croak "Failed to receive BP stati.\nReason: $@" if $@;
   
   my $return = {};
+  
+  croak "No data received from backend!" unless $status;
   
   foreach my $host (keys %{ $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' } }){
     foreach my $service (keys %{ $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' }{ $host } }){
@@ -599,17 +601,23 @@ sub _query_livestatus {
   my $self			= shift;
   my $service_names	= shift or croak ("Missing service_names!");
   
-  # TODO: BP-Addon query!!!
-  
+  my $query = undef;
+   
   # get service status for given host and services
   # construct livestatus query
-  my $query = "GET services\n
+  if ($service_names eq "__all"){
+  	$query = "GET services\n
+Columns: host_name description last_hard_state plugin_output\n";
+  }else{
+  	# query data for specified service
+    $query = "GET services\n
 Columns: display_name state\n";
-  # go through service array
-  for (my $i=0;$i< scalar @{ $service_names };$i++){
-   	$query .= "Filter: display_name = " . lc($service_names->[$i]) . "\n";
+    # go through service array
+    for (my $i=0;$i< scalar @{ $service_names };$i++){
+   	  $query .= "Filter: display_name = " . lc($service_names->[$i]) . "\n";
+    }
+    $query .= "Or: " . scalar @{ $service_names } . "\n" if scalar @{ $service_names } > 1;
   }
-  $query .= "Or: " . scalar @{ $service_names } . "\n" if scalar @{ $service_names } > 1;
   	  
   return $query;
   
@@ -700,7 +708,7 @@ sub _get_livestatus {
 	
   my $self	= shift;
   my $query	= shift or croak ("Missing livestatus query!");
-  # TODO: Ref!
+  my $fetch	= shift;	# how to handle results
   
   my $result;
   my $ml;
@@ -717,17 +725,54 @@ sub _get_livestatus {
   }
   
   $ml->errors_are_fatal(0);
-  $result = $ml->selectall_hashref($query, "display_name");
+  
+  # prepare return
+  if (! defined $fetch || $fetch eq "all"){
+    $result = $ml->selectall_hashref($query, "display_name");
+    
+  # example output:
+  # $VAR1 = {
+  #        'production-mail-zarafa' => {
+  #                                      'service' => 'production-mail-zarafa',
+  #                                      'state' => '0'
+  #                                    },
+  
+    foreach my $key (keys %{ $result }){
+      # rename columns
+      $result->{ $key }{ 'service' } = delete $result->{ $key }{ 'display_name' };
+    }
+  
+  
+  }elsif ($fetch eq "row"){
+  	# fetch all data and return array
+  	my $tmp = $ml->selectall_arrayref($query);
+    for (my $i=0; $i<scalar @{ $tmp }; $i++ ){
+      my $tmphash = {};
+      $tmphash->{ 'name2' } = $tmp->[$i][1];
+      $tmphash->{ 'last_hard_state' } = $tmp->[$i][2];
+      $tmphash->{ 'hostname' } = $tmp->[$i][0];
+      $tmphash->{ 'output' } = $tmp->[$i][3];
+  	  push @{ $result->{ $tmp->[$i][0] } }, $tmphash;
+  
+  # example output:
+  # $VAR1 = {
+  #         'loadbalancer' => [
+  #           {
+  #             'name2' => 'PING',
+  #             'last_hard_state' => '0',
+  #             'hostname' => 'loadbalancer',
+  #             'output' => ''
+  #           },
+  #         ]
+  #         },
+  	}
+
+  }else{
+  	croak "Unsupported fetch method: " . $fetch;
+  }
   
   if($Monitoring::Livestatus::ErrorCode) {
     croak "Getting Monitoring checkresults failed: $Monitoring::Livestatus::ErrorMessage";
-  }
-  
-  foreach my $key (keys %{ $result }){
-  	
-    # rename columns
-    $result->{ $key }{ 'service' } = delete $result->{ $key }{ 'display_name' };
-    
   }
   
   return $result;
