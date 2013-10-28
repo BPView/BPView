@@ -30,14 +30,11 @@ all:
 	sed -i -e 's!^  logfile:.*!  logfile: $(LOCALSTATEDIR)/log/bpview.log!' $(CONF).tmp
 	cp $(CONF).tmp $(CONF).yml
 	cp datasource.yml.in datasource.yml
-	cp bpview.conf.in bpview.conf
 	rm -f $(CONF).tmp
 
 	cp $(BPCONF).yml.in $(BPCONF).tmp
-	sed -i -e 's!^cache_file=.*!cache_file=$(LOCALSTATEDIR)/cache/bpview/ndo_backend_cache!' $(BPCONF).tmp
 	cp $(BPCONF).tmp $(BPCONF).yml
 	rm -f $(BPCONF).tmp
-
 
 # install
 install:

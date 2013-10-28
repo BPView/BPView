@@ -30,6 +30,8 @@ all:
 	rm -f $(SCRIPT1).tmp
 
 	cp $(SCRIPT2).pl.in $(SCRIPT2).tmp
+	sed -i -e 's!lib_path = .*!lib_path = "$(LIBDIR)";!' $(SCRIPT).tmp
+	sed -i -e 's!cfg_path = .*!cfg_path = "$(SYSCONFDIR)";!' $(SCRIPT).tmp
 	cp $(SCRIPT2).tmp $(SCRIPT2).pl
 	rm -f $(SCRIPT2).tmp
 
