@@ -2,10 +2,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-	<title>&lt;pre&gt;  BPView::Web</title>
-	<meta name="description" content="Pod documentation for &lt;pre&gt;  BPView::Web" />
-	<meta name="inputfile" content="../lib/BPView/Web.pm" />
-	<meta name="outputfile" content="../docs/modules/Web.html" />
+	<title>&lt;pre&gt;  BPView::BPWriter</title>
+	<meta name="description" content="Pod documentation for &lt;pre&gt;  BPView::BPWriter" />
+	<meta name="inputfile" content="../lib/BPView/BPWriter.pm" />
+	<meta name="outputfile" content="../docs/modules/BPWriter.html" />
 	<meta name="created" content="Tue Oct 29 14:51:12 2013" />
 	<meta name="generator" content="Pod::Xhtml 1.61" />
 </head>
@@ -22,7 +22,11 @@
 </ul>
 </li>
 <li><a href="#METHODS">METHODS	</a>
-<ul><li><a href="#display_page">display_page</a></li>
+<ul><li><a href="#gen_bpaddoncfg">gen_bpaddoncfg</a></li>
+</ul>
+</li>
+<li><a href="#METHODS-2">METHODS	</a>
+<ul><li><a href="#gen_nicfg">gen_nicfg</a></li>
 </ul>
 </li>
 <li><a href="#EXAMPLES">EXAMPLES</a></li>
@@ -36,26 +40,31 @@
 
 <h1 id="NAME">NAME</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="NAME_CONTENT">
-<pre>  BPView::Web - Create a webpage with Template Toolkit
+<pre>  BPView::BPWriter - Write Config Files for Monitoring-Tools based on bp-config yml files.
 
 </pre>
 
 </div>
 <h1 id="SYNOPSIS">SYNOPSIS</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="SYNOPSIS_CONTENT">
-<pre>  use BPView::Web;
-  my $page	= BPView::Web-&gt;new(
-             src_dir	=&gt; '/var/www/bpview/src',
-             data_dir	=&gt; '/var/www/bpview/static'
-             );
-  $page-&gt;display_page( page	=&gt; 'main' );
+<pre>  use BPView::Data;
+  my $details = BPView::BPWriter-&gt;new(
+  		config	=&gt; undef,
+  		bpcfg	=&gt; undef,
+  		time	=&gt; strftime('%A, %d-%b-%Y %H:%M',localtime), ## outputs 17-Dec-2008 10:08
+  	 );
+  gen_nicfg( 'bpcfg' =&gt; $yaml, 'config' =&gt; $config );
+
+
+
 
 </pre>
 
 </div>
 <h1 id="DESCRIPTION">DESCRIPTION</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="DESCRIPTION_CONTENT">
-<p>This module creates a webpage with Template Toolkit.</p>
+<p>This module reads business processes stored with yml syntax and writes config files for
+monitoring services such as Nagios or Icinga and BP-Addon Tools.</p>
 
 </div>
 <h1 id="CONSTRUCTOR">CONSTRUCTOR</h1><p><a href="#TOP" class="toplink">Top</a></p>
@@ -64,98 +73,63 @@
 </div>
 <h2 id="new_ARGS">new ( [ARGS] )</h2>
 <div id="new_ARGS_CONTENT">
-<p>Creates an BPView::Web object. &lt;new&gt; takes at least the src_dir 
-and data_dir. Arguments are in key-value pairs.
+<p>Creates an BPView::BWWriter object.
 See <cite>EXAMPLES</cite> for more complex variants.</p>
 <dl>
-	<dt>src_dir</dt>
+	<dt>config</dt>
 	<dd>
-		<p>path to Template Toolkit src directory</p>
+		<p>The Config hash including the Config from BPView</p>
 	</dd>
-	<dt>data_dir</dt>
+	<dt>bpcfg</dt>
 	<dd>
-		<p>path to BPView static directory</p>
-	</dd>
-	<dt>site_url</dt>
-	<dd>
-		<p>site url of BPView (default: /bpview)</p>
-	</dd>
-	<dt>template</dt>
-	<dd>
-		<p>name of template to use (default: default)
-Make sure to create a folder with this name in:
-  $data_dir/css/
-  $data_dir/images
-  $src_dir/</p>
-	</dd>
-	<dt>page</dt>
-	<dd>
-		<p>name of TT template for displaying webpage</p>
-	</dd>
-	<dt>content</dt>
-	<dd>
-		<p>additional content which shall be passed to TT </p>
-	</dd>
-	<dt>refresh</dt>
-	<dd>
-		<p>refresh interval of webpage (default: 15000) [ms]</p>
+		<p>business process related data </p>
+
+
+
+
 
 </div>
 <h1 id="METHODS">METHODS	</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="METHODS_CONTENT">
 
 </div>
-<h2 id="display_page">display_page</h2>
-<div id="display_page_CONTENT">
-<pre> display_Page ( page =&gt; 'page_name' )
+<h2 id="gen_bpaddoncfg">gen_bpaddoncfg</h2>
+<div id="gen_bpaddoncfg_CONTENT">
+<pre> gen_bpaddoncfg( 'bpcfg' =&gt; $yaml)
 
 </pre>
-		<p>Creates a new webpage by using argument 'page' as Template Toolkit template name.
-The search order of TT template is: src/template_name, src/global.</p>
-<pre>  $page-&gt;display_page( page	=&gt; 'main' );
+		<p>Writes the BP-Addon Config.</p>
+
+</div>
+<h1 id="METHODS-2">METHODS	</h1><p><a href="#TOP" class="toplink">Top</a></p>
+<div id="METHODS_CONTENT-2">
+
+</div>
+<h2 id="gen_nicfg">gen_nicfg</h2>
+<div id="gen_nicfg_CONTENT">
+<pre> gen_nicfg( 'bpcfg' =&gt; $yaml, 'config' =&gt; $config );
 
 </pre>
+		<p>Writes the service definitions for Icinga and/or Nagios into a config file.</p>
 
 </div>
 <h1 id="EXAMPLES">EXAMPLES</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="EXAMPLES_CONTENT">
-		<p>Display main page of BPView with template default.</p>
-<pre>  use BPView::Web;
-  my $src_dir	= &quot;/var/www/bpview/src&quot;;
-  my $data_dir	= &quot;/var/www/bpview/static&quot;;
-  my $site_url	= &quot;/bpview&quot;;
-  my $template	= &quot;default&quot;;
-
-  my $page = BPView::Web-&gt;new(
- 	src_dir		=&gt; $src_dir,
- 	data_dir	=&gt; $data_dir,
- 	site_url	=&gt; $site_url,
- 	template	=&gt; $template,
-  );
-  $page-&gt;display_page(
-    page		=&gt; &quot;main&quot;,
-  )
-
-
-
-
-</pre>
+		<p>TODO: Examples</p>
 
 </div>
 <h1 id="SEE_ALSO">SEE ALSO</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="SEE_ALSO_CONTENT">
-		<p>See BPView::Config for reading and parsing configuration files.</p>
 
 </div>
 <h1 id="AUTHOR">AUTHOR</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="AUTHOR_CONTENT">
-		<p>Rene Koch, &lt;r.koch@ovido.at&gt;
-Peter Stoeckl, &lt;p.stoeckl@ovido.at&gt;</p>
+		<p>Peter Stoeckl, &lt;p.stoeckl@ovido.at&gt;</p>
 
 </div>
 <h1 id="VERSION">VERSION</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="VERSION_CONTENT">
-		<p>Version 1.001  (July 23 2013))</p>
+		<p>Version 1.002  (July 25 2013))</p>
 
 </div>
 <h1 id="COPYRIGHT_AND_LICENSE">COPYRIGHT AND LICENSE</h1><p><a href="#TOP" class="toplink">Top</a></p>

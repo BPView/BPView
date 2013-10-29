@@ -6,7 +6,7 @@
 	<meta name="description" content="Pod documentation for &lt;pre&gt;  BPView::Config" />
 	<meta name="inputfile" content="../lib/BPView/Config.pm" />
 	<meta name="outputfile" content="../docs/modules/Config.html" />
-	<meta name="created" content="Thu Jul 25 11:04:15 2013" />
+	<meta name="created" content="Tue Oct 29 14:51:12 2013" />
 	<meta name="generator" content="Pod::Xhtml 1.61" />
 </head>
 <body>
@@ -27,6 +27,7 @@
 <li><a href="#validate">validate</a></li>
 <li><a href="#process_views">process_views</a></li>
 <li><a href="#get_dashboards">get_dashboards</a></li>
+<li><a href="#validate_bpconfig">validate_bpconfig</a></li>
 </ul>
 </li>
 <li><a href="#EXAMPLES">EXAMPLES</a></li>
@@ -146,9 +147,8 @@ Returns Hash.</p>
 
 </pre>
 		<p>Validates a specified config hashref if required parameters for BPView are present.
-Errors are printed out.
-Returns 0 or 1 (Config failure).</p>
-<pre>  my $config = $conf-&gt;validate( 'config' =&gt; $config);
+Croaks on error.</p>
+<pre>  $conf-&gt;validate( 'config' =&gt; $config);
 
 </pre>
 
@@ -193,6 +193,19 @@ Returns dashboard names arrayref.</p>
 </pre>
 
 </div>
+<h2 id="validate_bpconfig">validate_bpconfig</h2>
+<div id="validate_bpconfig_CONTENT">
+<pre> validate_bpconfig ( 'config' =&gt; $config)
+
+</pre>
+		<p>Validates a specified hashref if required parameters are present.
+Errors are printed out.
+Returns 0 or 1 (Config failure).</p>
+<pre>  my $config = $conf-&gt;validate_bpconfig( 'config' =&gt; $config);
+
+</pre>
+
+</div>
 <h1 id="EXAMPLES">EXAMPLES</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="EXAMPLES_CONTENT">
 		<p>Read all config files from a given directory and validate its parameters.</p>
@@ -225,12 +238,13 @@ Returns dashboard names arrayref.</p>
 </div>
 <h1 id="AUTHOR">AUTHOR</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="AUTHOR_CONTENT">
-		<p>Rene Koch, &lt;r.koch@ovido.at&gt;</p>
+		<p>Rene Koch, &lt;r.koch@ovido.at&gt;
+Peter Stoeckl, &lt;p.stoeckl@ovido.at&gt;</p>
 
 </div>
 <h1 id="VERSION">VERSION</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="VERSION_CONTENT">
-		<p>Version 1.002  (July 25 2013))</p>
+		<p>Version 1.110  (August 28 2013))</p>
 
 </div>
 <h1 id="COPYRIGHT_AND_LICENSE">COPYRIGHT AND LICENSE</h1><p><a href="#TOP" class="toplink">Top</a></p>

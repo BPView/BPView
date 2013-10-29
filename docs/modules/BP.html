@@ -2,10 +2,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-	<title>&lt;pre&gt;  BPView::Web</title>
-	<meta name="description" content="Pod documentation for &lt;pre&gt;  BPView::Web" />
-	<meta name="inputfile" content="../lib/BPView/Web.pm" />
-	<meta name="outputfile" content="../docs/modules/Web.html" />
+	<title>&lt;pre&gt;  BPView::BP</title>
+	<meta name="description" content="Pod documentation for &lt;pre&gt;  BPView::BP" />
+	<meta name="inputfile" content="../lib/BPView/BP.pm" />
+	<meta name="outputfile" content="../docs/modules/BP.html" />
 	<meta name="created" content="Tue Oct 29 14:51:12 2013" />
 	<meta name="generator" content="Pod::Xhtml 1.61" />
 </head>
@@ -22,7 +22,7 @@
 </ul>
 </li>
 <li><a href="#METHODS">METHODS	</a>
-<ul><li><a href="#display_page">display_page</a></li>
+<ul><li><a href="#get_bpstatus">get_bpstatus</a></li>
 </ul>
 </li>
 <li><a href="#EXAMPLES">EXAMPLES</a></li>
@@ -36,26 +36,27 @@
 
 <h1 id="NAME">NAME</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="NAME_CONTENT">
-<pre>  BPView::Web - Create a webpage with Template Toolkit
+<pre>  BPView::BP - Process BP stati and return BP details
 
 </pre>
 
 </div>
 <h1 id="SYNOPSIS">SYNOPSIS</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="SYNOPSIS_CONTENT">
-<pre>  use BPView::Web;
-  my $page	= BPView::Web-&gt;new(
-             src_dir	=&gt; '/var/www/bpview/src',
-             data_dir	=&gt; '/var/www/bpview/static'
-             );
-  $page-&gt;display_page( page	=&gt; 'main' );
+<pre>  use BPView::BP;
+  my $bp = BPView::BP-&gt;new(
+  		bps			=&gt; $business_processes,
+  		bpconfig	=&gt; $bp_config,
+  	 );
+  $result = $bp-&gt;get_bpstatus();
 
 </pre>
 
 </div>
 <h1 id="DESCRIPTION">DESCRIPTION</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="DESCRIPTION_CONTENT">
-<p>This module creates a webpage with Template Toolkit.</p>
+<p>This module calculates business process stati for Icinga/Nagios
+and/or returns details for business processes.</p>
 
 </div>
 <h1 id="CONSTRUCTOR">CONSTRUCTOR</h1><p><a href="#TOP" class="toplink">Top</a></p>
@@ -64,77 +65,62 @@
 </div>
 <h2 id="new_ARGS">new ( [ARGS] )</h2>
 <div id="new_ARGS_CONTENT">
-<p>Creates an BPView::Web object. &lt;new&gt; takes at least the src_dir 
-and data_dir. Arguments are in key-value pairs.
+<p>Creates an BPView::BP object. &lt;new&gt; takes at least the business
+process status hash and the business process configuration hash. 
+Arguments are in key-value pairs.
 See <cite>EXAMPLES</cite> for more complex variants.</p>
 <dl>
-	<dt>src_dir</dt>
+	<dt>bps</dt>
 	<dd>
-		<p>path to Template Toolkit src directory</p>
+		<p>Business process status hash created with BPView::Data-&gt;get_bpstatus.</p>
 	</dd>
-	<dt>data_dir</dt>
+	<dt>bpconfig</dt>
 	<dd>
-		<p>path to BPView static directory</p>
-	</dd>
-	<dt>site_url</dt>
-	<dd>
-		<p>site url of BPView (default: /bpview)</p>
-	</dd>
-	<dt>template</dt>
-	<dd>
-		<p>name of template to use (default: default)
-Make sure to create a folder with this name in:
-  $data_dir/css/
-  $data_dir/images
-  $src_dir/</p>
-	</dd>
-	<dt>page</dt>
-	<dd>
-		<p>name of TT template for displaying webpage</p>
-	</dd>
-	<dt>content</dt>
-	<dd>
-		<p>additional content which shall be passed to TT </p>
-	</dd>
-	<dt>refresh</dt>
-	<dd>
-		<p>refresh interval of webpage (default: 15000) [ms]</p>
+		<p>Business process configuration details read with BPView::Config-&gt;read_config.</p>
+		<p>Example configuration file:</p>
+		<p>&quot;produktion-datacenter-website&quot;:
+  BP:
+    NAME: &quot;Website&quot;
+    DESC: undef
+    TYPE: and
+    DISP: 0
+    MIND: 0
+  HOSTS:
+    loadbalancer:
+      &quot;HTTP Check&quot;:
+    webserver01:
+      &quot;HTTP Check&quot;
+    webserver02:
+      &quot;HTTP Check&quot;</p>
 
 </div>
 <h1 id="METHODS">METHODS	</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="METHODS_CONTENT">
 
 </div>
-<h2 id="display_page">display_page</h2>
-<div id="display_page_CONTENT">
-<pre> display_Page ( page =&gt; 'page_name' )
+<h2 id="get_bpstatus">get_bpstatus</h2>
+<div id="get_bpstatus_CONTENT">
+<pre> get_bpstatus ()
 
 </pre>
-		<p>Creates a new webpage by using argument 'page' as Template Toolkit template name.
-The search order of TT template is: src/template_name, src/global.</p>
-<pre>  $page-&gt;display_page( page	=&gt; 'main' );
+		<p>Get status of business process by comparing service and host
+checks with the given conjunction parameter (and|or|min).
+Returns Nagios status code (0|1|2|3).</p>
+<pre>  my $status = $get_bpstatus();
 
 </pre>
+		<p>$VAR1 = 0</p>
 
 </div>
 <h1 id="EXAMPLES">EXAMPLES</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="EXAMPLES_CONTENT">
-		<p>Display main page of BPView with template default.</p>
-<pre>  use BPView::Web;
-  my $src_dir	= &quot;/var/www/bpview/src&quot;;
-  my $data_dir	= &quot;/var/www/bpview/static&quot;;
-  my $site_url	= &quot;/bpview&quot;;
-  my $template	= &quot;default&quot;;
-
-  my $page = BPView::Web-&gt;new(
- 	src_dir		=&gt; $src_dir,
- 	data_dir	=&gt; $data_dir,
- 	site_url	=&gt; $site_url,
- 	template	=&gt; $template,
-  );
-  $page-&gt;display_page(
-    page		=&gt; &quot;main&quot;,
-  )
+		<p>Get status code of given business process.</p>
+<pre>  use BPView::BP;
+  my $bp = BPView::BP-&gt;new(
+  		bps			=&gt; $business_processes,
+  		bpconfig	=&gt; $bp_config,
+  	 );
+  $result = $bp-&gt;get_bpstatus();
 
 
 
@@ -144,18 +130,18 @@ The search order of TT template is: src/template_name, src/global.</p>
 </div>
 <h1 id="SEE_ALSO">SEE ALSO</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="SEE_ALSO_CONTENT">
-		<p>See BPView::Config for reading and parsing configuration files.</p>
+		<p>See BPView::Data for fetching BP data.
+See BPView::Config for reading BP configuration files.</p>
 
 </div>
 <h1 id="AUTHOR">AUTHOR</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="AUTHOR_CONTENT">
-		<p>Rene Koch, &lt;r.koch@ovido.at&gt;
-Peter Stoeckl, &lt;p.stoeckl@ovido.at&gt;</p>
+		<p>Rene Koch, &lt;r.koch@ovido.at&gt;</p>
 
 </div>
 <h1 id="VERSION">VERSION</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="VERSION_CONTENT">
-		<p>Version 1.001  (July 23 2013))</p>
+		<p>Version 1.000  (October 18 2013))</p>
 
 </div>
 <h1 id="COPYRIGHT_AND_LICENSE">COPYRIGHT AND LICENSE</h1><p><a href="#TOP" class="toplink">Top</a></p>

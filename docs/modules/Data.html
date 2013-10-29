@@ -6,7 +6,7 @@
 	<meta name="description" content="Pod documentation for &lt;pre&gt;  BPView::Data" />
 	<meta name="inputfile" content="../lib/BPView/Data.pm" />
 	<meta name="outputfile" content="../docs/modules/Data.html" />
-	<meta name="created" content="Tue Jul 23 16:01:42 2013" />
+	<meta name="created" content="Tue Oct 29 14:51:12 2013" />
 	<meta name="generator" content="Pod::Xhtml 1.61" />
 </head>
 <body>
@@ -26,6 +26,14 @@
 </ul>
 </li>
 <li><a href="#METHODS-2">METHODS	</a>
+<ul><li><a href="#get_bpstatus">get_bpstatus</a></li>
+</ul>
+</li>
+<li><a href="#METHODS-3">METHODS	</a>
+<ul><li><a href="#get_bpdetails">get_bpdetails</a></li>
+</ul>
+</li>
+<li><a href="#METHODS-4">METHODS	</a>
 <ul><li><a href="#get_details">get_details</a></li>
 </ul>
 </li>
@@ -61,7 +69,7 @@
 <h1 id="DESCRIPTION">DESCRIPTION</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="DESCRIPTION_CONTENT">
 <p>This module fetches business process data from various backends like
-IDOutils and BPaddon-API.</p>
+IDOutils and mk-livestatus.</p>
 
 </div>
 <h1 id="CONSTRUCTOR">CONSTRUCTOR</h1><p><a href="#TOP" class="toplink">Top</a></p>
@@ -89,11 +97,6 @@ See <cite>EXAMPLES</cite> for more complex variants.</p>
   username: database user (e.g. icinga)
   password: database password (e.g. icinga)
   prefix: database prefix (e.g. icinga_)</p>
-		<p>BPAddon:
-  cgi_url: url to BPAddon-CGIs (e.g. https://localhost/nagiosbp/cgi-bin)
-  conf: BPAddon config file name (e.g. nagios-bp)
-  username: CGI username (if url is protected)
-  password: CGI password (if url is protected)</p>
 	</dd>
 	<dt>views</dt>
 	<dd>
@@ -137,34 +140,74 @@ Returns JSON data.</p>
 <div id="METHODS_CONTENT-2">
 
 </div>
+<h2 id="get_bpstatus">get_bpstatus</h2>
+<div id="get_bpstatus_CONTENT">
+<pre> get_bpstatus ( )
+
+</pre>
+		<p>Connects to backend and queries status of all host and service checks.
+Returns hash.</p>
+<pre>  my $hash = $details-&gt;get_status();                               	
+
+</pre>
+		<p>$VAR1 = {
+  'loadbalancer' =&gt; [
+    {
+      'name2' =&gt; 'Service State Check',
+      'last_hard_state' =&gt; '0',
+      'hostname' =&gt; 'loadbalancer',
+      'output' =&gt; 'OK: All services are in their appropriate state.'
+    },
+  ],
+}  </p>
+
+</div>
+<h1 id="METHODS-3">METHODS	</h1><p><a href="#TOP" class="toplink">Top</a></p>
+<div id="METHODS_CONTENT-3">
+
+</div>
+<h2 id="get_bpdetails">get_bpdetails</h2>
+<div id="get_bpdetails_CONTENT">
+<pre> get_bpdetails ( $bp_name )
+
+</pre>
+		<p>Returns service details for given business process.
+Returns hash.</p>
+<pre>  my $hash = $details-&gt;get_bpdetails( $bp_name );                               	
+
+</pre>
+		<p>$VAR1 = {
+   &quot;mailserver&quot;: {
+      &quot;Amavisd-new Virus Check&quot; : {
+         &quot;hardstate&quot; : &quot;OK&quot;,
+         &quot;output&quot; : &quot;Amavisd-New Virusscanning OK - server returned 2.7.0 Ok, discarded, id=00848-16 - INFECTED: Eicar-Test-Signature&quot;
+      },
+   },
+}</p>
+
+</div>
+<h1 id="METHODS-4">METHODS	</h1><p><a href="#TOP" class="toplink">Top</a></p>
+<div id="METHODS_CONTENT-4">
+
+</div>
 <h2 id="get_details">get_details</h2>
 <div id="get_details_CONTENT">
 <pre> get_details ( 'bp' =&gt; $business_process )
 
 </pre>
-		<p>Connects to BPAddon API and fetches service status details for all
+		<p>Connects to data backend and fetches service status details for all
 services of this business process.
 Returns JSON data.</p>
 <pre>  my $json = $get_details( 'bp' =&gt; $business_process );
 
 </pre>
 		<p>$VAR1 = {
-   &quot;priority_definitions&quot; : {},
-   &quot;business_process&quot; : {
-      &quot;hardstate&quot; : &quot;OK&quot;,
-      &quot;components&quot; : [
-         {
-            &quot;hardstate&quot; : &quot;OK&quot;,
-            &quot;plugin_output&quot; : &quot;HTTP OK: HTTP/1.1 302 Moved Temporarily - 351 bytes in 0.187 second response time&quot;,
-            &quot;service&quot; : &quot;HTTPS Check&quot;,
-            &quot;host&quot; : &quot;localhost&quot;
-         }
-      ],
-      &quot;bp_id&quot; : &quot;production-mail-lb&quot;,
-      &quot;display_name&quot; : &quot;Loadbalancer&quot;,
-      &quot;display_prio&quot; : &quot;0&quot;
+   &quot;mailserver&quot;: {
+      &quot;Amavisd-new Virus Check&quot; : {
+         &quot;hardstate&quot; : &quot;OK&quot;,
+         &quot;output&quot; : &quot;Amavisd-New Virusscanning OK - server returned 2.7.0 Ok, discarded, id=00848-16 - INFECTED: Eicar-Test-Signature&quot;
+      },
    },
-   &quot;json_created&quot; : &quot;2013-07-23 15:41:19&quot;
 }</p>
 
 </div>
@@ -178,6 +221,21 @@ Returns JSON data.</p>
    	 provdata	=&gt; $provdata,
   );	
   $json = $dashboard-&gt;get_status();
+
+
+
+
+</pre>
+		<p>Get business process status from IDO backend with all states except ok</p>
+<pre>  use BPView::Data;
+  my $filter = { &quot;state&quot; =&gt; &quot;ok&quot; };
+  my $dashboard = BPView::Data-&gt;new(
+  	 views		=&gt; $views,
+   	 provider	=&gt; &quot;ido&quot;,
+   	 provdata	=&gt; $provdata,
+   	 filter		=&gt; $filter,
+  );	
+  $json = $dashboard-&gt;get_status
 
     
 
@@ -206,12 +264,13 @@ production-mail-lb</p>
 </div>
 <h1 id="AUTHOR">AUTHOR</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="AUTHOR_CONTENT">
-		<p>Rene Koch, &lt;r.koch@ovido.at&gt;</p>
+		<p>Rene Koch, &lt;r.koch@ovido.at&gt;
+Peter Stoeckl, &lt;p.stoeckl@ovido.at&gt;</p>
 
 </div>
 <h1 id="VERSION">VERSION</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="VERSION_CONTENT">
-		<p>Version 1.000  (July 23 2013))</p>
+		<p>Version 1.400  (October 18 2013))</p>
 
 </div>
 <h1 id="COPYRIGHT_AND_LICENSE">COPYRIGHT AND LICENSE</h1><p><a href="#TOP" class="toplink">Top</a></p>
