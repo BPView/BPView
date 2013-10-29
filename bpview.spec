@@ -87,6 +87,10 @@ make all
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT INSTALL_OPTS="" INSTALL_OPTS_WEB=""
 
+# backup folders
+mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}/backup/views
+mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}/backup/bp-config
+
 for selinuxvariant in %{selinux_variants}
 do
   install -d %{buildroot}%{_datadir}/selinux/${selinuxvariant}
@@ -126,6 +130,8 @@ fi
 %config(noreplace) %{_sysconfdir}/%{name}/bpview.yml
 %config(noreplace) %{_sysconfdir}/%{name}/datasource.yml
 %config(noreplace) %{_sysconfdir}/%{name}/views
+%config(noreplace) %{_sysconfdir}/%{name}/backup/bp-config
+%config(noreplace) %{_sysconfdir}/%{name}/backup/views
 %config(noreplace) %{_sysconfdir}/%{name}/bp-config
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/bpview.conf
 %config(noreplace) %{_sysconfdir}/sudoers.d/bpview
@@ -135,6 +141,8 @@ fi
 %attr(0755,root,root) %{_bindir}/bpview_cfg_writer.pl
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/bp-config
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/views
+%attr(0775,root,apache) %{_sysconfdir}/%{name}/backup/views
+%attr(0775,root,apache) %{_sysconfdir}/%{name}/backup/bp-config
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/icinga
 %attr(0664,root,apache) %{_sysconfdir}/%{name}/icinga/bpview_templates.cfg
 %attr(0664,root,apache) %{_sysconfdir}/%{name}/icinga/bpview_businessprocesses.cfg
@@ -157,6 +165,7 @@ fi
 - /etc/sudoers.d/bpview added
 - write permissions for apache on bpview/icinga config directory
 - added bpview_businessprocesses.cfg
+- create backup folder
 
 * Thu Sep 5 2013 Peter Stoeckl <p.stoeckl@ovido.at> 0.1-5
 - some changes
