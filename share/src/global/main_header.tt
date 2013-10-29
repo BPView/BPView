@@ -89,7 +89,7 @@
 								</ul>
 							</li>
 							<li>
-								<span style="line-height: 2;">Search a Host or Service&nbsp;&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/hostsearch.png" height="22" width="22" alt="" title="" /></sub></br>
+								<span style="line-height: 2;">Search a Host &nbsp;&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/hostsearch.png" height="22" width="22" alt="" title="" /></sub></br>
 								<a href="javascript:clearHostFilter();" style="display:inline;"><sub><img src="[% site_url %]/share/images/global/delete.png" height="17" width="17" alt="" title="Clear the host filter" /></sub></a>&nbsp;<input id="hostSearch" name="string" type="text" size="15" maxlength="100"></span>
 							</li>
 							<li style="border-bottom: 3px double rgb(63, 63, 63);"><a href="javascript:reloadconfig();">Generate and reload config&nbsp;&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/refresh_orange.png" height="22" width="22" alt="" title="" /></sub></a>
