@@ -30,8 +30,8 @@ all:
 	rm -f $(SCRIPT1).tmp
 
 	cp $(SCRIPT2).pl.in $(SCRIPT2).tmp
-	sed -i -e 's!lib_path = .*!lib_path = "$(LIBDIR)";!' $(SCRIPT).tmp
-	sed -i -e 's!cfg_path = .*!cfg_path = "$(SYSCONFDIR)";!' $(SCRIPT).tmp
+	sed -i -e 's!lib_path = .*!lib_path = "$(LIBDIR)";!' $(SCRIPT2).tmp
+	sed -i -e 's!cfg_path = .*!cfg_path = "$(SYSCONFDIR)";!' $(SCRIPT2).tmp
 	cp $(SCRIPT2).tmp $(SCRIPT2).pl
 	rm -f $(SCRIPT2).tmp
 
@@ -39,11 +39,11 @@ all:
 
 # install
 install:
-	for file in bpview.pl; do \
+	for file in $(SCRIPT1).pl; do \
 	  $(INSTALL) -D -m 755 $(INSTALL_OPTS) $$file $(DESTDIR)$(BINDIR)/$$file; \
 	done
-	for file in check_bp_status.pl; do \
-	  $(INSTALL) -D -m 755 $(INSTALL_OPTS) $$file $(DESTDIR)$(CGIDIR)/$$file; \
+	for file in $(SCRIPT2).pl; do \
+	  $(INSTALL) -D -m 755 $(INSTALL_OPTS) $$file $(DESTDIR)$(CGIDIR)/plugins/$$file; \
 	done
 
 # cleanup

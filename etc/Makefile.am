@@ -19,7 +19,6 @@ LOCALSTATEDIR=@localstatedir@
 INSTALL=@INSTALL@
 INSTALL_OPTS=@INSTALL_OPTS@
 CONF=bpview
-BPCONF=bp-addon
 CONTACTGROUP=admins
 
 # compile
@@ -32,15 +31,12 @@ all:
 	cp datasource.yml.in datasource.yml
 	rm -f $(CONF).tmp
 
-	cp $(BPCONF).yml.in $(BPCONF).tmp
-	cp $(BPCONF).tmp $(BPCONF).yml
-	rm -f $(BPCONF).tmp
-
 # install
 install:
-	for file in *.yml views/*.yml bp-config/*.yml; do \
+	for file in *.yml views/*.yml; do \
 	  $(INSTALL) -D -m 644 $(INSTALL_OPTS) $$file $(DESTDIR)$(SYSCONFDIR)/$$file; \
 	done
+	$(INSTALL) -d $(DESTDIR)$(SYSCONFDIR)/bp-config
 
 	
 # cleanup

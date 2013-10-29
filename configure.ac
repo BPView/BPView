@@ -15,13 +15,13 @@
 
 
 AC_PREREQ([2.63])
-AC_INIT([BPView], [0.1], [sales@ovido.at])
+AC_INIT([BPView], [0.5], [sales@ovido.at])
 AM_INIT_AUTOMAKE
 
 AC_PREFIX_DEFAULT(/usr/local/bpview)
 PKG_NAME="bpview"
-PKG_VERSION="0.1.0"
-PKG_REL_DATE="2013-08-19"
+PKG_VERSION="0.5.0"
+PKG_REL_DATE="2013-10-29"
 
 # Figure out how to invoke "install" and what install options to use
 AC_PROG_INSTALL
@@ -41,7 +41,7 @@ AC_PROG_PERL_MODULES( YAML::Syck, , AC_MSG_ERROR(Missing Perl module YAML::Syck)
 AC_PROG_PERL_MODULES( File::Spec, , AC_MSG_ERROR(Missing Perl module File::Spec))
 AC_PROG_PERL_MODULES( Carp, , AC_MSG_ERROR(Missing Perl module Carp))
 AC_PROG_PERL_MODULES( JSON::PP, , AC_MSG_ERROR(Missing Perl module JSON::PP))
-AC_PROG_PERL_MODULES( Tie::IxHash-, , AC_MSG_ERROR(Missing Perl module Tie::IxHash))
+AC_PROG_PERL_MODULES( Tie::IxHash, , AC_MSG_ERROR(Missing Perl module Tie::IxHash))
 
 # Options
 AC_ARG_WITH(web_user,AC_HELP_STRING([--with-web-user=<user>],[username for web writable files (default apache)]),web_user=$withval,web_user=apache)

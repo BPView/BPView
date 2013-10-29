@@ -1,34 +1,128 @@
 ovido:
-  permissions:
-    - users: hans
-    - users: sepp
-    - groups: testgroup
-
   views:
-    production:
+    "Kunden":
       __displayorder: 1
-      __displayinrow: 2
-      mail:
-        lb:
-        zarafa:
-      web:
-        lb:
-        otrs:
-        webserver:
-    Produktion:
-      __displayorder: 2
       __displayinrow: 1
-      Handel:
-        Topic with Umlauts Ã¶Ã¤uÃ–Ã„ÃœÃŸ -&gt; oau!:
-        otrs:
-        DAX:
-        NASDAQ:
-        NIKKEI:
-        ASE:
-        TASE:
-# ERROR handling!!!
-#    qa:
-#      mail:
-#      web:
-#    testing:
-#      mail:
+      "Bereitstellung für Kunden":
+        "Ticket-System":
+        "Repositories":
+        "Monitoring":
+      "Wartung & Service":
+        "Bank":
+        "Büroausstatter":
+        "Wasserschleifer":
+      "Hosting & Housing":
+        "VipWeb":
+        "Blockbauer":
+    "Produktion 2":
+      __displayorder: 1
+      __displayinrow: 1
+      "Virtualisierung":
+        "RHEV":
+        "KVMs":
+        "oVirt":
+        "VMware":
+        "HyperV":
+      "Datacenter":
+        "RH Satellite Server":
+        "MS System Center":
+        "LDAP / IPA":
+        "Monitoring":
+      "WWW":
+        "Homepage":
+        "Ticket-System":
+      "Serverraum":
+        "Umweltbedingungen":
+        "Alarmanlage":
+      "Bereitstellung für Kunden":
+        "Ticket-System":
+        "Repositories":
+        "Monitoring":
+      "Wartung & Service":
+        "Bank":
+        "Büroausstatter":
+        "Wasserschleifer":
+      "Hosting & Housing":
+        "VipWeb":
+        "Blockbauer":
+    "test yy":
+      __displayorder: 1
+      __displayinrow: 1
+      "Bereitstellung für Kunden":
+        "Ticket-System":
+        "Repositories":
+        "Monitoring":
+      "Wartung & Service":
+        "Bank":
+        "Büroausstatter":
+        "Wasserschleifer":
+      "Hosting & Housing":
+        "VipWeb":
+        "Blockbauer":
+    "Produktion":
+      __displayorder: 1
+      __displayinrow: 1
+      "Virtualisierung":
+        "RHEV":
+        "KVMs":
+        "oVirt":
+        "VMware":
+        "HyperV":
+      "Datacenter":
+        "RH Satellite Server":
+        "MS System Center":
+        "LDAP / IPA":
+        "Monitoring":
+      "WWW":
+        "Homepage":
+        "Ticket-System":
+      "Serverraum":
+        "Umweltbedingungen":
+        "Alarmanlage":
+      "interner Workspace":
+        "Fakturierung / CRM":
+        "Netzwerk":
+        "File-Server":
+        "Mail":
+    "test this":
+      __displayorder: 1
+      __displayinrow: 1
+      "Bereitstellung für Kunden":
+        "Ticket-System":
+        "Repositories":
+        "Monitoring":
+      "Wartung & Service":
+        "Bank":
+        "Büroausstatter":
+        "Wasserschleifer":
+      "Hosting & Housing":
+        "VipWeb":
+        "Blockbauer":
+    "test it":
+      __displayorder: 1
+      __displayinrow: 1
+      "Bereitstellung für Kunden":
+        "Ticket-System":
+        "Repositories":
+        "Monitoring":
+      "Wartung & Service":
+        "Bank":
+        "Büroausstatter":
+        "Wasserschleifer":
+      "Hosting & Housing":
+        "VipWeb":
+        "Blockbauer":
+    "test xx":
+      __displayorder: 1
+      __displayinrow: 1
+      "Bereitstellung für Kunden":
+        "Ticket-System":
+        "Repositories":
+        "Monitoring":
+      "Wartung & Service":
+        "Bank":
+        "Büroausstatter":
+        "Wasserschleifer":
+      "Hosting & Housing":
+        "VipWeb":
+        "Blockbauer":

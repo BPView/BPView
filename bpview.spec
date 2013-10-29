@@ -1,6 +1,6 @@
 Name: bpview
-Version: 0.4
-Release: 4%{?dist}
+Version: 0.5
+Release: 1%{?dist}
 Summary: Business Process view for Nagios/Icinga 
 
 Group: Applications/System
@@ -39,12 +39,16 @@ Requires: mod_fcgid
 Requires: httpd
 Requires: perl-suidperl
 Requires: perl-Tie-IxHash
+Requires: icinga
+Requires: sudo
 
 Requires(post):   /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
 Requires(postun): /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
 
 %define apacheuser apache
 %define apachegroup apache
+%define icingauser icinga
+%define icingagroup icingacmd
 
 %global selinux_variants mls targeted
 
@@ -121,30 +125,40 @@ fi
 %defattr(-,root,root)
 %config(noreplace) %{_sysconfdir}/%{name}/bpview.yml
 %config(noreplace) %{_sysconfdir}/%{name}/datasource.yml
-%config(noreplace) %{_sysconfdir}/%{name}/bp-addon.cfg
 %config(noreplace) %{_sysconfdir}/%{name}/views
 %config(noreplace) %{_sysconfdir}/%{name}/bp-config
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/bpview.conf
+%config(noreplace) %{_sysconfdir}/sudoers.d/bpview
 %{_libdir}/perl5/vendor_perl
-%attr(0755,root,root) %{_libdir}/%{name}/plugins/check_bp_status
+%attr(0755,root,root) %{_libdir}/%{name}/plugins/check_bp_status.pl
 %attr(0755,root,root) %{_libdir}/%{name}/bpview.pl
 %attr(0755,root,root) %{_bindir}/bpview_cfg_writer.pl
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/bp-config
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/views
-%attr(0664,root,apache) %{_sysconfdir}/%{name}/bpview.conf
+%attr(0775,root,apache) %{_sysconfdir}/%{name}/icinga
+%attr(0664,root,apache) %{_sysconfdir}/%{name}/icinga/bpview_templates.cfg
 %attr(0664,root,apache) %{_sysconfdir}/%{name}/icinga/bpview_businessprocesses.cfg
 %{_datarootdir}/%{name}/css
 %{_datarootdir}/%{name}/images
 %{_datarootdir}/%{name}/javascript
 %{_datarootdir}/%{name}/src
 %{_datadir}/selinux/*/%{name}.pp
-%attr(0755,%{apacheuser},%{apacheuser}) %{_localstatedir}/log/bpview.log
+%attr(0755,%{apacheuser},%{apachegroup}) %{_localstatedir}/log/bpview.log
+%attr(0775,%{icingauser},%{icingagroup}) %{_localstatedir}/cache/bpview
 %doc AUTHORS ChangeLog COPYING NEWS README sample-config selinux
 
 
 
 %changelog
-* Thu Sep 5 2013 Peter Stoeckl <r.stoeckl@ovido.at> 0.1-5
+* Tue Oct 29 2013 Rene Koch <r.koch@ovido.at> 0.5-1
+- bump to 0.5
+- removed bp-addon.cfg
+- requires icinga, sudo
+- /etc/sudoers.d/bpview added
+- write permissions for apache on bpview/icinga config directory
+- added bpview_businessprocesses.cfg
+
+* Thu Sep 5 2013 Peter Stoeckl <p.stoeckl@ovido.at> 0.1-5
 - some changes
 
 * Thu Aug 29 2013 Rene Koch <r.koch@ovido.at> 0.1-4

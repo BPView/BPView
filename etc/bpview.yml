@@ -111,9 +111,9 @@ bpview:
     
   mk-livestatus:
   
-   socket: /var/spool/icinga/rw/live
-#   server: 127.0.0.1
-#   port: 6557
+#   socket: /var/spool/icinga/rw/live
+   server: 10.0.200.30
+   port: 6557
     
 # ---
   

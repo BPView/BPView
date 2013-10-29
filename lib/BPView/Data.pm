@@ -809,6 +809,8 @@ sub _open_cache {
   my $cache_time = shift or croak ("Missing cache time!");
   my $cache_file = shift or croak ("Missing cache file!");
   
+  return 1 unless -f $cache_file;
+  
   # check file age
   if ( ( time() - $cache_time ) < ( stat( $cache_file )->mtime ) ){
   	

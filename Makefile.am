@@ -22,7 +22,9 @@ SELINUX_DIR=@srcdir@/selinux
 DOCDIR=@docdir@
 WEBCONF=@web_conf@
 HTTPCONF=httpd
+BPVIEWTMPL=bpview_templates
 CGIDIR=@sbindir@
+ETCDIR=@sysconfdir@
 DATAROOTDIR=@datarootdir@
 
 PACKAGE=@PACKAGE@
@@ -51,6 +53,12 @@ all:
 	sed -i 's!/data/www/BPView/share!$(DATAROOTDIR)!' sample-config/$(HTTPCONF).tmp
 	cp sample-config/$(HTTPCONF).tmp sample-config/$(HTTPCONF).conf
 	rm -f sample-config/$(HTTPCONF).tmp
+	
+	cp sample-config/$(BPVIEWTMPL).cfg.in sample-config/$(BPVIEWTMPL).tmp
+	sed -i -e 's!/usr/lib64/nagios/plugins/check_bpview_status.pl!$(CGIDIR)/plugins/check_bpview_status.pl!' sample-config/$(BPVIEWTMPL).tmp
+	cp sample-config/$(BPVIEWTMPL).tmp sample-config/$(BPVIEWTMPL).cfg
+	rm -f sample-config/$(BPVIEWTMPL).tmp
+	
 
 # Install
 install:
@@ -66,6 +74,11 @@ install:
 	done
 	
 	$(INSTALL) -D -m 644 $(INSTALL_OPTS) sample-config/httpd.conf $(DESTDIR)$(WEBCONF)
+	$(INSTALL) -D -m 664 $(INSTALL_OPTS) sample-config/bpview_templates.cfg $(DESTDIR)$(ETCDIR)/icinga/bpview_templates.cfg
+	$(INSTALL) -D -m 664 $(INSTALL_OPTS) sample-config/bpview_businessprocesses.cfg $(DESTDIR)$(ETCDIR)/icinga/bpview_businessprocesses.cfg
+	$(INSTALL) -D -m 440 $(INSTALL_OPTS) sample-config/sudoers $(DESTDIR)$(ETCDIR)/sudoers.d/bpview
+	
+	$(INSTALL) -d $(DESTDIR)/var/cache/bpview
 
 # Cleanup
 clean:
