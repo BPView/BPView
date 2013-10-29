@@ -107,7 +107,6 @@ sub import_cmdb {
 	my $cfg_path = $self->{ 'cfg_path' };
 
 	my $date = strftime "%Y-%m-%d", localtime;
-	
 	system("cd $cfg_path/views; for i in `ls`; do /bin/cp \$i ../backup/views/\$i-$date.bak; done; cd $cfg_path/bp-config; for i in `ls`; do /bin/cp \$i ../backup/bp-config/\$i-$date.bak; done;") or croak ("ERROR: Can't import data from CMDB. See logfile for more information.");
 	system("/bin/rm -f $cfg_path/views/*.yml;/bin/rm -f $cfg_path/bp-config/*.yml;" . $cmdbscript) or croak ("ERROR: Can't import data from CMDB. See logfile for more information.");
 	return;
