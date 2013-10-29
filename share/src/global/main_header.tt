@@ -29,15 +29,21 @@
 [% IF css != "bpview" %]
     <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/[% css %].css" />
 [% END %]
-    
     [%# set default timeout %]
     <script type="text/javascript">
+   [% FOR db = select_content %]
+      var activeDashboard = "[% db %]";
+   [% END %]
+
+
+
       var refreshInterval = [% refresh_interval %];
     </script>
     <script type="text/javascript" src="[% site_url %]/share/javascript/jquery-1.10.1.js"></script>
     <script type="text/javascript" src="[% site_url %]/share/javascript/moment.min.js"></script>
     <script type="text/javascript" src="[% site_url %]/share/javascript/bpview.js"></script>
     <script type="text/javascript" src="[% site_url %]/share/javascript/magnific-popup.js"></script>
+    <script type="text/javascript" src="[% site_url %]/share/javascript/superfish.js"></script>
   </head>
   <body>
 	<div class="topContainer topBar">
@@ -45,13 +51,61 @@
         	<span id="appname"><img src="[% site_url %]/share/images/global/bpview_logo.png" width="271" height="47" alt="BPView" /></span>
         	<span id="appdesc">[% sitename %]</span>
     	</div>
-		<div id="dashboard_select"><div class="dashboard_subject">Dashboard: </div><div class="form-select"><select name="dashboards" id="dashboards" size="1">
-				          [% FOR db = select_content %]
-				            <option>[% db %]</option>
-				          [% END %]
-				          </select></div>
-[% IF reloadit == 'yes' %]
-   <div class="reloadbutton"><a href="javascript:reloadconfig();"><img src="[% site_url %]/share/images/global/refresh_orange.png" height="23" width="23" alt="Reload Config!" title="Reload Config!" /></a></div>
+		<div id="dashboard_select">
+			<div class="dashboard_subject"><span style="color: rgb(250,250,250);">Dashboard: "[% db %]"</span></br><span style="color: rgb(160,160,160);">No Filters activated</span></div>
+			<div class="menuMain">
+				<ul class="sf-menu" id="menu">
+					<li class="current" style="border: 0;">
+						<a href="javascript:;" class="sf-with-ul"><img src="[% site_url %]/share/images/global/menu_button2.png" height="34" width="34" alt="Menu" title="Menu" /></a>
+						<!--<a href="javascript:;" class="sf-with-ul"><img src="[% site_url %]/share/images/global/arrow_orange_down3.png" height="34" width="34" alt="Menu" title="Menu" /></a>-->
+						<ul style="display: none; border-top: 0;">
+							<li>
+								<a href="javascript:;" class="sf-with-ul">Dashboards ...&nbsp;&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/dashboard4.png" height="22" width="22" alt="" title="" /></sub></a>
+                                                                <ul style="display: none;">
+[% FOREACH db IN select_content %]
+  [% IF loop.last %]
+									<li style=" border-bottom: 0;">
+  [% ELSE %]
+									<li>
+  [% END %]
+<a href="javascript:changeDash('[% db %]');">[% db %]&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/dashboard2.png" height="22" width="22" alt="" title="" /></sub></a></li>
 [% END %]
+                                                                </ul>
+                                                        </li>
+							<li>
+								<a href="javascript:;" class="sf-with-ul">change Stylesheet ...&nbsp;&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/stylesheet2.png" height="22" width="22" alt="" title="" /></sub></a>
+								<ul style="display: none;">
+									<li><a href="?css=bpview">default&nbsp;&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/stylesheet.png" height="22" width="22" alt="" title="" /></sub></a></li>
+									<li style=" border-bottom: 0;"><a href="?css=presentation-screen">Presentation-Screen&nbsp;&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/stylesheet.png" height="22" width="22" alt="" title="" /></sub></a></li>
+								</ul>
+							</li>
+							<li>
+								<a href="javascript:;" class="sf-with-ul">State Filter ...&nbsp;&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/generic_sorting.png" height="22" width="22" alt="" title="" /></sub></a>
+								<ul style="display: none;">
+									<li><a href="javascript:filterState('state+warning+unknown+critical');">Hide OK Events&nbsp;&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/circle_green_minus.png" height="22" width="22" alt="" title="" /></sub></a></li>
+									<li><a href="javascript:filterState('state+unknown+critical');">Display CRITICALs only&nbsp;&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/alert_warning2.png" height="22" width="22" alt="" title="" /></sub></a></li>
+									<li><a href="javascript:filterState('all');">Display ALL Events&nbsp;&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/traffic_light.png" height="22" width="22" alt="" title="" /></sub></a></li>
+									<li style=" border-bottom: 0;"><a href="javascript:custom_filter();">set a custom filter&nbsp;&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/custom_filter.png" height="22" width="22" alt="" title="" /></sub></a></li>
+								</ul>
+							</li>
+							<li>
+								<span style="line-height: 2;">Search a Host or Service&nbsp;&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/hostsearch.png" height="22" width="22" alt="" title="" /></sub></br>
+								<a href="javascript:clearHostFilter();" style="display:inline;"><sub><img src="[% site_url %]/share/images/global/delete.png" height="17" width="17" alt="" title="Clear the host filter" /></sub></a>&nbsp;<input id="hostSearch" name="string" type="text" size="15" maxlength="100"></span>
+							</li>
+							<li style="border-bottom: 3px double rgb(63, 63, 63);"><a href="javascript:reloadconfig();">Generate and reload config&nbsp;&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/refresh_orange.png" height="22" width="22" alt="" title="" /></sub></a>
+							</li>
+							<li style=" border-bottom: 0;"><a href="javascript:();">BPView Help ...&nbsp;&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/information.png" height="22" width="22" alt="" title="" /></sub></a>
+								<ul style="display: none;">
+									<li><a href="javascript:showCopyright();">About BPView&nbsp;&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/copyright.png" height="22" width="22" alt="" title="" /></sub></a></li>
+									<li><a href="https://github.com/ovido/BPView/" target="_new">Project Homepage&nbsp;&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/homepage.png" height="22" width="22" alt="" title="" /></sub></a></li>
+									<li style=" border-bottom: 0;"><a href="javascript:();">Technical Support&nbsp;&nbsp;&nbsp;<sub><img src="[% site_url %]/share/images/global/support.png" height="22" width="22" alt="" title="" /></sub></a></li>
+								</ul>
+							</li>
+
+						</ul>
+					</li>
+					<li>
+				</ul>
+			</div>
 		</div>
 	</div>

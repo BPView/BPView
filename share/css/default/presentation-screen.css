@@ -101,8 +101,8 @@ height: 15px;
 }
 
 .tile {
-min-width: 40px;
-max-width: 165px;
+min-width: 60px;
+max-width: 60px;
 padding: 6px;
 margin: 4px;
 border-radius: 4px;

@@ -1,3 +1,4 @@
+
 /*
  * COPYRIGHT:
  *
@@ -22,13 +23,23 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+var FilterJsonState = getCookie("BPView_FilterJsonState");
+var FilterJsonHost2 = getCookie("BPView_FilterJsonHost");
+var activeDashboard2 = getCookie("BPView_activeDashboard");
+
+if (FilterJsonState == null) FilterJsonState = "";
+if (FilterJsonHost2 == null) FilterJsonHost = "";
+if (activeDashboard2 != null) activeDashboard = activeDashboard2;
+if (FilterJsonHost2 != null) FilterJsonHost = FilterJsonHost2;
+
 $(document).ready(function() {
 
- $('#dashboards').change(function() {
-    // get JSON data
+// $('#dashboards').change(function() {
+//    // get JSON data
         getDbOverview();
-  })
-  .trigger('change');
+	updateDashSub();
+//  })
+//  .trigger('change');
 
   // get JSON data
   setInterval("getDbOverview()", refreshInterval);
@@ -37,6 +48,25 @@ $(document).ready(function() {
   $('.closePopup').click(function(){
         $('.overlayBG').hide();
   });
+
+  jQuery(document).ready(function() {
+	jQuery('ul.sf-menu').superfish({
+		useClick:     false,
+		animation:    {opacity:'show'},
+		animationOut: {opacity:'hide'},
+		disableHI:    false,
+		autoArrows:   true,
+                delay:        0000,
+                speed:        'fast'
+        });
+   });
+
+	if (FilterJsonHost != "") {
+		$('#hostSearch').replaceWith("<input id=\"hostSearch\" name=\"string\" type=\"text\" size=\"15\" maxlength=\"100\" value=\"" + FilterJsonHost + "\">");
+	}
+
+	inputHostEnter();
+
 });
 
 
@@ -61,9 +91,19 @@ $(document).on('click', 'div.tile', function(){
 
 
 function getDbOverview(){
-	var dashboard = $("#dashboards option:selected").val();
+//	var dashboard = $("#dashboards option:selected").val();
+	var dashboard = activeDashboard;
 	var watermark = 0;
-	$.getJSON( "?dashboard=" + dashboard, function(data){
+	var filter = "";
+	if (FilterJsonState != "") {
+		filter = "&filter=" + FilterJsonState;
+	}
+	if (FilterJsonHost != "") {
+		if (filter == "") filter = "&filter=";
+			if (FilterJsonState == "") filter += "name+" + FilterJsonHost;
+			else filter += "+name+" + FilterJsonHost;
+	}
+	$.getJSON( "?dashboard=" + dashboard + filter, function(data){
 		var jsonData = "";
         if (data == 1){
 			showErrorMessage();
@@ -94,11 +134,12 @@ function getDbOverview(){
 					case 2:		groupTiles = " groupTilesLeft50"; break;
 					case 3:		groupTiles = " groupTilesLeft33"; break;
 					case 4:		groupTiles = " groupTilesLeft25"; break;
+					case 5:		groupTiles = " groupTilesLeft20"; break;
 					default:	groupTiles = ""; break;
 				}
 				helper_val--; 
 				if (helper_val == 0 && inrow_val > 1) groupTiles = " groupTilesRight";
-				jsonData += "      <div class=\"groupTiles" + groupTiles + "\">\n      <div id=\"" + topic + "\" class=\"groups\">" + topic + "</div>\n";
+				jsonData += "      <div class=\"groupTiles" + groupTiles + "\">\n      <div class=\"groups\">" + topic + "</div>\n";
 
 				$.each(topicval, function(products, productval){
 					// set class for status code
@@ -143,7 +184,7 @@ function getDbOverview(){
 		  if (watermark == 1) $('#watermark').css({"height":"35%"});
           // display error message on empty returns
           if (jsonData == ""){
-        	showErrorMessage();
+        	jsonData = "<span style=\"font-size:24px; margin-left: 100px;\">No data returned.</span></br><span style=\"font-size:24px;margin-left: 100px;\">Did you use an active state or host filter?</span>";
           }
 
           // show last refresh date
@@ -160,68 +201,90 @@ function getDbOverview(){
           // Open DIV popup and inform user about error
           showErrorMessage();
         })
+//setInterval("getDbOverview()", refreshInterval);
 
 }
 
 
 function getDetails(businessProcess) {
-        $.getJSON( "?details=" + businessProcess, function(data){
-            var jsonData = "";
-            
-            // error handling
-            if (data == 1){
-              showErrorMessage();
-            }
+	var filter = "";
+        if (FilterJsonState != "") {
+                filter = "&filter=" + FilterJsonState;
+        }
+        if (FilterJsonHost != "") {
+                if (filter == "") filter = "&filter=";
+                        if (FilterJsonState == "") filter += "name+" + FilterJsonHost;
+                        else filter += "+name+" + FilterJsonHost;
+        }
+	$.getJSON( "?details=" + businessProcess + filter, function(data){
+		var jsonData = "";
+		
+		// error handling
+		if (data == 1){
+		  showErrorMessage();
+		}
 
+		$.each(data, function(host, hostval){
 
-            
-            $.each(data, function(host, hostval){
+		// host names
+		jsonData += "<table class=\"details\" width=\"100%\">\n";
+		jsonData += "  <colgroup>\n    <col class=\"detail_service\">\n    <col class=\"detail_output\">\n    <col class=\"detail_status\">\n  </colgroup>\n";
+		jsonData += "<thead><tr><th width=\"100%\" class=\"detail_host\" colspan=\"3\">" + host + "</th></tr></thead>\n";
 
-            // host names
-            jsonData += "<table class=\"details\" width=\"100%\">\n";
-            jsonData += "  <colgroup>\n    <col class=\"detail_service\">\n    <col class=\"detail_output\">\n    <col class=\"detail_status\">\n  </colgroup>\n";
-            jsonData += "<thead><tr><th width=\"100%\" class=\"detail_host\" colspan=\"3\">" + host + "</th></tr></thead>\n";
+			$.each(hostval, function(service, serviceval){
 
-                $.each(hostval, function(service, serviceval){
+			  // service names
+			  jsonData += "    <tbody><tr><td class=\"detail_service detail_status_" + serviceval.hardstate + " \"title=\"" + service + "\">" + service + "</td>\n";
+			  jsonData += "    <td class=\"detail_output detail_status_" + serviceval.hardstate + "\" title=\"" + serviceval.output + "\">" + serviceval.output + "</td>\n";
+			  jsonData += "    <td class=\"detail_status detail_status_" + serviceval.hardstate + "\" title=\"" + serviceval.hardstate + "\">" + serviceval.hardstate + "</td></tr></tbody>\n";
+			});
 
-                  // service names
-                  jsonData += "    <tbody><tr><td class=\"detail_service detail_status_" + serviceval.hardstate + " \"title=\"" + service + "\">" + service + "</td>\n";
-                  jsonData += "    <td class=\"detail_output detail_status_" + serviceval.hardstate + "\" title=\"" + serviceval.output + "\">" + serviceval.output + "</td>\n";
-                  jsonData += "    <td class=\"detail_status detail_status_" + serviceval.hardstate + "\" title=\"" + serviceval.hardstate + "\">" + serviceval.hardstate + "</td></tr></tbody>\n";
-                });
+			jsonData += "</table>\n";
+	  });
+	  // display error message on empty returns
+	  if (jsonData == ""){
+		jsonData = "<span style=\"font-size:24px; margin-left: 100px;\">No data returned.</span></br><span style=\"font-size:24px;margin-left: 100px;\">Did you use an active state or host filter?</span>";
+	  }
 
-                jsonData += "</table>\n";
-          });
-          // display error message on empty returns
-          if (jsonData == ""){
-        	showErrorMessage();
-          }
-
-      // create new details div
-          $('#details').empty();
-          $('.details').append(jsonData);
-          $('#details_data').empty();
-          $('#details_data').append(jsonData);
-        })
-        .fail(function(){
-          // Open DIV popup and inform user about error
-          showErrorMessage();
-        })
+  // create new details div
+	  $('#details').empty();
+	  $('.details').append(jsonData);
+	  $('#details_data').empty();
+	  $('#details_data').append(jsonData);
+	})
+	.fail(function(){
+	  // Open DIV popup and inform user about error
+	  showErrorMessage();
+	})
 }
 
 function showErrorMessage(){
 
-	$.magnificPopup.close();
 	$.magnificPopup.open({
 		enableEscapeKey: false,
 		closeOnBgClick: false,
 		showCloseBtn: false,
         items: {
-				src: '<div class="error-popup"><div id="details_subject" class="topBar">An error occured!</div><div id="details_data" class="details_data_error"><div class="details_data_error_content">Please check error_log of your webserver or try to reload this webapp!<br/><span style="font-size:13px;">&nbsp;<br/>(press &lt;F5\&gt; or &lt;CTRL-R&gt;)</span></div><div class="details_data_error_content_image"><img src="../share/images/global/exclamation_mark_red.png"></div></div</div>',
+		src: '<div class="error-popup"><div id="details_subject" class="topBar">An error occured!</div><div id="details_data" class="details_data_error"><div class="details_data_error_content">Please check error_log of your webserver or try to reload this webapp!<br/><span style="font-size:13px;">&nbsp;<br/>(press &lt;F5\&gt; or &lt;CTRL-R&gt;)</span></div><div class="details_data_error_content_image"><img src="../share/images/global/exclamation_mark_red.png"></div></div></div>',
                 type: 'inline'
         }
 	});
+	deleteCookie();
 }
+
+function showCopyright(){
+
+        $.magnificPopup.open({
+                enableEscapeKey: true,
+                closeOnBgClick: true,
+                showCloseBtn: false,
+        items: {
+		src: '<div class="error-popup"><div id="details_subject" class="topBar">BPView Copyright</div><div id="details_data" class="details_data_error"><div class="details_data_copyright_content">BPView is Open Source under the terms of the GNU General Public License.<br/>&nbsp;<br/><span style="font-size:14px;">Copyright:<br/>&nbsp;&nbsp;&nbsp;ovido<br/>&nbsp;&nbsp;&nbsp;Peter Stöckl, p.stoeckl@ovido.at</br>&nbsp;&nbsp;&nbsp;Rene Koch, r.koch@ovido.at</span></div><div class="details_data_copyright_content_image"><img src="../share/images/global/bpview_watermark.png" height="76" width="450"></div></div><button title="Close (Esc)" type="button" class="mfp-close" style="color: white;">×</button></div>',
+                type: 'inline'
+        }
+        });
+}
+
 
 function reloadconfig() {
 	var reloadit=confirm("Attention:\n\nA config reload enforce a data import, a config generation, and a reload of BPView. This operation could be decrease the performance from connected systems.\nIf you are unsure cancel the operation.\nDo you want to proceed?");
@@ -240,4 +303,91 @@ function reloadconfig() {
 			type: 'iframe'
 		});
 	}
+}
+
+function custom_filter() {
+	var s=prompt('Insert your custom search string:\n\nHelp:\n  Possible arguments are: ok, warning, critical, unknown\n  e.g: "warning+unknown" to display these states','');
+        if (s == "all") FilterJsonState="";
+        else if (s == "" || s == null) FilterJsonState="";
+        else FilterJsonState = "state+" + s;
+        document.cookie = "BPView_FilterJsonState=" + FilterJsonState;
+        getDbOverview();
+	updateDashSub();
+}
+
+function filterState(state) {
+	if (state == "all") FilterJsonState="";
+	else FilterJsonState = state;
+        document.cookie = "BPView_FilterJsonState=" + FilterJsonState;
+	getDbOverview();
+	updateDashSub();
+}
+
+function changeDash(db) {
+        activeDashboard = db;
+        document.cookie = "BPView_activeDashboard=" + activeDashboard;
+	getDbOverview();
+	updateDashSub();
+}
+
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
+function updateDashSub() {
+	var dashb = activeDashboard;
+	var filters = "<span style=\"color: rgb(160,160,160);\">No Filters activated</span>";
+        if (FilterJsonState != "" || FilterJsonHost != "") {
+		filters = "<span style=\"color: rgb(78,238,148);\">Filters: ";
+		if (FilterJsonState.search(/warning/) != -1) filters += "W ";
+		if (FilterJsonState.search(/unknown/) != -1) filters += "U ";
+		if (FilterJsonState.search(/critical/) != -1) filters += "C ";
+		if (FilterJsonState.search(/ok/) != -1) filters += "OK ";
+		filters += "</span>";
+	        if (FilterJsonHost != "") filters += "<span style=\"color: rgb(255,127,36);\" title=\"" + FilterJsonHost  + "\">+ HOST</<span>";
+        }
+	var data = "<span style=\"color: rgb(250,250,250);\">Dashboard: \"" + dashb  + "\"</span></br>" + filters;
+	$(function() {	
+		$('.dashboard_subject').replaceWith("<div class=\"dashboard_subject\">" + data + "</div>");
+	});
+}
+
+function clearHostFilter() {
+	$(function() {
+                $('#hostSearch').replaceWith("<input id=\"hostSearch\" name=\"string\" type=\"text\" size=\"15\" maxlength=\"100\" value=\"\">");
+		document.cookie = "BPView_FilterJsonHost=; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+		FilterJsonHost = "";
+		getDbOverview();
+		updateDashSub();
+		inputHostEnter();
+	});
+}
+
+function inputHostEnter() {
+	$('#hostSearch').bind("enterKey",function(e) {
+		FilterJsonHost = $('#hostSearch').val();
+		getDbOverview();
+		updateDashSub();
+		$('#hostSearch').change(FilterJsonHost);
+		document.cookie = "BPView_FilterJsonHost=" + FilterJsonHost;
+	});
+	$('#hostSearch').keyup(function(e) {
+		if(e.keyCode == 13) {
+		$(this).trigger("enterKey");
+		}
+	});
+
+}
+
+function deleteCookie() {
+	document.cookie = "BPView_FilterJsonHost=; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+	document.cookie = "BPView_FilterJsonState=; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+	document.cookie = "BPView_activeDashboard=; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
 }

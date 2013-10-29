@@ -14,10 +14,9 @@
 #   If not, see <http://www.gnu.org/licenses/>.
 %]
 
-
     <div id="watermark" class="contentBottom"></div>
-	<div class="footer topBar">
-		<div id="copyr">&copy; 2013, ovido gmbh</div>
+	<div class="footer bottomBar">
+		<div id="copyr">&copy; 2013 by ovido</div>
 		<div id="refresh">Last refresh</div>
 	</div>
   </body>
