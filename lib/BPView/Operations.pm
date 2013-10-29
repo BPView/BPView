@@ -34,6 +34,7 @@ use warnings;
 use YAML::Syck;
 use Carp;
 use File::Spec;
+use POSIX qw(strftime);
 
 # for debugging only
 #use Data::Dumper;
@@ -104,8 +105,10 @@ sub import_cmdb {
 	}
 	my $cmdbscript = $self->{'cfg_path'}{'businessprocess'}{'cmdb_exporter'};
 	my $cfg_path = $self->{ 'cfg_path' };
+
+	my $date = strftime "%Y-%m-%d", localtime;
 	
-#	system("/bin/rm -f $cfg_path/views/*.yml;/bin/rm -f $cfg_path/bp-config/*.yml") or croak ("ERROR: Can't execute delete commands (/bin/rm -f $cfg_path/views/*.yml;/bin/rm -f $cfg_path/bp-config/*.yml)");
+	system("cd $cfg_path/views; for i in `ls`; do /bin/cp \$i ../backup/views/\$i-$date.bak; done; cd $cfg_path/bp-config; for i in `ls`; do /bin/cp \$i ../backup/bp-config/\$i-$date.bak; done;") or croak ("ERROR: Can't import data from CMDB. See logfile for more information.");
 	system("/bin/rm -f $cfg_path/views/*.yml;/bin/rm -f $cfg_path/bp-config/*.yml;" . $cmdbscript) or croak ("ERROR: Can't import data from CMDB. See logfile for more information.");
 	return;
 }

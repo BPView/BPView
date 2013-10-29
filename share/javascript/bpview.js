@@ -92,6 +92,7 @@ $(document).on('click', 'div.tile', function(){
 
 function getDbOverview(){
 //	var dashboard = $("#dashboards option:selected").val();
+    if (activeDashboard == "dummy") return;
 	var dashboard = activeDashboard;
 	var watermark = 0;
 	var filter = "";

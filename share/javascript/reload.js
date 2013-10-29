@@ -47,7 +47,7 @@ function oneSecondFunction() {
 function goback() {
 	$(document).ready(function(){
 		setTimeout(function (){
-             window.top.location.href = "bpview.pl?reloadit=yes";
+             window.top.location.href = "bpview.pl";
         }, 3000);
 	});
 }

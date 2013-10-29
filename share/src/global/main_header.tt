@@ -31,6 +31,9 @@
 [% END %]
     [%# set default timeout %]
     <script type="text/javascript">
+[% IF db == "" %]
+      var activeDashboard = "dummy";
+[% END %]
    [% FOR db = select_content %]
       var activeDashboard = "[% db %]";
    [% END %]

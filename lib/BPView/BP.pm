@@ -211,10 +211,12 @@ sub _and {
   	  for (my $i=0;$i<$size;$i++){
   	  	if ($self->{ 'bps' }{ $host }->[ $i ]->{ 'name2' } eq $service ){
   	  	  $state = $self->{ 'bps' }{ $host }->[ $i ]->{ 'last_hard_state' } if ( $self->{ 'bps' }{ $host }->[ $i ]->{ 'last_hard_state' } == 3 && $state == 0 );
-  	  	  $state = $self->{ 'bps' }{ $host }->[ $i ]->{ 'last_hard_state' } if ( $self->{ 'bps' }{ $host }->[ $i ]->{ 'last_hard_state' } >= $state ) || $state == 3;
+  	  	  $state = $self->{ 'bps' }{ $host }->[ $i ]->{ 'last_hard_state' } if ( $self->{ 'bps' }{ $host }->[ $i ]->{ 'last_hard_state' } >= $state || $state == 3 ) && ($self->{ 'bps' }{ $host }->[ $i ]->{ 'last_hard_state' } != 3 && $self->{ 'bps' }{ $host }->[ $i ]->{ 'last_hard_state' } > 0);
   	  	  $tmp_state = $state;
   	  	}
   	  }
+  	  print STDERR Dumper $self->{ 'bps' }{ $host };
+  	  print STDERR Dumper $state;
   	  
   	  # set state to unknown if state was not found, but don't override warning and critical
   	  $state = 3 if $tmp_state == 3 && $state == 0;
