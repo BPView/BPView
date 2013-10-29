@@ -179,7 +179,7 @@ while ( my $q = new CGI::Fast ){
               
               
           # hostname filter
-          if ( ( $filtername eq "name" ) && ( $filterval[$i] !~ /^[a-zA-Z0-9_-]*$/ ) ){
+          if ( ( $filtername eq "name" ) && ( $filterval[$i] !~ /^[a-zA-Z0-9_.-]*$/ ) ){
             $log->error_die("Invalid filter characters option: " . $filterval[$i]);
           }elsif ($filtername eq "name"){
             push @{ $filter->{ $filtername } }, $filterval[$i];
@@ -235,7 +235,7 @@ while ( my $q = new CGI::Fast ){
               
               
           # hostname filter
-          if ( ( $filtername eq "name" ) && ( $filterval[$i] !~ /^[a-zA-Z0-9_-]*$/ ) ){
+          if ( ( $filtername eq "name" ) && ( $filterval[$i] !~ /^[a-zA-Z0-9_.-]*$/ ) ){
             $log->error_die("Invalid filter characters option: " . $filterval[$i]);
           }elsif ($filtername eq "name"){
             push @{ $filter->{ $filtername } }, $filterval[$i];
