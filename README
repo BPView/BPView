@@ -1,24 +1,26 @@
 #*********************************************************#
 #                                                         #
-#     README for BPView                                   #
-#       a Web-Frontend and Configuration Tool to display  #
-#       Business Processes with Icinga and Nagios         #
+#       ______   _____  _    _ _____ _______ _  _  _      #
+#       |_____] |_____]  \  /    |   |______ |  |  |      #
+#       |_____] |         \/   __|__ |______ |__|__|      #
+#          MONITORING Business Process Dashboard          #
 #                                                         #
 #*********************************************************#
 
-What is BPView?
-====================
+# NAME
 
-BPView is the short name for Business Process View. This Tool
-for Nagios and Icinga is used to display a combination of Checks
-in a Business Process.
+BPView - Business Process Dashboard for Monitoring Environments
 
+# DESCRIPTION
 
-Requirements
-============
+BPView is a webbased monitoring application for collect, manage and view
+business processes based on some monitoring environments such as Nagios,
+Icinga, and more.
+
+#REQUIREMENTS
 
 Make sure the following requirements are fulfilled:
-  * Webserver (Apache)
+  * Webserver (apache or nginx)
   * Perl
   * Perl Modules:
     - CGI
@@ -32,29 +34,54 @@ Make sure the following requirements are fulfilled:
     - HTTP::Request::Common
     - Data::Dumper
     - Template
-    - DBI			# for MySQL
-    - DBD::Pg		# for PostgreSQL
+    - DBI
+    - DBD::Pg
     - Log4perl
     
 
-Installation of modules on RHEL 6:
-
-Note: You need RHEL Server Optional and EPEL channels.
-
-# yum install httpd perl perl-CGI perl-CGI-Session perl-YAML-Syck perl-JSON perl-libwww-perl perl-Template-Toolkit perl-DBI perl-DBD-Pg
-
 When installing BPView via RPM package all dependencies are resolved automatically:
-# yum install bpview
+    # yum install bpview
 
-  Installation of mod_fcgid (recommended)
+## Installation of mod_fcgid (recommended)
 
-  # yum install mod_fcgid
+    # yum install mod_fcgid
   
-  Load mod_fcgid module
-  # vi /etc/httpd/conf/httpd.conf
-  LoadModule fcgid_module modules/mod_fcgid.so
+    Load mod_fcgid module
+    # vi /etc/httpd/conf/httpd.conf
+    LoadModule fcgid_module modules/mod_fcgid.so
   
-  Restart Apache
-  # service httpd restart
+    Restart Apache
+    # service httpd restart
+
+
+
+# AUTHOR
+
+    Peter Stöckl (PetziAt) _<p.stoeckl@ovido.at>_ ( Blog: [http://ovido.at/blog](http://ovido.at/blog) )
+    René Koch (scrat14) _<r.koch@ovido.at>_ ( Blog: [http://ovido.at/blog](http://ovido.at/blog) )
+
+## CONTRIBUTORS
+
+- 
+
+## SPONSORS
+
+Parts of this code were paid for by
+
+- (mt) ovido gmbh [http://www.ovido.at/](http://www.ovido.at/)
+- (mt) ERSTE GROUP IT [http://www.erstegroupit.com/at-en](http://www.erstegroupit.com/at-en)
+
+
+# COPYRIGHT
+
+Copyright (c) 2013 the BPView ["AUTHOR"](#AUTHOR), ["CONTRIBUTORS"](#CONTRIBUTORS), and ["SPONSORS"](#SPONSORS) as listed above.
+
+# LICENSE
+
+This library is free software and may be distributed under the same terms as perl itself.
+
+## AVAILABILITY
+
+The most current version of BPview can be found at [https://github.com/BPView](https://github.com/BPView)
 
   
