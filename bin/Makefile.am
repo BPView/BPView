@@ -20,7 +20,7 @@ INSTALL=@INSTALL@
 INSTALL_OPTS=@INSTALL_OPTS@
 SCRIPT1=bpview_cfg_writer
 SCRIPT2=check_bp_status
-SCRIPT2=bpview-fetcher
+SCRIPT3=bpview-fetcher
 
 # compile
 all:
