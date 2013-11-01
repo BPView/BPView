@@ -20,6 +20,7 @@ INSTALL=@INSTALL@
 INSTALL_OPTS=@INSTALL_OPTS@
 SCRIPT1=bpview_cfg_writer
 SCRIPT2=check_bp_status
+SCRIPT2=bpview-fetcher
 
 # compile
 all:
@@ -35,6 +36,11 @@ all:
 	cp $(SCRIPT2).tmp $(SCRIPT2).pl
 	rm -f $(SCRIPT2).tmp
 
+	cp $(SCRIPT3).in $(SCRIPT3).tmp
+	sed -i -e 's!lib_path = .*!lib_path = "$(LIBDIR)";!' $(SCRIPT3).tmp
+	sed -i -e 's!cfg_path = .*!cfg_path = "$(SYSCONFDIR)";!' $(SCRIPT3).tmp
+	cp $(SCRIPT2).tmp $(SCRIPT3)
+	rm -f $(SCRIPT2).tmp
 
 
 # install
@@ -42,11 +48,15 @@ install:
 	for file in $(SCRIPT1).pl; do \
 	  $(INSTALL) -D -m 755 $(INSTALL_OPTS) $$file $(DESTDIR)$(BINDIR)/$$file; \
 	done
-	for file in $(SCRIPT2).pl; do \
+	for file in $(SCRIPT1).pl; do \
+	  $(INSTALL) -D -m 755 $(INSTALL_OPTS) $$file $(DESTDIR)$(BINDIR)/$$file; \
+	done
+	for file in $(SCRIPT3); do \
 	  $(INSTALL) -D -m 755 $(INSTALL_OPTS) $$file $(DESTDIR)$(CGIDIR)/plugins/$$file; \
 	done
 
 # cleanup
 clean:
 	rm -f *.pl
+	rm -f $(SCRIPT3)
 
