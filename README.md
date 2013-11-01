@@ -53,8 +53,8 @@ When installing BPView via RPM package all dependencies are resolved automatical
 
 # AUTHOR
 
-- (mt) René Koch (scrat14) _<r.koch@ovido.at>_ ( Blog: [http://ovido.at/blog](http://ovido.at/blog) )
-- (mt) Peter Stöckl (PetziAt) _<p.stoeckl@ovido.at>_ ( Blog: [http://ovido.at/blog](http://ovido.at/blog) )
+- René Koch (scrat14) _<r.koch@ovido.at>_ ( Blog: [http://ovido.at/blog](http://ovido.at/blog) )
+- Peter Stöckl (PetziAt) _<p.stoeckl@ovido.at>_ ( Blog: [http://ovido.at/blog](http://ovido.at/blog) )
 
 ## CONTRIBUTORS
 
@@ -64,8 +64,8 @@ When installing BPView via RPM package all dependencies are resolved automatical
 
 Parts of this code were paid for by
 
-- (mt) ovido gmbh [http://www.ovido.at/](http://www.ovido.at/)
-- (mt) ERSTE GROUP IT [http://www.erstegroupit.com/at-en](http://www.erstegroupit.com/at-en)
+- ovido gmbh [http://www.ovido.at/](http://www.ovido.at/)
+- ERSTE GROUP IT [http://www.erstegroupit.com/at-en](http://www.erstegroupit.com/at-en)
 
 
 # COPYRIGHT
