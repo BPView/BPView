@@ -20,6 +20,7 @@ BuildRequires: perl-DBD-Pg
 BuildRequires: perl-JSON-XS
 BuildRequires: perl-libwww-perl
 BuildRequires: selinux-policy
+BuildRequires: perl-Proc-Daemon
 
 Requires: perl
 Requires: perl-CGI
@@ -35,6 +36,7 @@ Requires: perl-JSON-XS
 Requires: perl-libwww-perl
 Requires: perl-Time-HiRes
 Requires: perl-Crypt-SSLeay
+Requires: perl-Proc-Daemon
 Requires: mod_fcgid
 Requires: httpd
 Requires: perl-suidperl
