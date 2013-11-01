@@ -42,6 +42,7 @@ AC_PROG_PERL_MODULES( File::Spec, , AC_MSG_ERROR(Missing Perl module File::Spec)
 AC_PROG_PERL_MODULES( Carp, , AC_MSG_ERROR(Missing Perl module Carp))
 AC_PROG_PERL_MODULES( JSON::PP, , AC_MSG_ERROR(Missing Perl module JSON::PP))
 AC_PROG_PERL_MODULES( Tie::IxHash, , AC_MSG_ERROR(Missing Perl module Tie::IxHash))
+AC_PROG_PERL_MODULES( perl-Proc-Daemon, , AC_MSG_ERROR(Missing Perl module perl-Proc-Daemon))
 
 # Options
 AC_ARG_WITH(web_user,AC_HELP_STRING([--with-web-user=<user>],[username for web writable files (default apache)]),web_user=$withval,web_user=apache)
