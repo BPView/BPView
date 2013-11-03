@@ -37,6 +37,8 @@ use File::Spec;
 use File::stat;
 use JSON::PP;
 use Tie::IxHash;
+use Storable 'dclone';
+
 
 # for debugging only
 use Data::Dumper;
@@ -218,7 +220,7 @@ sub get_status {
   }
   
 	# sorting the hash 
-	my $views = $self->{ 'views' };
+	my $views = dclone $self->{ 'views' };
 	while(my($view_key, $view) = each %$views) {
 		while(my($topic, $prods) = each %$view) {
 			next if $topic =~ m/^__display/;
@@ -229,20 +231,20 @@ sub get_status {
 		$views->{$view_key} = \%new_view;
 	}
 	tie my %new_views, 'Tie::IxHash', (map { ($_ => $views->{$_}) } sort { $views->{$a}->{__displayorder} <=> $views->{$b}->{__displayorder} } keys %$views);
-	$self->{ 'views' } = \%new_views;
+	my $viewOut = \%new_views;
 
   # verify if status is given for all products
   # note: if product is missing in Icinga/Nagios there's no state for it
   # we use status code 99 for this (0-3 are reserved as Nagios plugin exit codes)
   # this is ugly - can it be done better?
   
-  foreach my $environment (keys %{ $self->{ 'views' } }){
-    foreach my $topic (keys %{ $self->{ 'views' }{ $environment } }){
+  foreach my $environment (keys %{ $viewOut }){
+    foreach my $topic (keys %{ $viewOut->{ $environment } }){
       
       # don't process order information
       next if ( $topic eq "__displayorder" || $topic eq "__displayinrow" );
       
-      foreach my $product (keys %{ $self->{ 'views' }{ $environment }{ $topic } }){
+      foreach my $product (keys %{ $viewOut->{ $environment }{ $topic } }){
       	
     	# see _get_ido for example output!
   	    my $service = lc($environment . "-" . $topic . "-" . $product);
@@ -252,15 +254,15 @@ sub get_status {
         
     	if (defined ($result->{ $service }{ 'state' })){
   	      # found status in IDO database
-	      $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'state' } = $result->{ $service }{ 'state' };
+	      $viewOut->{ $environment }{ $topic }{ $product }{ 'state' } = $result->{ $service }{ 'state' };
 	    }else{
 	      # didn't found status in IDO database
-  	      $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'state' } = 99;
+  	      $viewOut->{ $environment }{ $topic }{ $product }{ 'state' } = 99;
 	    }
 	    
 	    # return also business process name
-	    $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'bpname' } = $service;
-	    $self->{ 'views' }{ $environment }{ $topic }{ $product }{ 'name' } = $self->{ 'bps' }{ $service }{ 'BP' }{ 'NAME' };
+	    $viewOut->{ $environment }{ $topic }{ $product }{ 'bpname' } = $service;
+	    $viewOut->{ $environment }{ $topic }{ $product }{ 'name' } = $self->{ 'bps' }{ $service }{ 'BP' }{ 'NAME' };
 
 	    # filter objects
 	    if (defined $self->{ 'filter' }{ 'state' }){
@@ -278,7 +280,7 @@ sub get_status {
               $del = 0 if $result->{ $service }{ 'state' } == 3;
             }
           }
-          delete $self->{ 'views' }{ $environment }{ $topic }{ $product } if $del == 1;
+          delete $viewOut->{ $environment }{ $topic }{ $product } if $del == 1;
 	      
 	    }
 	    
@@ -292,19 +294,19 @@ sub get_status {
               $del = 0 if lc( $hostname ) =~ lc ( $self->{ 'filter' }{ 'name' }->[ $i ]);
             }
           }
-          delete $self->{ 'views' }{ $environment }{ $topic }{ $product } if $del == 1;
+          delete $viewOut->{ $environment }{ $topic }{ $product } if $del == 1;
 	    	
 	    }
 	      
       }
       
       # delete empty topics
-      delete $self->{ 'views' }{ $environment }{ $topic} if scalar keys %{ $self->{ 'views' }{ $environment }{ $topic } } == 0;
+      delete $viewOut->{ $environment }{ $topic} if scalar keys %{ $viewOut->{ $environment }{ $topic } } == 0;
       
     }
     
     # delete empty environments
-    delete $self->{ 'views' }{ $environment } if scalar keys %{ $self->{ 'views' }{ $environment } } <= 2;
+    delete $viewOut->{ $environment } if scalar keys %{ $viewOut->{ $environment } } <= 2;
     #print STDERR Dumper $self->{ 'views' }{ $environment };
     
   }
@@ -312,7 +314,7 @@ sub get_status {
   # produce json output
   my $json = JSON::PP->new->pretty;
   $json->utf8('true');
-  $json = $json->encode($self->{ 'views' });
+  $json = $json->encode($viewOut);
   return $json;
   
 }
