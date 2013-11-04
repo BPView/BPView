@@ -590,10 +590,25 @@ sub _query_ido {
   # construct SQL query
   # query all host and service data
   if ($service_names eq "__all"){
-  	$sql = "SELECT " . $self->{'provdata'}{'prefix'} . "objects.name1 AS hostname, " . $self->{'provdata'}{'prefix'} . "objects.name2, " . $self->{'provdata'}{'prefix'};
-  	$sql .= "servicestatus.last_hard_state, " . $self->{'provdata'}{'prefix'} . "servicestatus.output FROM " . $self->{'provdata'}{'prefix'} . "objects,";
-  	$sql .= $self->{'provdata'}{'prefix'} . "servicestatus WHERE " . $self->{'provdata'}{'prefix'} . "objects.objecttype_id=2 AND " . $self->{'provdata'}{'prefix'};
-  	$sql .= "objects.is_active=1 AND " . $self->{'provdata'}{'prefix'} . "objects.object_id=" . $self->{'provdata'}{'prefix'} . "servicestatus.service_object_id";
+
+    # example query:
+  	# select icinga_objects.name1 AS hostname, CASE WHEN icinga_objects.name2 IS NULL THEN '__HOSTCHECK' ELSE icinga_objects.name2 END AS name2, CASE WHEN 
+  	# icinga_hoststatus.last_hard_state IS NOT NULL THEN icinga_hoststatus.last_hard_state ELSE icinga_servicestatus.last_hard_state END AS last_hard_state, 
+  	# CASE WHEN icinga_hoststatus.output IS NOT NULL THEN icinga_hoststatus.output ELSE icinga_servicestatus.output END AS output from icinga_objects 
+  	# LEFT JOIN icinga_hoststatus ON icinga_objects.object_id=icinga_hoststatus.host_object_id LEFT JOIN icinga_servicestatus ON 
+  	# icinga_objects.object_id=icinga_servicestatus.service_object_id where icinga_objects.is_active=1 and (icinga_objects.objecttype_id=1 or icinga_objects.objecttype_id=2);
+    
+  	$sql = "SELECT " . $self->{'provdata'}{'prefix'} . "objects.name1 AS hostname, ";
+  	$sql .= "CASE WHEN " . $self->{'provdata'}{'prefix'} . "objects.name2 IS NULL THEN '__HOSTCHECK' ELSE " . $self->{'provdata'}{'prefix'} . "objects.name2 END AS name2, ";
+  	$sql .= "CASE WHEN " . $self->{'provdata'}{'prefix'} . "hoststatus.last_hard_state IS NOT NULL THEN " . $self->{'provdata'}{'prefix'} . "hoststatus.last_hard_state ELSE ";
+  	$sql .= $self->{'provdata'}{'prefix'} . "servicestatus.last_hard_state END AS last_hard_state, ";
+  	$sql .= "CASE WHEN " . $self->{'provdata'}{'prefix'} . "hoststatus.output IS NOT NULL THEN " . $self->{'provdata'}{'prefix'} . "hoststatus.output ELSE ";
+  	$sql .= $self->{'provdata'}{'prefix'} . "hoststatus.output END AS output FROM " . $self->{'provdata'}{'prefix'} . "objects ";
+  	$sql .= "LEFT JOIN " . $self->{'provdata'}{'prefix'} . "hoststatus ON " . $self->{'provdata'}{'prefix'} . "objects.object_id=" . $self->{'provdata'}{'prefix'} . "hoststatus.host_object_id ";
+  	$sql .= "LEFT JOIN " . $self->{'provdata'}{'prefix'} . "servicestatus ON " . $self->{'provdata'}{'prefix'} . "objects.object_id=" . $self->{'provdata'}{'prefix'} . "servicestatus.service_object_id ";
+  	$sql .= "WHERE " . $self->{'provdata'}{'prefix'} . "objects.is_active=1 AND (" . $self->{'provdata'}{'prefix'} . "objects.objecttype_id=1 OR ";
+  	$sql .= $self->{'provdata'}{'prefix'} . "objects.objecttype_id=2)";
+  	
   }else{
     # query data for specified service
     $sql = "SELECT name2 AS service, current_state AS state FROM " . $self->{'provdata'}{'prefix'} . "objects, " . $self->{'provdata'}{'prefix'} . "servicestatus ";
