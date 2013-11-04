@@ -215,8 +215,6 @@ sub _and {
   	  	  $tmp_state = $state;
   	  	}
   	  }
-  	  print STDERR Dumper $self->{ 'bps' }{ $host };
-  	  print STDERR Dumper $state;
   	  
   	  # set state to unknown if state was not found, but don't override warning and critical
   	  $state = 3 if $tmp_state == 3 && $state == 0;
