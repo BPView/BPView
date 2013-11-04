@@ -603,7 +603,7 @@ sub _query_ido {
   	$sql .= "CASE WHEN " . $self->{'provdata'}{'prefix'} . "hoststatus.last_hard_state IS NOT NULL THEN " . $self->{'provdata'}{'prefix'} . "hoststatus.last_hard_state ELSE ";
   	$sql .= $self->{'provdata'}{'prefix'} . "servicestatus.last_hard_state END AS last_hard_state, ";
   	$sql .= "CASE WHEN " . $self->{'provdata'}{'prefix'} . "hoststatus.output IS NOT NULL THEN " . $self->{'provdata'}{'prefix'} . "hoststatus.output ELSE ";
-  	$sql .= $self->{'provdata'}{'prefix'} . "hoststatus.output END AS output FROM " . $self->{'provdata'}{'prefix'} . "objects ";
+  	$sql .= $self->{'provdata'}{'prefix'} . "servicestatus.output END AS output FROM " . $self->{'provdata'}{'prefix'} . "objects ";
   	$sql .= "LEFT JOIN " . $self->{'provdata'}{'prefix'} . "hoststatus ON " . $self->{'provdata'}{'prefix'} . "objects.object_id=" . $self->{'provdata'}{'prefix'} . "hoststatus.host_object_id ";
   	$sql .= "LEFT JOIN " . $self->{'provdata'}{'prefix'} . "servicestatus ON " . $self->{'provdata'}{'prefix'} . "objects.object_id=" . $self->{'provdata'}{'prefix'} . "servicestatus.service_object_id ";
   	$sql .= "WHERE " . $self->{'provdata'}{'prefix'} . "objects.is_active=1 AND (" . $self->{'provdata'}{'prefix'} . "objects.objecttype_id=1 OR ";
