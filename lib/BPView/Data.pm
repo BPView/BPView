@@ -266,36 +266,32 @@ sub get_status {
 
 	    # filter objects
 	    if (defined $self->{ 'filter' }{ 'state' }){
-	      	
-	      my $del = 1;
-          # filter results
-          for (my $i=0;$i< scalar @{ $self->{ 'filter' }{ 'state' } }; $i++){
-            if (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "ok"){
-              $del = 0 if $result->{ $service }{ 'state' } == 0;
-            }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "warning"){
-              $del = 0 if $result->{ $service }{ 'state' } == 1;
-            }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "critical"){
-              $del = 0 if $result->{ $service }{ 'state' } == 2;
-            }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "unknown"){
-              $del = 0 if $result->{ $service }{ 'state' } == 3;
-            }
-          }
-          delete $viewOut->{ $environment }{ $topic }{ $product } if $del == 1;
-	      
+		my $del = 1;
+          	# filter results
+          	for (my $i=0;$i< scalar @{ $self->{ 'filter' }{ 'state' } }; $i++){
+          		if (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "ok"){
+		        	$del = 0 if $result->{ $service }{ 'state' } == 0;
+		        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "warning"){
+				$del = 0 if $result->{ $service }{ 'state' } == 1;
+		        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "critical"){
+				$del = 0 if $result->{ $service }{ 'state' } == 2;
+			}elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "unknown"){
+				$del = 0 if $result->{ $service }{ 'state' } == 3;
+		        }
+		}
+	        delete $viewOut->{ $environment }{ $topic }{ $product } if $del == 1;
 	    }
 	    
 	    # filter hostnames
 	    if (defined $self->{ 'filter' }{ 'name' }){
-	    	
-	      my $del = 1;
-          # loop through hostname hash
-          foreach my $hostname (keys %{ $self->{ 'bps' }{ $service }{ 'HOSTS' } }){
-            for (my $i=0;$i< scalar @{ $self->{ 'filter' }{ 'name' } }; $i++){
-              $del = 0 if lc( $hostname ) =~ lc ( $self->{ 'filter' }{ 'name' }->[ $i ]);
-            }
-          }
-          delete $viewOut->{ $environment }{ $topic }{ $product } if $del == 1;
-	    	
+		my $del = 1;
+		# loop through hostname hash
+		foreach my $hostname (keys %{ $self->{ 'bps' }{ $service }{ 'HOSTS' } }){
+	            for (my $i=0;$i< scalar @{ $self->{ 'filter' }{ 'name' } }; $i++){
+	              $del = 0 if lc( $hostname ) =~ lc ( $self->{ 'filter' }{ 'name' }->[ $i ]);
+        	    }
+          	}
+          	delete $viewOut->{ $environment }{ $topic }{ $product } if $del == 1;
 	    }
 	      
       }
@@ -465,10 +461,10 @@ sub get_bpdetails {
       }
       # service not found
       if (! defined $return->{ $host }{ $service }{ 'hardstate' } ){
-      	# service missing in data source
-      	$return->{ $host }{ $service }{ 'hardstate' } = "UNKNOWN";
-      	$return->{ $host }{ $service }{ 'output' } = "Service $service not found in Monitoring system!";
-      }
+      		# service missing in data source
+      		$return->{ $host }{ $service }{ 'hardstate' } = "UNKNOWN";
+      		$return->{ $host }{ $service }{ 'output' } = "Service $service not found in Monitoring system!";
+	  }
     }
   }
   
@@ -527,25 +523,26 @@ sub get_details {
   # filter objects
   if (defined $self->{ 'filter' }{ 'state' }){
   	
-  	foreach my $host (keys %{ $return }){
-  	  foreach my $service (keys %{ $return->{ $host } }){
-	      	
-        my $del = 1;
-        # filter results
-        for (my $x=0;$x< scalar @{ $self->{ 'filter' }{ 'state' } }; $x++){
-          if (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "ok"){
-            $del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "ok";
-          }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "warning"){
-            $del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "warning";
-          }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "critical"){
-            $del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "critical";
-          }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "unknown"){
-            $del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "unknown";
-          }
+	foreach my $host (keys %{ $return }){
+		foreach my $service (keys %{ $return->{ $host } }){
+			my $del = 1;
+	        # filter results
+	        for (my $x=0;$x< scalar @{ $self->{ 'filter' }{ 'state' } }; $x++){
+	        	if (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "ok"){
+	        		$del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "ok";
+	          	}elsif (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "warning"){
+	            	$del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "warning";
+	          	}elsif (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "critical"){
+	            	$del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "critical";
+	          	}elsif (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "unknown"){
+	            	$del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "unknown";
+	          	}
+	        }
+	        delete $return->{ $host }{ $service } if $del == 1;
         }
-        delete $return->{ $host }{ $service } if $del == 1;
-    
-  	  }
+		if (scalar keys %{ $return->{ $host } } == 0) {
+			delete $return->{ $host };
+		}
     }
 	      
   }
@@ -561,7 +558,8 @@ sub get_details {
         for (my $x=0;$x< scalar @{ $self->{ 'filter' }{ 'name' } }; $x++){
           $del = 0 if lc( $host ) =~ lc ( $self->{ 'filter' }{ 'name' }->[ $x ]);
         }
-        delete $return->{ $host }{ $service } if $del == 1
+        delete $return->{ $host } if $del == 1
+        #delete $return->{ $host }{ $service } if $del == 1
   	  }
     }
     
