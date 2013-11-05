@@ -557,6 +557,7 @@ sub get_details {
 	        $del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "warning";
 	      }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "critical"){
 	        $del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "critical";
+	        $del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "down";
 	      }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "unknown"){
 	        $del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "unknown";
 	      }
