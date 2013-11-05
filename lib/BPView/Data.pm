@@ -26,7 +26,7 @@
 package BPView::Data;
 
 BEGIN {
-    $VERSION = '1.500'; # Don't forget to set version and release
+    $VERSION = '1.510'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -726,6 +726,11 @@ sub _get_ido {
   }elsif ($fetch eq "row"){
   	# fetch all data and return array
   	while (my $row = $query->fetchrow_hashref()){
+  	  
+  	  # set last hard state to 2 (critical) if host check is 1 (down)
+  	  if ($row->{ 'name2'} eq "__HOSTCHECK"){
+  	  	$row->{ 'last_hard_state' } = 2 if $row->{ 'last_hard_state' } != 0;
+  	  }
   	  push @{ $result->{ $row->{ 'hostname' } } }, $row;
   
   # example output:
@@ -805,6 +810,10 @@ sub _get_livestatus {
       $tmphash->{ 'last_hard_state' } = $tmp->[$i][2];
       $tmphash->{ 'hostname' } = $tmp->[$i][0];
       $tmphash->{ 'output' } = $tmp->[$i][3];
+      # set last hard state to 2 (critical) if host check is 1 (down)
+      if ($tmphash->{ 'name2' } eq "__HOSTCHECK"){
+        $tmphash->{ 'last_hard_state' } = 2 if $tmp->[$i][2] != 0; 
+      }
   	  push @{ $result->{ $tmp->[$i][0] } }, $tmphash;
   
   # example output:
@@ -934,7 +943,7 @@ Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.500  (November 05 2013))
+Version 1.510  (November 05 2013))
 
 =head1 COPYRIGHT AND LICENSE
 
