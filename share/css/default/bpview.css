@@ -149,6 +149,14 @@ white-space: nowrap;
   cursor: hand;
 }
 
+/* State MAJOR (Host down) */
+.state4 {
+  background-color: black;
+  color: white;
+  cursor: pointer;
+  cursor: hand;
+}
+
 /* State Not-Monitored */
 .state99 {
   background-color: lightgrey;

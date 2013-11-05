@@ -26,7 +26,7 @@
 package BPView::Data;
 
 BEGIN {
-    $VERSION = '1.400'; # Don't forget to set version and release
+    $VERSION = '1.500'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -236,7 +236,7 @@ sub get_status {
   # verify if status is given for all products
   # note: if product is missing in Icinga/Nagios there's no state for it
   # we use status code 99 for this (0-3 are reserved as Nagios plugin exit codes)
-  # this is ugly - can it be done better?
+  # we use status code 4 for major problems (host down)
   
   foreach my $environment (keys %{ $viewOut }){
     foreach my $topic (keys %{ $viewOut->{ $environment } }){
@@ -255,6 +255,21 @@ sub get_status {
     	if (defined ($result->{ $service }{ 'state' })){
   	      # found status in IDO database
 	      $viewOut->{ $environment }{ $topic }{ $product }{ 'state' } = $result->{ $service }{ 'state' };
+	      
+#	      # Due to exit code limitations in Nagios/Icinga we use state 4 for host down issues
+
+	      if ($result->{ $service }{ 'state' } != 0){
+	      	my $details = $self->get_details( 'bp' => $service );
+	      	my $json = JSON::PP->new->pretty;
+            $json->utf8('true');
+            $details = $json->decode($details);
+	      	foreach my $host (keys %{ $details }){
+	      	  if (defined $details->{ $host }{ '__HOSTCHECK' } ){
+	      	  	$viewOut->{ $environment }{ $topic }{ $product }{ 'state' } = 4 if $details->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } ne "OK";
+	      	  }
+	      	}
+	      }
+	      
 	    }else{
 	      # didn't found status in IDO database
   	      $viewOut->{ $environment }{ $topic }{ $product }{ 'state' } = 99;
@@ -303,7 +318,6 @@ sub get_status {
     
     # delete empty environments
     delete $viewOut->{ $environment } if scalar keys %{ $viewOut->{ $environment } } <= 2;
-    #print STDERR Dumper $self->{ 'views' }{ $environment };
     
   }
 
@@ -511,7 +525,11 @@ sub get_details {
   	}
   }
 
-  #use BPView::BP;
+  if (defined $self->{ 'config' }{ 'provider' }{ 'source' }){
+  	# override provider data to be able to detect host down events
+  	$self->{ 'provider' } = $self->{ 'config' }{ 'provider' }{ 'source' };
+  	$self->{ 'provdata' } = $self->{ 'config' }{ $self->{ 'config' }{ 'provider' }{ 'source' } };
+  }
   
   # Die if no hosts are defined
   croak "No host defined for given business process " . $self->{ 'bp' } unless defined $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' };
@@ -916,7 +934,7 @@ Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.400  (October 18 2013))
+Version 1.500  (November 05 2013))
 
 =head1 COPYRIGHT AND LICENSE
 

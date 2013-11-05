@@ -192,6 +192,7 @@ while ( my $q = new CGI::Fast ){
   	
       # get dashboard data
       my $dashboard = BPView::Data->new(
+  		   config	=> $config,
     	   views	=> $views->{ param("dashboard") }{ 'views' },
     	   provider	=> $config->{ 'bpview' }{ 'datasource' },
     	   provdata	=> $config->{ 'bpview'}{ $config->{ 'bpview' }{ 'datasource' } },
