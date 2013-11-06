@@ -76,7 +76,7 @@ install:
 	$(INSTALL) -D -m 644 $(INSTALL_OPTS) sample-config/httpd.conf $(DESTDIR)$(WEBCONF)
 	$(INSTALL) -D -m 664 $(INSTALL_OPTS) sample-config/bpview_templates.cfg $(DESTDIR)$(ETCDIR)/icinga/bpview_templates.cfg
 	$(INSTALL) -D -m 664 $(INSTALL_OPTS) sample-config/bpview_businessprocesses.cfg $(DESTDIR)$(ETCDIR)/icinga/bpview_businessprocesses.cfg
-	$(INSTALL) -D -m 440 $(INSTALL_OPTS) sample-config/sudoers $(DESTDIR)$(ETCDIR)/sudoers.d/bpview
+	$(INSTALL) -D -m 440 $(INSTALL_OPTS) sample-config/sudoers $(DESTDIR)/etc/sudoers.d/bpview
 	
 	$(INSTALL) -d $(DESTDIR)/var/cache/bpview
 
