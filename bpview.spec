@@ -153,13 +153,14 @@ fi
 %{_datadir}/selinux/*/%{name}.pp
 %attr(0755,%{apacheuser},%{apachegroup}) %{_localstatedir}/log/bpview.log
 %attr(0775,%{icingauser},%{icingagroup}) %{_localstatedir}/cache/bpview
-%doc AUTHORS ChangeLog COPYING NEWS README sample-config selinux
+%doc AUTHORS ChangeLog COPYING NEWS README.md sample-config selinux
 
 
 
 %changelog
 * Wed Nov 06 2013 Rene Koch <r.koch@ovido.at> 0.6-1
 - bump to 0.6
+- renamed README to README.md
 
 * Tue Oct 29 2013 Rene Koch <r.koch@ovido.at> 0.5-1
 - bump to 0.5
