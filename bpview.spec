@@ -1,5 +1,5 @@
 Name: bpview
-Version: 0.5
+Version: 0.6
 Release: 1%{?dist}
 Summary: Business Process view for Nagios/Icinga 
 
@@ -158,6 +158,9 @@ fi
 
 
 %changelog
+* Wed Nov 06 2013 Rene Koch <r.koch@ovido.at> 0.6-1
+- bump to 0.6
+
 * Tue Oct 29 2013 Rene Koch <r.koch@ovido.at> 0.5-1
 - bump to 0.5
 - removed bp-addon.cfg
