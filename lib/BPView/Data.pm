@@ -258,17 +258,20 @@ sub get_status {
 	      
 #	      # Due to exit code limitations in Nagios/Icinga we use state 4 for host down issues
 
-	      if ($result->{ $service }{ 'state' } != 0){
-	      	my $details = $self->get_details( 'bp' => $service );
-	      	my $json = JSON::PP->new->pretty;
-            $json->utf8('true');
-            $details = $json->decode($details);
-	      	foreach my $host (keys %{ $details }){
-	      	  if (defined $details->{ $host }{ '__HOSTCHECK' } ){
-	      	  	$viewOut->{ $environment }{ $topic }{ $product }{ 'state' } = 4 if $details->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } ne "OK";
-	      	  }
-	      	}
-	      }
+# temporary disabled host check due too performance issues
+# rewrite of this logic is required!
+#
+#	      if ($result->{ $service }{ 'state' } != 0){
+#	      	my $details = $self->get_details( 'bp' => $service );
+#	      	my $json = JSON::PP->new->pretty;
+#            $json->utf8('true');
+#            $details = $json->decode($details);
+#	      	foreach my $host (keys %{ $details }){
+#	      	  if (defined $details->{ $host }{ '__HOSTCHECK' } ){
+#	      	  	$viewOut->{ $environment }{ $topic }{ $product }{ 'state' } = 4 if $details->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } ne "OK";
+#	      	  }
+#	      	}
+#	      }
 	      
 	    }else{
 	      # didn't found status in IDO database
@@ -460,25 +463,37 @@ sub get_bpdetails {
   foreach my $host (keys %{ $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' } }){
     foreach my $service (keys %{ $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' }{ $host } }){
     	
-      # loop through host array
-      for (my $i=0; $i< scalar @{ $status->{ $host } }; $i++){
-      	if ($status->{ $host }->[ $i ]->{ 'name2' } eq $service){
-      	  # service found
-      	  my $state = "UNKNOWN";
-      	  if    ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 0 ){ $state = "OK"; }
-      	  elsif ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 1 ){ $state = "WARNING"; }
-      	  elsif ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 2 ){ $state = "CRITICAL"; } 
-      	  elsif ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 3 ){ $state = "UNKNOWN"; }; 
-      	  $return->{ $host }{ $service }{ 'hardstate' } = $state;
-     	  $return->{ $host }{ $service }{ 'output' } = $status->{ $host }->[ $i ]->{ 'output' };
-      	}
+      # Check if host array is empty - this happens if host was not found in monitoring system
+      if (defined $status->{ $host }){
+      	
+        # loop through host array
+        for (my $i=0; $i< scalar @{ $status->{ $host } }; $i++){
+      	  if ($status->{ $host }->[ $i ]->{ 'name2' } eq $service){
+      	    # service found
+      	    my $state = "UNKNOWN";
+      	    if    ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 0 ){ $state = "OK"; }
+      	    elsif ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 1 ){ $state = "WARNING"; }
+      	    elsif ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 2 ){ $state = "CRITICAL"; } 
+      	    elsif ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 3 ){ $state = "UNKNOWN"; }; 
+      	    $return->{ $host }{ $service }{ 'hardstate' } = $state;
+     	    $return->{ $host }{ $service }{ 'output' } = $status->{ $host }->[ $i ]->{ 'output' };
+      	  }
+        }
+        
+        # service not found
+        if (! defined $return->{ $host }{ $service }{ 'hardstate' } ){
+      	  # service missing in data source
+      	  $return->{ $host }{ $service }{ 'hardstate' } = "UNKNOWN";
+      	  $return->{ $host }{ $service }{ 'output' } = "Service $service not found in Monitoring system!";
+	    }
+	  
+      }else{
+      	
+      	# Host missing in monitoring system
+      	$return->{ $host }{ ' ' }{ 'hardstate' } = "UNKNOWN";
+      	$return->{ $host }{ ' ' }{ 'output' } = "Host $host not found in Monitoring system!";
+      	
       }
-      # service not found
-      if (! defined $return->{ $host }{ $service }{ 'hardstate' } ){
-      		# service missing in data source
-      		$return->{ $host }{ $service }{ 'hardstate' } = "UNKNOWN";
-      		$return->{ $host }{ $service }{ 'output' } = "Service $service not found in Monitoring system!";
-	  }
     }
   }
   
@@ -542,7 +557,7 @@ sub get_details {
   	
   	# set status to DOWN if host is down
   	if (defined $return->{ $host }{ '__HOSTCHECK' }){
-  	  $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } = 'DOWN' if $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } ne "OK";
+  	  $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } = 'DOWN' if $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } ne "OK" && $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } ne "UNKNOWN";
   	}
 		
     # filter objects
