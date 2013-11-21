@@ -607,6 +607,65 @@ sub get_details {
   
 }
 
+#----------------------------------------------------------------
+
+sub query_provider {
+
+  my $self      = shift;
+  my %options   = @_;
+  my $result = undef;
+  for my $key (keys %options){
+        if (exists $self->{ $key }){
+          $self->{ $key } = $options{ $key };
+        }else{
+          croak "Unknown option: $key";
+        }
+  }
+#  my $memd = new Cache::Memcached {
+#       'servers' => [ "127.0.0.1:11211" ],
+#       'debug' => 0,
+#       'compress_threshold' => 10_000,
+#     };
+  # fetch data from Icinga/Nagios
+  if ($self->{'provider'} eq "ido"){
+
+        # construct SQL query
+        my $sql = $self->_query_ido( '__all' );
+        # get results
+        $result = $self->_get_ido( $sql, "row" );
+
+  }elsif ($self->{'provider'} eq "mk-livestatus"){
+
+        # construct query
+        my $query = $self->_query_livestatus( '__all' );
+        # get results
+        $result = eval { $self->_get_livestatus( $query, "row" ) };
+
+  }else{
+        carp ("Unsupported provider: $self->{'provider'}!");
+  }
+
+#       $memd->set("hosts3", $status);
+#       my $return = {};
+
+#       foreach my $host (keys %{ $status }){
+#               for (my $i=0; $i< scalar @{ $status->{$host} }; $i++){
+#                       my $state = "UNKNOWN";
+#                       my $service = $status->{$host}->[ $i ]->{ 'name2' };
+#                       if    ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 0 ){ $state = "OK"; }
+#                       elsif ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 1 ){ $state = "WARNING"; }
+#                       elsif ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 2 ){ $state = "CRITICAL"; }
+#                       elsif ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 3 ){ $state = "UNKNOWN"; };
+#
+#                       $return->{ $host }{ $service }{ 'hardstate' } = $state;
+#                       $return->{ $host }{ $service }{ 'output' } = $status->{ $host }->[ $i ]->{ 'output' };
+#
+#               }               
+#       }
+        $self->_write_cache( "10", $self->{ 'provdata' }{ 'cache_file' }, $result );
+}
+
+
 
 #----------------------------------------------------------------
 
