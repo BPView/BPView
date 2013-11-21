@@ -79,6 +79,8 @@ install:
 	$(INSTALL) -D -m 440 $(INSTALL_OPTS) sample-config/sudoers $(DESTDIR)/etc/sudoers.d/bpview
 	
 	$(INSTALL) -d $(DESTDIR)/var/cache/bpview
+	
+	$(INSTALL) -D -m 775 $(INSTALL_OPTS) bpview.rh6.init $(DESTDIR)/etc/init.d/bpview
 
 # Cleanup
 clean:

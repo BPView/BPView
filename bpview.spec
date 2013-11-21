@@ -1,5 +1,5 @@
 Name: bpview
-Version: 0.6
+Version: 0.7
 Release: 1%{?dist}
 Summary: Business Process view for Nagios/Icinga 
 
@@ -39,6 +39,7 @@ Requires: mod_fcgid
 Requires: httpd
 Requires: perl-suidperl
 Requires: perl-Tie-IxHash
+Requires: perl-File-Pid
 Requires: icinga
 Requires: sudo
 
@@ -139,6 +140,7 @@ fi
 %attr(0755,root,root) %{_libdir}/%{name}/plugins/check_bp_status.pl
 %attr(0755,root,root) %{_libdir}/%{name}/bpview.pl
 %attr(0755,root,root) %{_bindir}/bpview_cfg_writer.pl
+%attr(0755,root,root) %{_bindir}/bpviewd
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/bp-config
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/views
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/backup/views
@@ -146,6 +148,7 @@ fi
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/icinga
 %attr(0664,root,apache) %{_sysconfdir}/%{name}/icinga/bpview_templates.cfg
 %attr(0664,root,apache) %{_sysconfdir}/%{name}/icinga/bpview_businessprocesses.cfg
+%attr(0775,root,root) %{_sysconfdir}/init.d/bpview
 %{_datarootdir}/%{name}/css
 %{_datarootdir}/%{name}/images
 %{_datarootdir}/%{name}/javascript
@@ -158,6 +161,11 @@ fi
 
 
 %changelog
+* Thu Nov 21 2013 Rene Koch <r.koch@ovido.at> 0.7-1
+- bump to 0.7
+- added bpviewd
+- requires perl-File-Pid
+
 * Wed Nov 06 2013 Rene Koch <r.koch@ovido.at> 0.6-1
 - bump to 0.6
 - renamed README to README.md
