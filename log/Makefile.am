@@ -24,7 +24,7 @@ all:
 # install
 install:
 	for file in *.log; do \
-	  $(INSTALL) -D -m 664 $(INSTALL_OPTS_WEB) $$file $(DESTDIR)$(LOCALSTATEDIR)/log/$$file; \
+	  $(INSTALL) -D -m 664 $(INSTALL_OPTS_WEB) $$file $(DESTDIR)$(LOCALSTATEDIR)/log/bpview/$$file; \
 	done
 	
 # cleanup
