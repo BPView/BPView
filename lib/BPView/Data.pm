@@ -490,7 +490,7 @@ sub get_bpdetails {
       }else{
       	
       	# Host missing in monitoring system
-      	$return->{ $host }{ ' ' }{ 'hardstate' } = "MISSING";
+      	$return->{ $host }{ ' ' }{ 'hardstate' } = "UNKNOWN";
       	$return->{ $host }{ ' ' }{ 'output' } = "Host $host not found in Monitoring system!";
       	
       }
