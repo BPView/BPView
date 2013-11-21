@@ -125,7 +125,7 @@ ido:
 #   cache it for $cache_time seconds.
 #
 
-  cache_file: "/var/cache/bpview/ndo.cache"
+  cache_file: "/dev/shm/bpview_icinga_cache"
   
   
 # ---
