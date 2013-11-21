@@ -37,8 +37,8 @@ all:
 	rm -f $(SCRIPT2).tmp
 	
 	cp $(SCRIPT3).pl.in $(SCRIPT3).tmp
-	sed -i -e 's!lib_path = .*!lib_path = "$(LIBDIR)";!' $(SCRIPT1).tmp
-	sed -i -e 's!cfg_path = .*!cfg_path = "$(SYSCONFDIR)";!' $(SCRIPT1).tmp
+	sed -i -e 's!lib_path = .*!lib_path = "$(LIBDIR)";!' $(SCRIPT3).tmp
+	sed -i -e 's!cfg_path = .*!cfg_path = "$(SYSCONFDIR)";!' $(SCRIPT3).tmp
 	cp $(SCRIPT3).tmp $(SCRIPT3)
 	rm -f $(SCRIPT3).tmp
 

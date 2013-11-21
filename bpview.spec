@@ -1,6 +1,6 @@
 Name: bpview
 Version: 0.7
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Business Process view for Nagios/Icinga 
 
 Group: Applications/System
@@ -154,13 +154,17 @@ fi
 %{_datarootdir}/%{name}/javascript
 %{_datarootdir}/%{name}/src
 %{_datadir}/selinux/*/%{name}.pp
-%attr(0755,%{apacheuser},%{apachegroup}) %{_localstatedir}/log/bpview.log
+%attr(0755,%{apacheuser},%{apachegroup}) %{_localstatedir}/log/%{name}
+%attr(0755,%{apacheuser},%{apachegroup}) %{_localstatedir}/log/%{name}/bpview.log
 %attr(0775,%{icingauser},%{icingagroup}) %{_localstatedir}/cache/bpview
 %doc AUTHORS ChangeLog COPYING NEWS README.md sample-config selinux
 
 
 
 %changelog
+* Thu Nov 21 2013 Rene Koch <r.koch@ovido.at> 0.7-2
+- changed log file path to /var/log/bpview/bpview.log
+
 * Thu Nov 21 2013 Rene Koch <r.koch@ovido.at> 0.7-1
 - bump to 0.7
 - added bpviewd
