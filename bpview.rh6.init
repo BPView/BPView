@@ -39,11 +39,8 @@ start() {
 
 	daemon $prog --pidfile /var/run/$prog.pid
 	RETVAL=$?
-	PID=$$
 	echo
 	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/$prog
-#	[ $RETVAL -eq 0 ] && echo $PID > /var/run/$prog.pid
-	echo $prog
 	return $RETVAL
 }	
 
