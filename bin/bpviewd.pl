@@ -29,8 +29,8 @@ use POSIX;
 use File::Pid;
 use File::Spec;
 #use Log::Log4perl;
-use Cache::Memcached;
-use threads;
+#use Cache::Memcached;
+#use threads;
 
 # for debugging only
 use Data::Dumper;
