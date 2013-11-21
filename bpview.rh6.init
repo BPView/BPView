@@ -1,0 +1,90 @@
+#!/bin/bash
+#
+#	/etc/rc.d/init.d/bpviewd
+#
+# bpview	This starts and stops bpviewd
+#
+# description:	bpviewd is a daemon for bpview applications	
+#
+# processname:	/usr/bin/bpviewd
+# config:	/etc/bpviewd.yml
+# pidfile:	/var/run/bpviewd.pid
+# Source function library.
+
+### BEGIN INIT INFO
+# Provides:
+# Required-Start:
+# Required-Stop:
+# Should-Start:
+# Should-Stop:
+# Default-Start: 3 4 5
+# Default-Stop: 0 1 2 6
+# Short-Description: start and stop bpviewd
+# Description: bpviewd is a daemon for bpview applications
+### END INIT INFO
+
+. /etc/init.d/functions
+PATH=/sbin:/bin:/usr/bin:/usr/sbin
+RETVAL=0
+prog="bpviewd"
+
+start() {
+	[ -f /usr/bin/bpviewd ] || exit 5
+#	[ -f /etc/bpview/bpviewd.yml ] || exit 6
+	# this is suitable way considering SELinux is guarding write
+	# access to PID file
+		[ $EUID -eq 0 ] || exit 4
+
+    	echo -n $"Starting $prog: "
+
+	daemon $prog --pidfile /var/run/$prog.pid
+	RETVAL=$?
+	PID=$$
+	echo
+	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/$prog
+#	[ $RETVAL -eq 0 ] && echo $PID > /var/run/$prog.pid
+	echo $prog
+	return $RETVAL
+}	
+
+stop() {
+	echo -n "Shutting down $prog: "
+	killproc -p /var/run/$prog.pid $prog
+	RETVAL=$?
+	# if we are in halt or reboot runlevel kill all running sessions
+	# so the TCP connections are closed cleanly
+	if [ "x$runlevel" = x0 -o "x$runlevel" = x6 ] ; then
+	    trap '' TERM
+	    killall $prog 2>/dev/null
+	    trap TERM
+	fi
+	[ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/$prog
+	echo
+}
+
+case "$1" in
+    start)
+	start
+	;;
+    stop)
+	stop
+	;;
+    status)
+	;;
+    restart)
+    	stop
+	start
+	;;
+    reload)
+	;;
+    condrestart)
+#	[ -f /var/lock/subsys/$prog ] && restart || :
+	;;
+    probe)
+	;;
+    *)
+	echo "Usage: <servicename> {start|stop|status|reload|restart[|probe]"
+	exit 1
+	;;
+esac
+exit $?
