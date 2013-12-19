@@ -22,6 +22,8 @@
 # along with BPView.  
 # If not, see <http://www.gnu.org/licenses/>.
 
+# /usr/lib64/nagios/plugins/check_procs --ereg-argument-array=bpviewd.pid
+
 use strict;
 use warnings;
 use YAML::Syck;
@@ -123,9 +125,17 @@ my $data = BPView::Data->new(
 # "infinite" loop where some useful process happens
 until ($dieNow) {
 
+	my $tmp = 0;
 	eval { $data->query_provider() };
-	logEntry("ERROR:" . $@, 1)if $@;
-	logEntry("Fetched.", 0);
+	
+	if ($@) {
+		my $msg = $@;
+		$msg =~ s/\n//g;
+		logEntry("ERROR: " . $msg, 0);
+	} else {
+		logEntry("Fetched.", 0);
+	}
+
 	sleep($sleepMainLoop);
 
 }

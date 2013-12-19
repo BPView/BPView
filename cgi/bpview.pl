@@ -37,10 +37,8 @@ use Data::Dumper;
 # define default paths required to read config files
 my ($lib_path, $cfg_path);
 BEGIN {
-#  $lib_path = "/usr/lib64/perl5/vendor_perl";   # path to BPView lib directory
-#  $cfg_path = "/etc/bpview";                    # path to BPView etc directory
-  $lib_path = "/home/users/r.koch/git/BPView/lib";   # path to BPView lib directory
-  $cfg_path = "/home/users/r.koch/git/BPView/etc";                    # path to BPView etc directory
+  $lib_path = "/usr/lib64/perl5/vendor_perl";   # path to BPView lib directory
+  $cfg_path = "/etc/bpview";                    # path to BPView etc directory
 }
 
 
