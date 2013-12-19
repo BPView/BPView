@@ -165,6 +165,7 @@ sub reload {
 	}
 	
 	system("/usr/bin/sudo /sbin/service icinga reload");
+	system("/usr/bin/sudo /usr/local/bin/restart_httpd");
 	return;
 }
 
