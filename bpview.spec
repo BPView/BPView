@@ -35,6 +35,7 @@ Requires: perl-JSON-XS
 Requires: perl-libwww-perl
 Requires: perl-Time-HiRes
 Requires: perl-Crypt-SSLeay
+Requires: perl-File-Copy-Recursive
 Requires: mod_fcgid
 Requires: httpd
 Requires: perl-suidperl
