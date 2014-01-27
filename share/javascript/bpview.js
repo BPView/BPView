@@ -227,6 +227,12 @@ function getDetails(businessProcess) {
 
 		$.each(data, function(host, hostval){
 
+		// did we receive an error message?
+		if (host == "error"){
+		  showDetailedErrorMessage(hostval);
+		  exit;
+		}
+
 		// host names
 		jsonData += "<table class=\"details\" width=\"100%\">\n";
 		jsonData += "  <colgroup>\n    <col class=\"detail_service\">\n    <col class=\"detail_output\">\n    <col class=\"detail_status\">\n  </colgroup>\n";
@@ -271,6 +277,19 @@ function showErrorMessage(){
         }
 	});
 	deleteCookie();
+}
+
+function showDetailedErrorMessage(message){
+
+	$.magnificPopup.open({
+		enableEscapeKey: true,
+		closeOnBgClick: true,
+		showCloseBtn: true,
+        items: {
+		src: '<div class="error-popup"><div id="details_subject" class="topBar">An error occured!</div><div id="details_data" class="details_data_error"><div class="details_data_error_content">' + message + '</div><div class="details_data_error_content_image"><img src="../share/images/global/exclamation_mark_red.png"></div></div></div>',
+                type: 'inline'
+        }
+	});
 }
 
 function showCopyright(){

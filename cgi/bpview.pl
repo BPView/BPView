@@ -29,6 +29,7 @@ use CGI qw(param);
 use CGI::Fast;
 use CGI::Carp qw(fatalsToBrowser);
 use Log::Log4perl;
+use JSON::PP;
 
 
 # for debugging only
@@ -198,7 +199,19 @@ while ( my $q = new CGI::Fast ){
     	   filter	=> $filter,
          );
       $json = eval { $dashboard->get_status() };
-	  $log->error_die($@) if $@;
+#	  $log->error_die($@) if $@;
+      if ($@){
+      	my $error_message->{ 'error' } = $@;
+      	$log->error($error_message->{ 'error' });
+      	
+      	# make output more pretty for users
+        $error_message->{ 'error' } =~ s/\n/<br>/g;
+        $error_message->{ 'error' } =~ s/:  at.*//;
+        
+      	$json = JSON::PP->new->pretty;
+        $json->utf8('true');
+        $json = $json->encode($error_message);
+      }
        
     }elsif (defined param("details")){
       print "Content-type: application/json; charset=utf-8\n\n";
@@ -254,7 +267,19 @@ while ( my $q = new CGI::Fast ){
    	      filter	=> $filter,
   	     );
   	  $json = eval { $details->get_details() };
-	  $log->error_die($@) if $@;
+#	  $log->error_die($@) if $@;
+      if ($@){
+      	my $error_message->{ 'error' } = $@;
+      	$log->error($error_message->{ 'error' });
+      	
+      	# make output more pretty for users
+        $error_message->{ 'error' } =~ s/\n/<br>/g;
+        $error_message->{ 'error' } =~ s/:  at.*//;
+      	
+      	$json = JSON::PP->new->pretty;
+        $json->utf8('true');
+        $json = $json->encode($error_message);
+      }
   	
     }elsif (defined param("css")){
   	
