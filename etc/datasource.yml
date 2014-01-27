@@ -1,5 +1,5 @@
 #
-# This is the data backend BPView configuration file.  It contains
+# This is the data backend BPView configuration file. It contains
 # the configuration directives that enables access to various data
 # backends.
 #
@@ -14,20 +14,20 @@
 #
 # The structure and shifting hast to be:
 # provider:
-#   source: <source>
+# source: <source>
 #
 
 provider:
 
 #
 # source: name of the provider.
-#    This requires a configuration block with the same name later
-#    in this configuration file.
+# This requires a configuration block with the same name later
+# in this configuration file.
 #
-#    Supported values are:
-#      * ido
-#      * mk-livestatus
-#      * bpaddon
+# Supported values are:
+# * ido
+# * mk-livestatus
+# * bpaddon
 #
 
   source: ido
@@ -44,14 +44,14 @@ provider:
 #
 # The structure and shifting hast to be:
 # ido:
-#   host: <host>
-#   port: <port>
-#   type: <type>
-#   database: <database>
-#   username: <username>
-#   password: <password>
-#   prefix: <prefix>
-#   timeout: <timeout>
+# host: <host>
+# port: <port>
+# type: <type>
+# database: <database>
+# username: <username>
+# password: <password>
+# prefix: <prefix>
+# timeout: <timeout>
 #
 # For further details on how to integrate IDOutils in your
 # monitoring system visit: http://docs.icinga.org/latest/en/
@@ -67,18 +67,18 @@ ido:
 
 #
 # port: Port of the database server.
-#   Most likely the following ports are in use:
-#     * 3306 (MySQL)
-#     * 5432 (PostgreSQL)
+# Most likely the following ports are in use:
+# * 3306 (MySQL)
+# * 5432 (PostgreSQL)
 #
   
   port: 3306
   
 #
 # type: Database type.
-#   The following databases are supported:
-#     * mysql (MySQL)
-#     * pgsql (PostgreSQL)
+# The following databases are supported:
+# * mysql (MySQL)
+# * pgsql (PostgreSQL)
 #
   
   type: mysql
@@ -109,29 +109,29 @@ ido:
   
 #
 # timeout: Timeout in seconds when database connection shall
-#   be closed if no data are received.
+# be closed if no data are received.
 #
   
   timeout: 10
   
 #
 # cache_time: Cache results in file for $cache_time seconds
-#  
+#
   
   cache_time: 30
 
 #
 # cache_file: Write results of this provider in this file to
-#   cache it for $cache_time seconds.
+# cache it for $cache_time seconds.
 #
 
-  cache_file: "/var/cache/bpview/ndo.cache"
+  cache_file: "/dev/shm/bpview_icinga_cache"
   
   
 # ---
   
 #
-# This is the mk-livestatus provider configuration block which 
+# This is the mk-livestatus provider configuration block which
 # defines connections to mk-livestatus. The configuration format
 # is YAML.
 #
@@ -140,9 +140,9 @@ ido:
 #
 # The structure and shifting hast to be:
 # mk-livestatus:
-#   socket: <socket>
-#   server: <server>
-#   port: <port>
+# socket: <socket>
+# server: <server>
+# port: <port>
 #
 # For further details on how to integrate mk-livestatus in your
 # monitoring system visit: http://mathias-kettner.de/checkmk_livestatus.html
@@ -154,36 +154,36 @@ mk-livestatus:
 
 #
 # socket: Path to mk-livetstatus socket if connection shall be
-#   established using sockets instead of TCP connection.
+# established using sockets instead of TCP connection.
 #
-#   Note that you can't use socket and server/port the same time.
-#   You have to choose which method to use!
+# Note that you can't use socket and server/port the same time.
+# You have to choose which method to use!
 #
-#   When using a socket make sure your webserver user can write
-#   to it! 
+# When using a socket make sure your webserver user can write
+# to it!
 #
 
   socket: /var/spool/icinga/rw/live
   
 #
 # server: IP-address or hostname of server providing access to
-#   mk-livestatus via xinetd. server also requires port!
+# mk-livestatus via xinetd. server also requires port!
 #
-#   Note that you can't use socket and server/port the same time.
-#   You have to choose which method to use!
+# Note that you can't use socket and server/port the same time.
+# You have to choose which method to use!
 #
   
-#  server:
+# server:
   
 #
-# port: port of server providing access to mk-livestatus via 
-#   xinetd. port requires also server!
+# port: port of server providing access to mk-livestatus via
+# xinetd. port requires also server!
 #
-#   Note that you can't use socket and server/port the same time.
-#   You have to choose which method to use!
-# 
+# Note that you can't use socket and server/port the same time.
+# You have to choose which method to use!
+#
   
-#  port:
+# port:
   
   
 # ---
