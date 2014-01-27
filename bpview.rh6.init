@@ -26,56 +26,72 @@
 . /etc/init.d/functions
 PATH=/sbin:/bin:/usr/bin:/usr/sbin
 RETVAL=0
-prog="bpviewd"
+PROG="bpviewd"
+PID_FILE="/var/run/bpviewd.pid"
 
 start() {
 	[ -f /usr/bin/bpviewd ] || exit 5
 #	[ -f /etc/bpview/bpviewd.yml ] || exit 6
 	# this is suitable way considering SELinux is guarding write
 	# access to PID file
-		[ $EUID -eq 0 ] || exit 4
+	[ $EUID -eq 0 ] || exit 4
 
-    	echo -n $"Starting $prog: "
+   	echo -n $"Starting $PROG: "
 
-	daemon $prog --pidfile /var/run/$prog.pid
+	daemon $PROG --pidfile $PID_FILE
 	RETVAL=$?
+	
 	echo
-	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/$prog
+	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/$PROG
 	return $RETVAL
 }	
 
 stop() {
-	echo -n "Shutting down $prog: "
-	killproc -p /var/run/$prog.pid $prog
+	echo -n "Shutting down $PROG: "
+	killproc -p $PID_FILE $PROG
 	RETVAL=$?
 	# if we are in halt or reboot runlevel kill all running sessions
 	# so the TCP connections are closed cleanly
 	if [ "x$runlevel" = x0 -o "x$runlevel" = x6 ] ; then
 	    trap '' TERM
-	    killall $prog 2>/dev/null
+	    killall $PROG 2>/dev/null
 	    trap TERM
 	fi
-	[ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/$prog
+	[ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/$PROG
 	echo
+	return $RETVAL
+}
+
+rh_status() {
+	status -p $PID_FILE $PROG
+}
+
+rh_status_q() {
+	rh_status >/dev/null 2>&1
 }
 
 case "$1" in
     start)
-	start
+    	rh_status_q && exit 0
+		start
 	;;
     stop)
-	stop
+		stop
 	;;
     status)
+    	rh_status
+    	RETVAL=$?
 	;;
     restart)
     	stop
-	start
+		start
 	;;
     reload)
+    	stop
+    	start
 	;;
     condrestart)
-#	[ -f /var/lock/subsys/$prog ] && restart || :
+#		[ -f /var/lock/subsys/$PROG ] && restart || :
 	;;
     probe)
 	;;
@@ -84,4 +100,4 @@ case "$1" in
 	exit 1
 	;;
 esac
-exit $?
+exit $RETVAL

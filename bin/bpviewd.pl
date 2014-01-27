@@ -30,6 +30,7 @@ use YAML::Syck;
 use POSIX;
 use File::Pid;
 use File::Spec;
+use Getopt::Long;
 #use Log::Log4perl;
 #use Cache::Memcached;
 #use threads;
@@ -50,6 +51,14 @@ BEGIN {
   $logFile       = $log_path. $daemonName . ".log";
 }
 
+my $pidfile = "/var/run/$daemonName" . ".pid";
+
+# check arguments
+Getopt::Long::Configure ("bundling");
+GetOptions(
+    'p:s'    => \$pidfile,     'pidfile:s'   => \$pidfile,
+);
+
 # load custom Perl modules
 use lib "$lib_path";
 use BPView::Config;
@@ -66,11 +75,22 @@ open STDIN,  '/dev/null'   or die "Can't read /dev/null: $!";
 open STDOUT, '>>/dev/null' or die "Can't write to /dev/null: $!";
 open STDERR, '>>/dev/null' or die "Can't write to /dev/null: $!";
 defined( my $pid = fork ) or die "Can't fork: $!";
-exit if $pid;
+exit if ! $pid;
 
 # dissociate this process from the controlling terminal that started it and stop being part
 # of whatever process group this process was a part of.
 POSIX::setsid() or die "Can't start a new session.";
+
+# write PID file
+my $pid_file = File::Pid->new({
+				file	=> $pidfile,
+});
+
+if (-f $pidfile){
+  die "$daemonName already running!\n";
+}else{
+  $pid_file->write;
+}
 
 # callback signal handler for signals.
 $SIG{INT} = $SIG{TERM} = $SIG{HUP} = \&signalHandler;
@@ -168,4 +188,5 @@ sub signalHandler {
 # do this stuff when exit() is called.
 END {
 	if ($logging) { close LOG }
+	$pid_file->remove if defined $pid_file;
 }
