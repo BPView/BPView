@@ -37,8 +37,9 @@
    [% FOR db = select_content %]
       var activeDashboard = "[% db %]";
    [% END %]
-
-
+[% IF uri_dashb != "0" %]
+	  var  activeDashboard = "[% uri_dashb %]";
+[% END %]
 
       var refreshInterval = [% refresh_interval %];
     </script>

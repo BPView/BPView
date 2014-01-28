@@ -104,7 +104,7 @@ function getDbOverview(){
 			if (FilterJsonState == "") filter += "name+" + FilterJsonHost;
 			else filter += "+name+" + FilterJsonHost;
 	}
-	$.getJSON( "?dashboard=" + dashboard + filter, function(data){
+	$.getJSON( "?json=1&dashboard=" + dashboard + filter, function(data){
 		var jsonData = "";
         if (data == 1){
 			showErrorMessage();

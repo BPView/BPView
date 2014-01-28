@@ -93,6 +93,17 @@ while ( my $q = new CGI::Fast ){
   my $reloadit  = "no";
   my $reloadnow = "no";
 
+  my $uri_dashb  = "0";
+  my $uri_filter = "";
+  
+  if (defined param("dashboard")){
+  	$uri_dashb = param("dashboard");
+  }
+  
+  if (defined param("dash")){
+  	$uri_dashb = param("dash");
+  }
+  
   if (defined param("reloadit")) {
   	$reloadit = "yes" if (param("reloadit") eq "yes");
   }
@@ -111,8 +122,11 @@ while ( my $q = new CGI::Fast ){
 	if ($round eq "1") {
 		sleep 3;
 		eval { $operations->import_cmdb() };
+		$log->info($@) if $@;
 		eval { $operations->write_cfgs() };
+		$log->info($@) if $@;
 		eval { $operations->reload() };
+		$log->info($@) if $@;
 		$log->info("\n>>>>>>\n>>>>>> Restarting the BPView Instance ...\n>>>>>>\n>>>>>>\n");
 	}
 
@@ -139,12 +153,12 @@ while ( my $q = new CGI::Fast ){
   }
 
   # process URL
-  if ((defined param) && ($reloadit eq "no")) {
+  if ((defined param) && ($reloadit eq "no") && defined(!param("dash"))) {
 
     # JSON Header
     my $json = undef;
 
-    if (defined param("dashboard")){
+    if (defined param("dashboard") && param("json")){
       print "Content-type: application/json; charset=utf-8\n\n";
     
       # use filters to display only certain states or hosts
@@ -281,11 +295,22 @@ while ( my $q = new CGI::Fast ){
         $json = $json->encode($error_message);
       }
   	
-    }elsif (defined param("css")){
+    }elsif (defined param("css") || (defined param("dash"))){
   	
   	  # override default template using GET variable 
   	  print "Content-type: text/html\n\n";
   	  $log->error_die("Invalid character in template variable: " . param("template")) unless param("template") =~ /^[a-zA-Z0-9_-]*$/;
+  	  
+  	  my $css = "bpview";
+  	  if (defined param("css")){
+  	  	$css = param("css");
+  	  }
+  	  
+  	  if (defined param("filter")){
+  	  	$uri_filter = param("filter");
+  	  	$uri_filter =~ s/%2B/+/g;
+  	  	$uri_filter =~ s/ /+/g;
+  	  }
 
       # display web page
       my $page = BPView::Web->new(
@@ -293,7 +318,7 @@ while ( my $q = new CGI::Fast ){
  	    data_dir	=> $config->{ 'bpview' }{ 'data_dir' },
  	    site_url	=> $config->{ 'bpview' }{ 'site_url' },
  	    template	=> $config->{ 'bpview' }{ 'template' },
- 	    css			=> param("css"),
+ 	    css			=> $css,
  	    site_name 	=> $config->{ 'bpview' }{ 'site_name' },
       );
 
@@ -303,6 +328,8 @@ while ( my $q = new CGI::Fast ){
          content	=> $dashboards,
          refresh	=> $config->{ 'refresh' }{ 'interval' },
          reloadit	=> $reloadit,
+         uri_dashb	=> $uri_dashb,
+         uri_filter	=> $uri_filter,
       ) };
       $log->error_die($@) if $@;
 
@@ -332,10 +359,11 @@ while ( my $q = new CGI::Fast ){
 
     #   $page->login();
     eval{ $page->display_page(
-       page		=> "main",
-       content	=> $dashboards,
-       refresh	=> $config->{ 'refresh' }{ 'interval' },
-       reloadit	=> $reloadit,
+       page			=> "main",
+       content		=> $dashboards,
+       refresh		=> $config->{ 'refresh' }{ 'interval' },
+       reloadit		=> $reloadit,
+       uri_dashb	=> $uri_dashb,
     ) };
     $log->error_die($@) if $@;
 

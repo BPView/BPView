@@ -117,6 +117,8 @@ sub new {
   	"reloadit"			=> undef,		# should be the reload button displayed?
   	"site_name"			=> "a universal <b>B</b>usiness <b>P</b>rocess <b>View</b> UI",
   	"round"				=> undef,
+  	"uri_hashb"			=> undef,
+  	"uri_filter"		=> undef,
   };
   
   for my $key (keys %options){
@@ -184,6 +186,8 @@ sub display_page {
   	'reloadit'		=> $reloadit,
   	'sitename'		=> $self->{ 'site_name' },
   	'round'			=> $self->{ 'round' },
+  	'uri_dashb'		=> $self->{ 'uri_dashb' },
+  	'uri_filter'	=> $self->{ 'uri_filter' },
   };
   
   if (defined $self->{ 'content' }){
