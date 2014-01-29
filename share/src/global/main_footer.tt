@@ -22,7 +22,7 @@
 	<script type="text/javascript">
 [% IF uri_filter != "" %]
       uri_filter("[% uri_filter %]");
-[% ENF %]
+[% END %]
 	</script>
   </body>
 </html>

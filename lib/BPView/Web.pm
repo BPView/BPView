@@ -117,7 +117,7 @@ sub new {
   	"reloadit"			=> undef,		# should be the reload button displayed?
   	"site_name"			=> "a universal <b>B</b>usiness <b>P</b>rocess <b>View</b> UI",
   	"round"				=> undef,
-  	"uri_hashb"			=> undef,
+  	"uri_dashb"			=> undef,
   	"uri_filter"		=> undef,
   };
   
