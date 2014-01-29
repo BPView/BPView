@@ -25,7 +25,7 @@
 package BPView::Web;
 
 BEGIN {
-    $VERSION = '1.001'; # Don't forget to set version and release
+    $VERSION = '1.100'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -119,6 +119,7 @@ sub new {
   	"round"				=> undef,
   	"uri_dashb"			=> undef,
   	"uri_filter"		=> undef,
+  	"styles"			=> undef,		# Array ref of css style sheets
   };
   
   for my $key (keys %options){
@@ -194,6 +195,14 @@ sub display_page {
   	$tt_vars->{ 'select_content' } = $self->{ 'content' };
   }
   
+  # check for given css style sheets
+  if (defined $self->{ 'styles' }){
+  	$tt_vars->{ 'styles' } = $self->{ 'styles' };
+  }else{
+  	# use default style sheet
+  	$tt_vars->{ 'styles' }->[0] = 'bpview';
+  }
+  
   if (defined $self->{ 'refresh' }){
   	# set refresh interval in ms
   	$tt_vars->{ 'refresh_interval' } = $self->{ 'refresh' } * 1000;
@@ -266,7 +275,7 @@ Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.001  (July 23 2013))
+Version 1.100  (January 29 2014))
 
 =head1 COPYRIGHT AND LICENSE
 

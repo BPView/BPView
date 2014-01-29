@@ -26,7 +26,7 @@
 package BPView::Config;
 
 BEGIN {
-    $VERSION = '1.110'; # Don't forget to set version and release
+    $VERSION = '1.200'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -428,6 +428,53 @@ sub get_dashboards {
 }
 
 
+#----------------------------------------------------------------
+
+=head2 get_css
+
+ get_css ( 'config' => $config)
+
+Searches for css files on filesystem.
+Returns dashboard names arrayref.
+
+  my $css_files = $conf->get_css( 'config' => $config);
+
+=cut
+
+sub get_css {
+	
+  my $self		= shift;
+  my %options	= @_;
+  
+  for my $key (keys %options){
+  	if (exists $self->{ $key }){
+  	  $self->{ $key } = $options{ $key };
+  	}else{
+  	  croak "Unknown option: $key";
+  	}
+  }
+  
+  # validation
+  croak ("Missing config!") unless defined $self->{ 'config' };
+  my $config	= $self->{ 'config' };
+  my $dir		= $config->{ 'bpview' }{ 'data_dir' } . "/css/" . $config->{ 'bpview' }{ 'template' };
+  croak ("$dir isn't a directory!") if ! -d $dir;
+  
+  my $css_files = [];
+  
+  # get list of css files
+  opendir (CSSDIR, $dir) or croak ("Can't open directory $dir }: $!");
+  while (my $file = readdir (CSSDIR)){
+	next unless $file =~ /\.css$/;
+	$file =~ s/.css$//;
+	push @{ $css_files }, $file;
+  }
+  closedir (CSSDIR);
+  
+  return $css_files;
+  
+}
+
 
 #----------------------------------------------------------------
 
@@ -599,7 +646,7 @@ Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.110  (August 28 2013))
+Version 1.200  (January 29 2014))
 
 =head1 COPYRIGHT AND LICENSE
 

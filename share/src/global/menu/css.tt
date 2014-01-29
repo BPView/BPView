@@ -6,19 +6,14 @@
 	</a>
 	
 	<ul style="display: none;">
-		<li>
-			<a href="?css=bpview">default&nbsp;&nbsp;&nbsp;
-				<sub>
-					<img src="[% site_url %]/share/images/global/stylesheet.png" height="22" width="22" alt="" title="" />
-				</sub>
-			</a>
-		</li>
-		<li style=" border-bottom: 0;">
-			<a href="?css=presentation-screen">Presentation-Screen&nbsp;&nbsp;&nbsp;
-				<sub>
-					<img src="[% site_url %]/share/images/global/stylesheet.png" height="22" width="22" alt="" title="" />
-				</sub>
-			</a>
-		</li>
+		[% FOREACH css IN styles %]
+			<li>
+				<a href="?css=[% css %]">[% css %]&nbsp;&nbsp;&nbsp;
+					<sub>
+						<img src="[% site_url %]/share/images/global/stylesheet.png" height="22" width="22" alt="" title="" />
+					</sub>
+				</a>
+			</li>
+		[% END %]
 	</ul>
 </li>

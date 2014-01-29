@@ -82,7 +82,11 @@ $log->error_die($@) if $@;
 # replaces possible arrays in views with hashes
 $views = eval { $conf->process_views( 'config' => $views ) };
 $log->error_die($@) if $@;
+# get dashboards
 my $dashboards = eval { $conf->get_dashboards( 'config' => $views ) };
+$log->error_die($@) if $@;
+# get css files
+my $css_files = eval { $conf->get_css( 'config' => $config ) };
 $log->error_die($@) if $@;
 
 
@@ -330,6 +334,7 @@ while ( my $q = new CGI::Fast ){
          reloadit	=> $reloadit,
          uri_dashb	=> $uri_dashb,
          uri_filter	=> $uri_filter,
+         styles		=> $css_files,
       ) };
       $log->error_die($@) if $@;
 
@@ -364,6 +369,7 @@ while ( my $q = new CGI::Fast ){
        refresh		=> $config->{ 'refresh' }{ 'interval' },
        reloadit		=> $reloadit,
        uri_dashb	=> $uri_dashb,
+       styles		=> $css_files,
     ) };
     $log->error_die($@) if $@;
 
