@@ -1,0 +1,24 @@
+<li>
+	<a href="javascript:;" class="sf-with-ul">change Stylesheet ...&nbsp;&nbsp;&nbsp;
+		<sub>
+			<img src="[% site_url %]/share/images/global/stylesheet2.png" height="22" width="22" alt="" title="" />
+		</sub>
+	</a>
+	
+	<ul style="display: none;">
+		<li>
+			<a href="?css=bpview">default&nbsp;&nbsp;&nbsp;
+				<sub>
+					<img src="[% site_url %]/share/images/global/stylesheet.png" height="22" width="22" alt="" title="" />
+				</sub>
+			</a>
+		</li>
+		<li style=" border-bottom: 0;">
+			<a href="?css=presentation-screen">Presentation-Screen&nbsp;&nbsp;&nbsp;
+				<sub>
+					<img src="[% site_url %]/share/images/global/stylesheet.png" height="22" width="22" alt="" title="" />
+				</sub>
+			</a>
+		</li>
+	</ul>
+</li>

@@ -1,0 +1,24 @@
+<div class="menuMain">
+	<ul class="sf-menu" id="menu">
+		<li class="current" style="border: 0;">
+			<a href="javascript:;" class="sf-with-ul">
+				<img src="[% site_url %]/share/images/global/menu_button2.png" height="34" width="34" alt="Menu" title="Menu" />
+			</a>
+			<!--
+			<a href="javascript:;" class="sf-with-ul">
+				<img src="[% site_url %]/share/images/global/arrow_orange_down3.png" height="34" width="34" alt="Menu" title="Menu" />
+			</a>
+			-->
+			<ul style="display: none; border-top: 0;">
+
+[% INCLUDE menu/dashboards.tt %]
+[% INCLUDE menu/css.tt %]
+[% INCLUDE menu/filters.tt %]
+[% INCLUDE menu/search.tt %]
+[% INCLUDE menu/help.tt %]
+
+			</ul>
+		</li>
+		<!-- <li> -->
+	</ul>
+</div>

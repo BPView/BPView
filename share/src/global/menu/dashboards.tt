@@ -1,0 +1,23 @@
+<li>
+	<a href="javascript:;" class="sf-with-ul">Dashboards ...&nbsp;&nbsp;&nbsp;
+		<sub>
+			<img src="[% site_url %]/share/images/global/dashboard4.png" height="22" width="22" alt="" title="" />
+		</sub>
+	</a>
+	
+	<ul style="display: none;">
+		[% FOREACH db IN select_content %]
+			[% IF loop.last %]
+			<li style=" border-bottom: 0;">
+  			[% ELSE %]
+			<li>
+			[% END %]
+				<a href="javascript:changeDash('[% db %]');">[% db %]&nbsp;&nbsp;
+					<sub>
+						<img src="[% site_url %]/share/images/global/dashboard2.png" height="22" width="22" alt="" title="" />
+					</sub>
+				</a>
+			</li>
+		[% END %]
+	</ul>
+</li>

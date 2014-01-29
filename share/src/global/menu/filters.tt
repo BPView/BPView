@@ -1,0 +1,38 @@
+<li>
+	<a href="javascript:;" class="sf-with-ul">State Filter ...&nbsp;&nbsp;&nbsp;
+		<sub>
+			<img src="[% site_url %]/share/images/global/generic_sorting.png" height="22" width="22" alt="" title="" />
+		</sub>
+	</a>
+	
+	<ul style="display: none;">
+		<li>
+			<a href="javascript:filterState('state+warning+unknown+critical');">Hide OK Events&nbsp;&nbsp;&nbsp;
+				<sub>
+					<img src="[% site_url %]/share/images/global/circle_green_minus.png" height="22" width="22" alt="" title="" />
+				</sub>
+			</a>
+		</li>
+		<li>
+			<a href="javascript:filterState('state+unknown+critical');">Display CRITICALs only&nbsp;&nbsp;&nbsp;
+				<sub>
+					<img src="[% site_url %]/share/images/global/alert_warning2.png" height="22" width="22" alt="" title="" />
+				</sub>
+			</a>
+		</li>
+		<li>
+			<a href="javascript:filterState('all');">Clear Filter&nbsp;&nbsp;&nbsp;
+				<sub>
+					<img src="[% site_url %]/share/images/global/traffic_light.png" height="22" width="22" alt="" title="" />
+				</sub>
+			</a>
+		</li>
+		<li style=" border-bottom: 0;">
+			<a href="javascript:custom_filter();">set a custom filter&nbsp;&nbsp;&nbsp;
+				<sub>
+					<img src="[% site_url %]/share/images/global/custom_filter.png" height="22" width="22" alt="" title="" />
+				</sub>
+			</a>
+		</li>
+	</ul>
+</li>
