@@ -218,7 +218,7 @@ sub get_status {
   }else{
   	carp ("Unsupported provider: $self->{'provider'}!");
   }
-  
+
 	# sorting the hash 
 	my $views = dclone $self->{ 'views' };
 	while(my($view_key, $view) = each %$views) {
@@ -232,7 +232,7 @@ sub get_status {
 	}
 	tie my %new_views, 'Tie::IxHash', (map { ($_ => $views->{$_}) } sort { $views->{$a}->{__displayorder} <=> $views->{$b}->{__displayorder} } keys %$views);
 	my $viewOut = \%new_views;
-
+	
   # verify if status is given for all products
   # note: if product is missing in Icinga/Nagios there's no state for it
   # we use status code 99 for this (0-3 are reserved as Nagios plugin exit codes)
@@ -557,7 +557,25 @@ sub get_details {
   	
   	# set status to DOWN if host is down
   	if (defined $return->{ $host }{ '__HOSTCHECK' }){
-  	  $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } = 'DOWN' if $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } ne "OK" && $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } ne "UNKNOWN";
+  		
+  	  # check if host check is mapped to a service check
+  	  if (defined $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' }{ $host }{ '__HOSTCHECK' }){
+  	  	my $host_service = $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' }{ $host }{ '__HOSTCHECK' };
+  	  	
+  	  	# verify if defined services does exist
+  	  	if (! defined $return->{ $host }{ $host_service }{ 'hardstate' }){
+  	  	  $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } = 'UNKNOWN';
+  	  	  $return->{ $host }{ '__HOSTCHECK' }{ 'output' } = 'Unknown service check mapped to __HOSTCHECK';
+  	  	}else{
+  	  	  $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } = 'DOWN' if $return->{ $host }{ $host_service }{ 'hardstate' } eq "CRITICAL";
+  	  	  $return->{ $host }{ '__HOSTCHECK' }{ 'output' } = $return->{ $host }{ $host_service }{ 'output' };
+  	  	}
+  	  	
+  	  }else{
+  	  	# no mapping - use real host check
+  	    $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } = 'DOWN' if $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } ne "OK" && $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } ne "UNKNOWN";
+  	  }
+  	  
   	}
 		
     # filter objects
