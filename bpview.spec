@@ -1,6 +1,6 @@
 Name: bpview
-Version: 0.7
-Release: 2%{?dist}
+Version: 0.8
+Release: 1%{?dist}
 Summary: Business Process view for Nagios/Icinga 
 
 Group: Applications/System
@@ -36,6 +36,7 @@ Requires: perl-libwww-perl
 Requires: perl-Time-HiRes
 Requires: perl-Crypt-SSLeay
 Requires: perl-File-Copy-Recursive
+Requires: perl-Proc-Daemon
 Requires: mod_fcgid
 Requires: httpd
 Requires: perl-suidperl
@@ -163,6 +164,10 @@ fi
 
 
 %changelog
+* Thu Mar 06 2014 Rene Koch <rkoch@linuxland.at> 0.8-1
+- bump to 0.8
+- requires perl-Proc-Daemon
+
 * Thu Nov 21 2013 Rene Koch <r.koch@ovido.at> 0.7-2
 - changed log file path to /var/log/bpview/bpview.log
 

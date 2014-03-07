@@ -307,9 +307,16 @@ function showCopyright(){
 
 
 function reloadconfig() {
+	
 	var reloadit=confirm("Attention:\n\nA config reload enforce a data import, a config generation, and a reload of BPView. This operation could be decrease the performance from connected systems.\nIf you are unsure cancel the operation.\nDo you want to proceed?");
+	
 	if (reloadit==true) {
-		var Address = 'bpview.pl?reloadit=yes&reloadnow=yes&round=0';
+		$.getJSON( "?reload=true", function(data){
+			alert(data)
+		});
+	}
+/*	
+		var Address = '?reload';
 		$.magnificPopup.open({
 			enableEscapeKey: false,
 			closeOnBgClick: false,
@@ -322,7 +329,7 @@ function reloadconfig() {
 			},
 			type: 'iframe'
 		});
-	}
+*/
 }
 
 function custom_filter() {

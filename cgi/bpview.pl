@@ -58,12 +58,18 @@ my $config = eval{ $conf->read_dir( dir => $cfg_path ) };
 die "Reading configuration files failed.\nReason: $@" if $@;
 
 # initialize Log4perl
+my $reload_log = "/var/log/bpview/reload.log";
 my $logconf = "
-    log4perl.category.BPView.Log		= INFO, Logfile
-    log4perl.appender.Logfile			= Log::Log4perl::Appender::File
-	log4perl.appender.Logfile.filename	= $config->{ 'logging' }{ 'logfile' }
-    log4perl.appender.Logfile.layout	= Log::Log4perl::Layout::PatternLayout
-    log4perl.appender.Logfile.layout.ConversionPattern = %d %F: [%p] %m%n
+    log4perl.category.BPView.Log		= INFO, BPViewLog
+    log4perl.category.BPViewReload.Log	= INFO, BPViewReloadLog
+    log4perl.appender.BPViewLog				= Log::Log4perl::Appender::File
+	log4perl.appender.BPViewLog.filename	= $config->{ 'logging' }{ 'logfile' }
+    log4perl.appender.BPViewLog.layout		= Log::Log4perl::Layout::PatternLayout
+    log4perl.appender.BPViewLog.layout.ConversionPattern = %d %F: [%p] %m%n
+    log4perl.appender.BPViewReloadLog			= Log::Log4perl::Appender::File
+	log4perl.appender.BPViewReloadLog.filename	= $reload_log
+    log4perl.appender.BPViewReloadLog.layout	= Log::Log4perl::Layout::PatternLayout
+    log4perl.appender.BPViewReloadLog.layout.ConversionPattern = %d %F: [%p] %m%n
 ";
 Log::Log4perl::init( \$logconf );
 my $log = Log::Log4perl::get_logger("BPView::Log");
@@ -94,8 +100,8 @@ $log->error_die($@) if $@;
 # loop for FastCGI
 while ( my $q = new CGI::Fast ){
 
-  my $reloadit  = "no";
-  my $reloadnow = "no";
+#  my $reloadit  = "no";
+#  my $reloadnow = "no";
 
   my $uri_dashb  = "0";
   my $uri_filter = "";
@@ -108,56 +114,59 @@ while ( my $q = new CGI::Fast ){
   	$uri_dashb = param("dash");
   }
   
-  if (defined param("reloadit")) {
-  	$reloadit = "yes" if (param("reloadit") eq "yes");
-  }
-  if (defined param("reloadnow")) {
-    $reloadnow = "yes" if (param("reloadnow") eq "yes");
-  }
-  if ($reloadnow eq "yes" and $reloadit eq "yes") {
-	print "Content-type: text/html\n\n";
+#  if (defined param("reloadit")) {
+#  	$reloadit = "yes" if (param("reloadit") eq "yes");
+#  }
+#  if (defined param("reloadnow")) {
+#    $reloadnow = "yes" if (param("reloadnow") eq "yes");
+#  }
+#  if ($reloadnow eq "yes" and $reloadit eq "yes") {
+  if (defined param("reload")){
+    print "Content-type: application/json; charset=utf-8\n\n";
+#	print "Content-type: text/html\n\n";
     use BPView::Operations;
 	my $operations = BPView::Operations->new(
     	   config	=> $config,
     	   cfg_path	=> $cfg_path,
          );
-    my $round = "0";
-    $round = param("round") if (defined param("round"));
-	if ($round eq "1") {
-		sleep 3;
-		eval { $operations->import_cmdb() };
+#    my $round = "0";
+#    $round = param("round") if (defined param("round"));
+#	if ($round eq "1") {
+#		sleep 3;
+		eval { $operations->generate_config() };
 		$log->info($@) if $@;
-		eval { $operations->write_cfgs() };
-		$log->info($@) if $@;
-		eval { $operations->reload() };
-		$log->info($@) if $@;
-		$log->info("\n>>>>>>\n>>>>>> Restarting the BPView Instance ...\n>>>>>>\n>>>>>>\n");
-	}
+#		eval { $operations->write_cfgs() };
+#		$log->info($@) if $@;
+#		eval { $operations->reload() };
+#		$log->info($@) if $@;
+#		$log->info("\n>>>>>>\n>>>>>> Restarting the BPView Instance ...\n>>>>>>\n>>>>>>\n");
+#	}
 
-    my $page = BPView::Web->new(
- 	  src_dir	=> $config->{ 'bpview' }{ 'src_dir' },
- 	  data_dir	=> $config->{ 'bpview' }{ 'data_dir' },
- 	  site_url	=> $config->{ 'bpview' }{ 'site_url' },
- 	  template	=> $config->{ 'bpview' }{ 'template' },
- 	  site_name => $config->{ 'bpview' }{ 'site_name' },
-    );
-	#   $page->login();
-	eval{ $page->display_page(
-		page		=> "iframe",
-		round		=> $round,
-		reloadit	=> $reloadit,
-	)};
-	$log->error_die($@) if $@;
-	if ($round eq "1") {
-		exit;
-	}
-	else {
-		last;
-	}
-  }
+#    my $page = BPView::Web->new(
+# 	  src_dir	=> $config->{ 'bpview' }{ 'src_dir' },
+# 	  data_dir	=> $config->{ 'bpview' }{ 'data_dir' },
+# 	  site_url	=> $config->{ 'bpview' }{ 'site_url' },
+# 	  template	=> $config->{ 'bpview' }{ 'template' },
+# 	  site_name => $config->{ 'bpview' }{ 'site_name' },
+#    );
+#	#   $page->login();
+#	eval{ $page->display_page(
+#		page		=> "iframe",
+#		round		=> $round,
+#		reloadit	=> $reloadit,
+#	)};
+#	$log->error_die($@) if $@;
+#	if ($round eq "1") {
+#		exit;
+#	}
+#	else {
+#		last;
+#	}
+#  }
 
   # process URL
-  if ((defined param) && ($reloadit eq "no") && defined(!param("dash"))) {
+#  if ((defined param) && ($reloadit eq "no") && defined(!param("dash"))) {
+  }elsif ((defined param) && defined (!param("reload")) && defined(!param("dash"))) {
 
     # JSON Header
     my $json = undef;
@@ -331,7 +340,7 @@ while ( my $q = new CGI::Fast ){
          page		=> "main",
          content	=> $dashboards,
          refresh	=> $config->{ 'refresh' }{ 'interval' },
-         reloadit	=> $reloadit,
+#         reloadit	=> $reloadit,
          uri_dashb	=> $uri_dashb,
          uri_filter	=> $uri_filter,
          styles		=> $css_files,
@@ -367,7 +376,7 @@ while ( my $q = new CGI::Fast ){
        page			=> "main",
        content		=> $dashboards,
        refresh		=> $config->{ 'refresh' }{ 'interval' },
-       reloadit		=> $reloadit,
+#       reloadit		=> $reloadit,
        uri_dashb	=> $uri_dashb,
        styles		=> $css_files,
     ) };

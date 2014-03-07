@@ -114,7 +114,7 @@ sub new {
   	"page"				=> "main",		# page to display
   	"content"			=> undef,		# various content to pass to template toolkit (like dashboards)
   	"refresh"			=> 15000,		# refresh interval
-  	"reloadit"			=> undef,		# should be the reload button displayed?
+#  	"reloadit"			=> undef,		# should be the reload button displayed?
   	"site_name"			=> "a universal <b>B</b>usiness <b>P</b>rocess <b>View</b> UI",
   	"round"				=> undef,
   	"uri_dashb"			=> undef,
@@ -176,7 +176,7 @@ sub display_page {
 	
   # page to display ( e.g. main )
   my $tt_template	= $self->{ 'src_dir' } . "/global/" . $self->{ 'page' } . ".tt";
-  my $reloadit = "yes" if ($self->{ 'reloadit' } eq "yes");
+#  my $reloadit = "yes" if ($self->{ 'reloadit' } eq "yes");
 
   my $tt_vars		= { 
   	'templ' 		=> $self->{ 'template' },
@@ -184,7 +184,7 @@ sub display_page {
   	'src_dir'		=> $self->{ 'src_dir' },
   	'data_dir'		=> $self->{ 'data_dir' },
   	'site_url'		=> $self->{ 'site_url' },
-  	'reloadit'		=> $reloadit,
+#  	'reloadit'		=> $reloadit,
   	'sitename'		=> $self->{ 'site_name' },
   	'round'			=> $self->{ 'round' },
   	'uri_dashb'		=> $self->{ 'uri_dashb' },
