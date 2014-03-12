@@ -26,6 +26,8 @@
 var FilterJsonState = getCookie("BPView_FilterJsonState");
 var FilterJsonHost2 = getCookie("BPView_FilterJsonHost");
 var activeDashboard2 = getCookie("BPView_activeDashboard");
+var reloadWait;
+var popup;
 
 if (FilterJsonState == null) FilterJsonState = "";
 if (FilterJsonHost2 == null) FilterJsonHost = "";
@@ -299,10 +301,39 @@ function showCopyright(){
                 closeOnBgClick: true,
                 showCloseBtn: false,
         items: {
-		src: '<div class="error-popup"><div id="details_subject" class="topBar">BPView Copyright</div><div id="details_data" class="details_data_error"><div class="details_data_copyright_content">BPView is Open Source under the terms of the GNU General Public License.<br/>&nbsp;<br/><span style="font-size:14px;">Copyright:<br/>&nbsp;&nbsp;&nbsp;ovido<br/>&nbsp;&nbsp;&nbsp;Peter Stöckl, p.stoeckl@ovido.at</br>&nbsp;&nbsp;&nbsp;Rene Koch, r.koch@ovido.at</span></div><div class="details_data_copyright_content_image"><img src="../share/images/global/bpview_watermark.png" height="76" width="450"></div></div><button title="Close (Esc)" type="button" class="mfp-close" style="color: white;">×</button></div>',
+		src: '<div class="error-popup"><div id="details_subject" class="topBar">Copyright</div><div id="details_data" class="details_data_error"><div class="details_data_copyright_content">BPView is Open Source under the terms of the GNU General Public License.<br/>&nbsp;<br/><span style="font-size:14px;">Copyright:<br/>&nbsp;&nbsp;&nbsp;ovido<br/>&nbsp;&nbsp;&nbsp;Peter Stöckl, p.stoeckl@ovido.at</br>&nbsp;&nbsp;&nbsp;Rene Koch, r.koch@ovido.at</span></div><div class="details_data_copyright_content_image"><img src="../share/images/global/bpview_watermark.png" height="76" width="450"></div></div><button title="Close (Esc)" type="button" class="mfp-close" style="color: white;">×</button></div>',
                 type: 'inline'
         }
         });
+}
+
+function showReload(){
+
+	popup = this;
+    $.magnificPopup.open({
+            enableEscapeKey: true,
+            closeOnBgClick: true,
+            showCloseBtn: false,
+    items: {
+    	src: '<div class="error-popup"><div id="details_subject" class="topBar">Generate and Reload Config</div><div id="details_data" class="details_data_error"><div class="details_data_copyright_content" style="text-aling: center;">Generating configuration and reloading application...<br/>&nbsp;<br/><img src="../share/images/global/ajax-loader.gif"><br /><br /></div><div class="details_data_copyright_content_image"><img src="../share/images/global/bpview_watermark.png" height="76" width="450"></div></div><button title="Close (Esc)" type="button" class="mfp-close" style="color: white;">×</button></div>',
+            type: 'inline'
+    }
+    });
+}
+
+function getStatus() {
+	$.getJSON("?reload=status", function(data){
+		if (data.status != 1){
+			// exit loop
+			clearInterval(reloadWait);
+			
+			statusMessage = "<div>" + data.message + "<br /><br /><br /></div>";
+	
+			$('.details_data_copyright_content').empty();
+			$('.details_data_copyright_content').append(statusMessage);
+			
+		}
+	});
 }
 
 
@@ -311,8 +342,16 @@ function reloadconfig() {
 	var reloadit=confirm("Attention:\n\nA config reload enforce a data import, a config generation, and a reload of BPView. This operation could be decrease the performance from connected systems.\nIf you are unsure cancel the operation.\nDo you want to proceed?");
 	
 	if (reloadit==true) {
+		showReload();
 		$.getJSON( "?reload=true", function(data){
-			alert(data)
+			if (data.status == 1){
+				// Reload is still in progress - loop
+				reloadWait=setInterval("getStatus()", 3000);
+			}else{
+				statusMessage = "<div>" + data.message + "</div>";
+				$('.details_data_copyright_content').empty();
+				$('.details_data_copyright_content').append(statusMessage);
+			}
 		});
 	}
 /*	

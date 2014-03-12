@@ -34,12 +34,12 @@ use warnings;
 use YAML::Syck;
 use Carp;
 use File::Spec;
-use POSIX qw(strftime);
+use POSIX qw(strftime setsid);
 use File::Pid;
-use File::Path qw(make_path);
+use File::Path qw(make_path remove_tree);
 
 # for debugging only
-#use Data::Dumper;
+use Data::Dumper;
 
 =head1 NAME
 
@@ -66,7 +66,8 @@ sub new {
         my %options        = @_;
         my $self                 = {
                 "config"        => undef,        # config object (hash)
-                "cfg_path"        => undef,
+                "cfg_path"      => undef,
+  				"pid_file"		=> "/tmp/bpview_reload.pid",
         };
         for my $key (keys %options) {
                 if (exists $self->{ $key }) {
@@ -108,16 +109,17 @@ sub generate_config {
   }
 
   my $script = $self->{'config'}{'businessprocess'}{'cmdb_exporter'};
-  $self->{ 'pid_file' } = "/tmp/bpview_reload.pid";
   
   if (my $pid = fork){
   	
-  	# wait for PID from child
-  	waitpid ($pid, 0);
-  	
+    # check if child is running
+    sleep 2;
+    return $self->_status_script();
+
   }else{
   	
   	# This code is executed by the child process
+  	setsid or die "Can't start a new session: $!\n";
   	
   	# Logging
     $self->{ 'log' } = Log::Log4perl::get_logger("BPViewReload::Log");
@@ -132,7 +134,7 @@ sub generate_config {
     }else{
   	  $pidfile->write;
     }
-    
+
     $self->{ 'log' }->info("Creating backup of existing configs");
     my $date = strftime "%Y-%m-%d-%H-%M-%S", localtime;
     if (! make_path("$self->{ 'cfg_path' }/backup/$date/views", "$self->{ 'cfg_path' }/backup/$date/bp-config") ){
@@ -163,8 +165,7 @@ sub generate_config {
     }else{
       $self->{ 'log' }->error("Fetching data failed from CMDB");
       $self->_restore ("views", $date);
-      $self->_restore ("bp-config", $date);
-      die;
+      $self->_restore_die ("", "bp-config", $date);
     }
     if ($script_output ne ""){
       $self->{ 'log' }->info($script_output);
@@ -187,20 +188,21 @@ sub generate_config {
     if (! `/usr/bin/sudo /sbin/service icinga reload`){
       $self->_error_die("Failed to reload Icinga: $!");
     }
-	if (! `/usr/bin/sudo /sbin/services httpd restart`){
+	if (! `/usr/bin/sudo /sbin/service httpd restart`){
 	  $self->_error_die("Failed to restart Apache: $!");
 	}
 	
-	$self->{ 'log' }->info("Sucessfully completed generating new configuration");
+	$self->{ 'log' }->info("[SUCCESS] Successfully generated new configuration");
+	
+	# remove backup
+	remove_tree("$self->{ 'cfg_path' }/backup/$date");
   
     # remove PID file
     unlink $self->{ 'pid_file' };
+    exit 0;
 
   }
   
-  # check if child is running
-  $self->_status_script();
-
 }
 
 
@@ -224,8 +226,9 @@ sub _restore_die {
   my $folder	= shift;
   my $date		= shift;
   
-  $self->{ 'log' }->error($error_msg);
+  $self->{ 'log' }->error($error_msg) if $error_msg != "";
   $self->_restore ($folder, $date);
+  remove_tree("$self->{ 'cfg_path' }/backup/$date");
   
   unlink $self->{ 'pid_file' };
   die;
@@ -241,13 +244,53 @@ sub _restore {
   use File::Copy::Recursive qw(rcopy);
   if (! rcopy("$self->{ 'cfg_path' }/backup/$date/$folder/*", "$self->{ 'cfg_path' }/$folder/") ){
     $self->{ 'log' }->error("Failed to restore backup: $!");
-  } 
+  }else{
+  	remove_tree("$self->{ 'cfg_path' }/backup/$date/$folder");
+  }
 }
 
 sub _status_script {
+  my $self		= shift;
 
-  return;
+  # open PID file
+  if (! -r $self->{ 'pid_file' }){
+  	my $return->{ 'status' } = 0;
+  	   $return->{ 'message' } = $self->_check_last_run();
+  	return $return;
+  }
+  
+  my $pid = `cat $self->{ 'pid_file' }`;
+  if (! $pid){
+  	unlink $self->{ 'pid_file' } if -r $self->{ 'pid_file' };
+  }
 
+  # Send kill -0 to process
+  # 0 ... process is not running
+  # 1 ... process is running
+  my $status = kill 'ZERO', $pid;
+  my $return;
+  if ($status == 0){
+  	$return->{ 'message' } = $self->_check_last_run();
+  	unlink $self->{ 'pid_file' } if -r $self->{ 'pid_file' };
+  }
+  
+  $return->{ 'status' } = $status;
+  return $return;
+
+}
+
+
+sub _check_last_run {
+  my $status = `tail -1 /var/log/bpview/reload.log`;
+  my $return;
+  if ($status =~ /[SUCCESS]/){
+    $return = "Sucessfully generated and reloaded configuration!";
+  }elsif ($status =~ /[ERROR]/){
+    $return = "Failed to generate and reload configuration! Please check reload.log!";
+  }else{
+    $return = "Unknown status of config generation run!";
+  }
+  return $return;
 }
 
 

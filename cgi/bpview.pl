@@ -100,9 +100,6 @@ $log->error_die($@) if $@;
 # loop for FastCGI
 while ( my $q = new CGI::Fast ){
 
-#  my $reloadit  = "no";
-#  my $reloadnow = "no";
-
   my $uri_dashb  = "0";
   my $uri_filter = "";
   
@@ -114,58 +111,34 @@ while ( my $q = new CGI::Fast ){
   	$uri_dashb = param("dash");
   }
   
-#  if (defined param("reloadit")) {
-#  	$reloadit = "yes" if (param("reloadit") eq "yes");
-#  }
-#  if (defined param("reloadnow")) {
-#    $reloadnow = "yes" if (param("reloadnow") eq "yes");
-#  }
-#  if ($reloadnow eq "yes" and $reloadit eq "yes") {
   if (defined param("reload")){
     print "Content-type: application/json; charset=utf-8\n\n";
-#	print "Content-type: text/html\n\n";
     use BPView::Operations;
 	my $operations = BPView::Operations->new(
     	   config	=> $config,
     	   cfg_path	=> $cfg_path,
          );
-#    my $round = "0";
-#    $round = param("round") if (defined param("round"));
-#	if ($round eq "1") {
-#		sleep 3;
-		eval { $operations->generate_config() };
-		$log->info($@) if $@;
-#		eval { $operations->write_cfgs() };
-#		$log->info($@) if $@;
-#		eval { $operations->reload() };
-#		$log->info($@) if $@;
-#		$log->info("\n>>>>>>\n>>>>>> Restarting the BPView Instance ...\n>>>>>>\n>>>>>>\n");
-#	}
 
-#    my $page = BPView::Web->new(
-# 	  src_dir	=> $config->{ 'bpview' }{ 'src_dir' },
-# 	  data_dir	=> $config->{ 'bpview' }{ 'data_dir' },
-# 	  site_url	=> $config->{ 'bpview' }{ 'site_url' },
-# 	  template	=> $config->{ 'bpview' }{ 'template' },
-# 	  site_name => $config->{ 'bpview' }{ 'site_name' },
-#    );
-#	#   $page->login();
-#	eval{ $page->display_page(
-#		page		=> "iframe",
-#		round		=> $round,
-#		reloadit	=> $reloadit,
-#	)};
-#	$log->error_die($@) if $@;
-#	if ($round eq "1") {
-#		exit;
-#	}
-#	else {
-#		last;
-#	}
-#  }
+    my $return = undef;
+
+    if (param("reload") eq "true"){
+	  $return = eval { $operations->generate_config() };
+	  $log->info($@) if $@;
+    }elsif (param("reload") eq "status"){
+      $return = $operations->_status_script();
+    }
+    
+  	my $json = JSON::PP->new->pretty;
+    $json->utf8('true');
+    if (ref($return) ne "HASH"){
+      # config generation failed
+      $return = undef;
+      $return->{ 'status' } = 0;
+      $return->{ 'message' } = "Another instance is already running!";
+    }
+    print $json->encode($return);
 
   # process URL
-#  if ((defined param) && ($reloadit eq "no") && defined(!param("dash"))) {
   }elsif ((defined param) && defined (!param("reload")) && defined(!param("dash"))) {
 
     # JSON Header
