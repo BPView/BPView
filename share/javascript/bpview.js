@@ -28,6 +28,8 @@ var FilterJsonHost2 = getCookie("BPView_FilterJsonHost");
 var activeDashboard2 = getCookie("BPView_activeDashboard");
 var reloadWait;
 var popup;
+var overviewErrorCount = 0;
+var detailsErrorCount = 0;
 
 if (FilterJsonState == null) FilterJsonState = "";
 if (FilterJsonHost2 == null) FilterJsonHost = "";
@@ -201,8 +203,16 @@ function getDbOverview(){
 
        })
         .fail(function(){
-          // Open DIV popup and inform user about error
-          showErrorMessage();
+          // Retry fetching data before rising an error
+          if (overviewErrorCount <= 2){
+        	  // Sleep for 5 seconds
+        	  setTimeout("getDbOverview()", 50000)
+        	  overviewErrorCount = overviewErrorCount + 1;
+          }else{
+        	  // Open DIV popup and inform user about error
+        	  overviewErrorCount = 0;
+        	  showErrorMessage();
+          }
         })
 //setInterval("getDbOverview()", refreshInterval);
 
@@ -262,8 +272,16 @@ function getDetails(businessProcess) {
 	  $('#details_data').append(jsonData);
 	})
 	.fail(function(){
-	  // Open DIV popup and inform user about error
-	  showErrorMessage();
+        // Retry fetching data before rising an error
+        if (detailsErrorCount <= 2){
+      	  // Sleep for 5 seconds
+      	  setTimeout("getDetails()", 50000)
+      	  detailsErrorCount = detailsErrorCount + 1;
+        }else{
+      	  // Open DIV popup and inform user about error
+      	  detailsErrorCount = 0;
+      	  showErrorMessage();
+        }
 	})
 }
 
