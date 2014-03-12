@@ -113,7 +113,6 @@ sub generate_config {
   if (my $pid = fork){
   	
     # check if child is running
-    sleep 2;
     return $self->_status_script();
 
   }else{
