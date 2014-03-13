@@ -225,9 +225,10 @@ sub _restore_die {
   my $folder	= shift;
   my $date		= shift;
   
-  $self->{ 'log' }->error($error_msg) if $error_msg != "";
+  $self->{ 'log' }->error($error_msg) if $error_msg ne "";
   $self->_restore ($folder, $date);
   remove_tree("$self->{ 'cfg_path' }/backup/$date");
+  $self->{ 'log' }->error($error_msg) if $error_msg ne "";
   
   unlink $self->{ 'pid_file' };
   die;
@@ -282,9 +283,9 @@ sub _status_script {
 sub _check_last_run {
   my $status = `tail -1 /var/log/bpview/reload.log`;
   my $return;
-  if ($status =~ /[SUCCESS]/){
+  if ($status =~ /\[SUCCESS\]/){
     $return = "Sucessfully generated and reloaded configuration!";
-  }elsif ($status =~ /[ERROR]/){
+  }elsif ($status =~ /\[ERROR\]/){
     $return = "Failed to generate and reload configuration! Please check reload.log!";
   }else{
     $return = "Unknown status of config generation run!";
