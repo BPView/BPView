@@ -26,7 +26,7 @@ all:
 	cp $(CONF).yml.in $(CONF).tmp
 	sed -i -e 's!^  data_dir:.*!  data_dir: $(DATAROOTDIR)!' $(CONF).tmp
 	sed -i -e 's!^  src_dir:.*!  src_dir: $(DATAROOTDIR)/src!' $(CONF).tmp
-	sed -i -e 's!^  logfile:.*!  logfile: $(LOCALSTATEDIR)/log/bpview.log!' $(CONF).tmp
+	sed -i -e 's!^  logfile:.*!  logfile: $(LOCALSTATEDIR)/log/bpview/bpview.log!' $(CONF).tmp
 	cp $(CONF).tmp $(CONF).yml
 	cp datasource.yml.in datasource.yml
 	rm -f $(CONF).tmp
