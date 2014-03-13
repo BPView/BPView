@@ -150,7 +150,7 @@ fi
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/icinga
 %attr(0664,root,apache) %{_sysconfdir}/%{name}/icinga/bpview_templates.cfg
 %attr(0664,root,apache) %{_sysconfdir}/%{name}/icinga/bpview_businessprocesses.cfg
-%attr(0775,root,root) %{_sysconfdir}/init.d/bpview
+%attr(0775,root,root) %{_sysconfdir}/init.d/bpviewd
 %{_datarootdir}/%{name}/css
 %{_datarootdir}/%{name}/images
 %{_datarootdir}/%{name}/javascript
@@ -164,6 +164,9 @@ fi
 
 
 %changelog
+* Thu Mar 13 2014 Rene Koch <rkoch@linuxland.at> 0.8-2
+- Fixed name of bpviewd init script
+
 * Thu Mar 06 2014 Rene Koch <rkoch@linuxland.at> 0.8-1
 - bump to 0.8
 - requires perl-Proc-Daemon
