@@ -128,7 +128,7 @@ while ( my $q = new CGI::Fast ){
       $return = $operations->_status_script();
     }
     
-  	my $json = JSON::PP->new->pretty;
+  	my $json = JSON::PP->new->pretty->allow_nonref;
     $json->utf8('true');
     if (ref($return) ne "HASH"){
       # config generation failed
@@ -136,6 +136,7 @@ while ( my $q = new CGI::Fast ){
       $return->{ 'status' } = 0;
       $return->{ 'message' } = "Another instance is already running!";
     }
+
     print $json->encode($return);
 
   # process URL
