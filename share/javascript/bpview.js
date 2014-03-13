@@ -370,7 +370,11 @@ function reloadconfig() {
 				$('.details_data_copyright_content').empty();
 				$('.details_data_copyright_content').append(statusMessage);
 			}
-		});
+		}).fail(function(){
+			statusMessage = "<div>An unknown error occured during reload process - please check reload.log!</div>";
+			$('.details_data_copyright_content').empty();
+			$('.details_data_copyright_content').append(statusMessage);
+		})
 	}
 /*	
 		var Address = '?reload';
