@@ -1,4 +1,3 @@
-
 /*
  * COPYRIGHT:
  *
@@ -38,12 +37,8 @@ if (FilterJsonHost2 != null) FilterJsonHost = FilterJsonHost2;
 
 $(document).ready(function() {
 
-// $('#dashboards').change(function() {
-//    // get JSON data
-        getDbOverview();
-	updateDashSub();
-//  })
-//  .trigger('change');
+  getDbOverview();
+  updateDashSub();
 
   // get JSON data
   setInterval("getDbOverview()", refreshInterval);
@@ -89,13 +84,11 @@ $(document).on('click', 'div.tile', function(){
                         type: 'inline'
                 }
         });
-        //    window.open('?details=' + $(this).attr("id"), '_blank', "width=700,height=500,location=no,status=no" )
   }
 });
 
 
 function getDbOverview(){
-//	var dashboard = $("#dashboards option:selected").val();
     if (activeDashboard == "dummy") return;
 	var dashboard = activeDashboard;
 	var watermark = 0;
@@ -169,7 +162,6 @@ function getDbOverview(){
 				if (helper_keys == 0 && inrow_count != inrow_val && inrow_val != 1) {
 						inrow_count++;
 					while (inrow_count != inrow_val) {
-//					if (inrow_count == inrow_val) continue;
 						jsonData += "      <div class=\"groupTilesEmpty" + groupTiles + "\">\n      <div class=\"groups\">&nbsp;</div>\n</div>\n";
 						inrow_count++;
 
@@ -177,7 +169,6 @@ function getDbOverview(){
 					if 	(inrow_count == inrow_val) {
 						jsonData += "      <div class=\"groupTilesEmpty groupTilesRight\">&nbsp;</div>\n";
 						jsonData += "      </div>\n";
-//						inrow_count = -1;
 					}					
 				}
 				inrow_count++;
@@ -214,7 +205,6 @@ function getDbOverview(){
         	  showErrorMessage();
           }
         })
-//setInterval("getDbOverview()", refreshInterval);
 
 }
 
@@ -376,21 +366,6 @@ function reloadconfig() {
 			$('.details_data_copyright_content').append(statusMessage);
 		})
 	}
-/*	
-		var Address = '?reload';
-		$.magnificPopup.open({
-			enableEscapeKey: false,
-			closeOnBgClick: false,
-			showCloseBtn: false,
-			markup: '<div class="mfp-iframe-scaler">'+
-				'<iframe class="mfp-iframe" frameborder="0" allowfullscreen></iframe>'+
-			  '</div>',
-			items: {
-				src: Address
-			},
-			type: 'iframe'
-		});
-*/
 }
 
 function custom_filter() {
