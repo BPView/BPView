@@ -1,6 +1,6 @@
 Name: bpview
 Version: 0.8
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Business Process view for Nagios/Icinga 
 
 Group: Applications/System
@@ -11,13 +11,10 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildRequires: perl
 BuildRequires: perl-CGI
-BuildRequires: perl-Log-Log4perl
-BuildRequires: perl-Template-Toolkit
 BuildRequires: perl-JSON
 BuildRequires: perl-YAML-Syck
 BuildRequires: perl-DBI
 BuildRequires: perl-DBD-Pg
-BuildRequires: perl-JSON-XS
 BuildRequires: perl-libwww-perl
 BuildRequires: selinux-policy
 
@@ -90,9 +87,8 @@ make all
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT INSTALL_OPTS="" INSTALL_OPTS_WEB=""
 
-# backup folders
-mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}/backup/views
-mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}/backup/bp-config
+# backup folder
+mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}/backup
 
 for selinuxvariant in %{selinux_variants}
 do
@@ -133,8 +129,7 @@ fi
 %config(noreplace) %{_sysconfdir}/%{name}/bpview.yml
 %config(noreplace) %{_sysconfdir}/%{name}/datasource.yml
 %config(noreplace) %{_sysconfdir}/%{name}/views
-%config(noreplace) %{_sysconfdir}/%{name}/backup/bp-config
-%config(noreplace) %{_sysconfdir}/%{name}/backup/views
+%config(noreplace) %{_sysconfdir}/%{name}/backup
 %config(noreplace) %{_sysconfdir}/%{name}/bp-config
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/bpview.conf
 %config(noreplace) %{_sysconfdir}/sudoers.d/bpview
@@ -145,8 +140,7 @@ fi
 %attr(0755,root,root) %{_bindir}/bpviewd
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/bp-config
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/views
-%attr(0775,root,apache) %{_sysconfdir}/%{name}/backup/views
-%attr(0775,root,apache) %{_sysconfdir}/%{name}/backup/bp-config
+%attr(0775,root,apache) %{_sysconfdir}/%{name}/backup
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/icinga
 %attr(0664,root,apache) %{_sysconfdir}/%{name}/icinga/bpview_templates.cfg
 %attr(0664,root,apache) %{_sysconfdir}/%{name}/icinga/bpview_businessprocesses.cfg
@@ -166,6 +160,7 @@ fi
 %changelog
 * Thu Mar 13 2014 Rene Koch <rkoch@linuxland.at> 0.8-2
 - Fixed name of bpviewd init script
+- Fixed permissions for /etc/bpview/backup folder
 
 * Thu Mar 06 2014 Rene Koch <rkoch@linuxland.at> 0.8-1
 - bump to 0.8
