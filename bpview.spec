@@ -1,6 +1,6 @@
 Name: bpview
-Version: 0.8
-Release: 2%{?dist}
+Version: 0.9
+Release: 1%{?dist}
 Summary: Business Process view for Nagios/Icinga 
 
 Group: Applications/System
@@ -138,6 +138,7 @@ fi
 %attr(0755,root,root) %{_libdir}/%{name}/bpview.pl
 %attr(0755,root,root) %{_bindir}/bpview_cfg_writer.pl
 %attr(0755,root,root) %{_bindir}/bpviewd
+%attr(0755,root,root) %{_bindir}/bpview_reload
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/bp-config
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/views
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/backup
@@ -158,6 +159,11 @@ fi
 
 
 %changelog
+* Mon Apr 07 2014 Rene Koch <rkoch@linuxland.at> 0.9-1
+- bump to 0.9
+- Removed BuildRequires of EPEL packages
+- Added bpview_reload script 
+
 * Thu Mar 13 2014 Rene Koch <rkoch@linuxland.at> 0.8-2
 - Fixed name of bpviewd init script
 - Fixed permissions for /etc/bpview/backup folder

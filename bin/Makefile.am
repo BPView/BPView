@@ -21,6 +21,7 @@ INSTALL_OPTS=@INSTALL_OPTS@
 SCRIPT1=bpview_cfg_writer
 SCRIPT2=check_bp_status
 SCRIPT3=bpviewd
+SCRIPT4=bpview_reload
 
 # compile
 all:
@@ -41,12 +42,17 @@ all:
 	sed -i -e 's!cfg_path = .*!cfg_path = "$(SYSCONFDIR)";!' $(SCRIPT3).tmp
 	cp $(SCRIPT3).tmp $(SCRIPT3)
 	rm -f $(SCRIPT3).tmp
-
+	
+	cp $(SCRIPT4).pl.in $(SCRIPT4).tmp
+	sed -i -e 's!lib_path = .*!lib_path = "$(LIBDIR)";!' $(SCRIPT4).tmp
+	sed -i -e 's!cfg_path = .*!cfg_path = "$(SYSCONFDIR)";!' $(SCRIPT4).tmp
+	cp $(SCRIPT4).tmp $(SCRIPT4)
+	rm -f $(SCRIPT4).tmp
 
 
 # install
 install:
-	for file in $(SCRIPT1).pl $(SCRIPT3); do \
+	for file in $(SCRIPT1).pl $(SCRIPT3) $(SCRIPT4); do \
 	  $(INSTALL) -D -m 755 $(INSTALL_OPTS) $$file $(DESTDIR)$(BINDIR)/$$file; \
 	done
 	for file in $(SCRIPT2).pl; do \
