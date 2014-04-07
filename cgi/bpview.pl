@@ -111,6 +111,11 @@ while ( my $q = new CGI::Fast ){
   	$uri_dashb = param("dash");
   }
   
+
+#----------------------------------------------------------------
+# Reload web application
+
+
   if (defined param("reload")){
     print "Content-type: application/json; charset=utf-8\n\n";
     use BPView::Operations;
@@ -139,12 +144,20 @@ while ( my $q = new CGI::Fast ){
 
     print $json->encode($return);
 
-  # process URL
+
+#----------------------------------------------------------------
+# Process URL
+
+
   }elsif ((defined param) && defined (!param("reload")) && defined(!param("dash"))) {
 
     # JSON Header
     my $json = undef;
 
+
+    #----------------------------------------------------------------
+    # Get JSON status for given dashboard    
+    
     if (defined param("dashboard") && param("json")){
       print "Content-type: application/json; charset=utf-8\n\n";
     
@@ -214,6 +227,10 @@ while ( my $q = new CGI::Fast ){
         $json = $json->encode($error_message);
       }
        
+       
+    #----------------------------------------------------------------
+    # Get details for given business process in JSON format
+    
     }elsif (defined param("details")){
       print "Content-type: application/json; charset=utf-8\n\n";
   	
@@ -282,6 +299,10 @@ while ( my $q = new CGI::Fast ){
         $json = $json->encode($error_message);
       }
   	
+  	
+  	#----------------------------------------------------------------
+    # Display requested web page
+    
     }elsif (defined param("css") || (defined param("dash"))){
   	
   	  # override default template using GET variable 
@@ -314,13 +335,15 @@ while ( my $q = new CGI::Fast ){
          page		=> "main",
          content	=> $dashboards,
          refresh	=> $config->{ 'refresh' }{ 'interval' },
-#         reloadit	=> $reloadit,
          uri_dashb	=> $uri_dashb,
          uri_filter	=> $uri_filter,
          styles		=> $css_files,
       ) };
       $log->error_die($@) if $@;
 
+    
+    #----------------------------------------------------------------
+    # Redirect to main page
     
     }else{
 		my $query=new CGI;
@@ -330,6 +353,11 @@ while ( my $q = new CGI::Fast ){
     }
   
     print $json unless defined param("template");
+
+
+#----------------------------------------------------------------
+# Display default web page
+
   	
   }else{
   	
@@ -350,7 +378,6 @@ while ( my $q = new CGI::Fast ){
        page			=> "main",
        content		=> $dashboards,
        refresh		=> $config->{ 'refresh' }{ 'interval' },
-#       reloadit		=> $reloadit,
        uri_dashb	=> $uri_dashb,
        styles		=> $css_files,
     ) };
