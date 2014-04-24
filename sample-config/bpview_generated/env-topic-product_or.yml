@@ -6,13 +6,14 @@ env-topic-product_or:
     DISP: 0
     MIND: 0
   HOSTS:
-    host-nr1:
-      service_nr1:
-      service_nr2:
-      service_nr3:
-    host-nr2:
-      service_nr1:
-      service_nr2:
-    BPROC:
-      env-topic-prod:
-      env-topic-prod2:
+    monitoring-source:
+      host-nr1:
+        service_nr1:
+        service_nr2:
+        service_nr3:
+      host-nr2:
+        service_nr1:
+        service_nr2:
+  BPROC:
+    env-topic-prod:
+    env-topic-prod2:

@@ -6,10 +6,11 @@ env-topic-product_min:
     DISP: 0
     MIND: 1
   HOSTS:
-    host-nr1:
-      service_nr1:
-      service_nr2:
-      service_nr3:
-    BPROC:
-      env-topic-prod:
-      env-topic-prod2:
+    monitoring-source:
+      host-nr1:
+        service_nr1:
+        service_nr2:
+        service_nr3:
+  BPROC:
+    env-topic-prod:
+    env-topic-prod2:
