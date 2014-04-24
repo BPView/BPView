@@ -108,7 +108,7 @@ function getDbOverview(){
         }
         $.each(data, function(environment, envval){
 			// main environments
-            jsonData += "<div class=\"environment\"><div class=\"environmentTitle\">" + environment + "</div><div class=\"environmentEditBtn\"><a href=\"javascript:;\" class=\"\"><img src=\"/bpview/share/images/global/menu_button2.png\" height=\"24\" width=\"24\" alt=\"Settings\" title=\"Settings\"></a></div>\\n";
+            jsonData += "<div class=\"environment\"><div class=\"environmentTitle\">" + environment + "<div class=\"environmentEditBtn\"><a href=\"javascript:;\" class=\"\"><img src=\"/bpview/share/images/global/settings2.png\" height=\"20\" width=\"20\" alt=\"Settings\" title=\"Settings\"></a></div></div>";
 
 			var inrow_val;
 			var helper_val;
