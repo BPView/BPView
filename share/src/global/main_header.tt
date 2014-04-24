@@ -25,7 +25,7 @@
     <meta http-equiv="pragma" content="no-cache" />
     <meta http-equiv="cache-control" content="no-cache" />
     <title>BPView | [% sitename %]</title>
-    <link href="[% site_url %]/share/images/[% templ %]/favicon.ico" rel="SHORTCUT ICON">
+    <link rel="icon" type="image/x-icon" href="[% site_url %]/share/images/[% templ %]/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/bpview.css" />
 [% IF css != "bpview" %]
     <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/[% css %].css" />
