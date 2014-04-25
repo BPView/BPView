@@ -1,6 +1,6 @@
 Name: bpview
 Version: 0.9
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Business Process view for Nagios/Icinga 
 
 Group: Applications/System
@@ -136,7 +136,6 @@ fi
 %{_libdir}/perl5/vendor_perl
 %attr(0755,root,root) %{_libdir}/%{name}/plugins/check_bp_status.pl
 %attr(0755,root,root) %{_libdir}/%{name}/bpview.pl
-%attr(0755,root,root) %{_bindir}/bpview_cfg_writer.pl
 %attr(0755,root,root) %{_bindir}/bpviewd
 %attr(0755,root,root) %{_bindir}/bpview_reload
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/bp-config
@@ -153,12 +152,14 @@ fi
 %{_datadir}/selinux/*/%{name}.pp
 %attr(0755,%{apacheuser},%{apachegroup}) %{_localstatedir}/log/%{name}
 %attr(0755,%{apacheuser},%{apachegroup}) %{_localstatedir}/log/%{name}/bpview.log
-%attr(0775,%{icingauser},%{icingagroup}) %{_localstatedir}/cache/bpview
 %doc AUTHORS ChangeLog COPYING NEWS README.md sample-config selinux
 
 
 
 %changelog
+* Fri Apr 25 2014 Rene Koch <rkoch@linuxland.at> 0.9-2
+- cleanup of old files
+
 * Mon Apr 07 2014 Rene Koch <rkoch@linuxland.at> 0.9-1
 - bump to 0.9
 - Removed BuildRequires of EPEL packages
