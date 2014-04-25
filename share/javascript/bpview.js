@@ -114,64 +114,73 @@ function getDbOverview(){
 			var helper_val;
 			var helper_keys = Object.keys(envval).length-2;
 			var inrow_count = 1;
-			$.each(envval, function(topic, topicval){
+			$.each(envval, function(sections, sectionval){
 
-			if (topic == "__displayorder") return true;// {
-				if (topic == "__displayinrow") {
-					inrow_val = topicval;
-					return true;
-				}
-				if 	(inrow_count == 1) {
-
-					if (inrow_val == 1) jsonData += "    <div class=\"groupTilesRow\">\n";
-					else jsonData += "    <div class=\"groupTilesRow\">\n";
-					helper_val = inrow_val;
-				}
-				var groupTiles;
-				switch (inrow_val) {
-					case 2:		groupTiles = " groupTilesLeft50"; break;
-					case 3:		groupTiles = " groupTilesLeft33"; break;
-					case 4:		groupTiles = " groupTilesLeft25"; break;
-					case 5:		groupTiles = " groupTilesLeft20"; break;
-					default:	groupTiles = ""; break;
-				}
-				helper_val--; 
-				if (helper_val == 0 && inrow_val > 1) groupTiles = " groupTilesRight";
-				jsonData += "      <div class=\"groupTiles" + groupTiles + "\">\n      <div class=\"groups\">" + topic + "</div>\n";
-
-				$.each(topicval, function(products, productval){
-					// set class for status code
-					var statusClass = "state" + productval.state;
-					var bpName      = productval.bpname;
-					var name		= productval.name;
-					var name_short = (name.length > 20) ? name.substr(0,20) + " ..." : name;
-					//products
-					jsonData += "          <div id=\"" + bpName +"\" class=\"tile " + statusClass + "\" title=\"" + name + "\">" + name_short + "</div>\n";
-				});
-
-				jsonData += "    </div>\n";
-				if (watermark == 0) watermark = 1;
-
-				helper_keys--;
-				if 	(inrow_count == inrow_val) {
-					jsonData += "      </div>\n";
-					if (helper_keys != 0) jsonData += "      <div class=\"groupTilesRowEmpty\"></div>\n";
-					inrow_count = 1;
-					 return true;
-				}
-				if (helper_keys == 0 && inrow_count != inrow_val && inrow_val != 1) {
-						inrow_count++;
-					while (inrow_count != inrow_val) {
-						jsonData += "      <div class=\"groupTilesEmpty" + groupTiles + "\">\n      <div class=\"groups\">&nbsp;</div>\n</div>\n";
-						inrow_count++;
-
-					}
-					if 	(inrow_count == inrow_val) {
-						jsonData += "      <div class=\"groupTilesEmpty groupTilesRight\">&nbsp;</div>\n";
-						jsonData += "      </div>\n";
-					}					
-				}
-				inrow_count++;
+    			if (sections == "__display") {
+    				$.each(sectionval, function(display, displayval){
+    					if (display == "order") return true;
+    					if (display  == "inrow") {
+    						inrow_val = displayval;
+    						return true;
+    					}
+    				});
+    			}else{ //__topics
+    				$.each(sectionval, function(topic, topicval){
+    			
+    				if 	(inrow_count == 1) {
+        
+        					if (inrow_val == 1) jsonData += "    <div class=\"groupTilesRow\">\n";
+        					else jsonData += "    <div class=\"groupTilesRow\">\n";
+        					helper_val = inrow_val;
+        				}
+        				var groupTiles;
+        				switch (inrow_val) {
+        					case 2:		groupTiles = " groupTilesLeft50"; break;
+        					case 3:		groupTiles = " groupTilesLeft33"; break;
+        					case 4:		groupTiles = " groupTilesLeft25"; break;
+        					case 5:		groupTiles = " groupTilesLeft20"; break;
+        					default:	groupTiles = ""; break;
+        				}
+        				helper_val--; 
+        				if (helper_val == 0 && inrow_val > 1) groupTiles = " groupTilesRight";
+        				jsonData += "      <div class=\"groupTiles" + groupTiles + "\">\n      <div class=\"groups\">" + topic + "</div>\n";
+        
+        				$.each(topicval, function(products, productval){
+        					// set class for status code
+        					var statusClass = "state" + productval.state;
+        					var bpName      = productval.bpname;
+        					var name		= productval.name;
+        					var name_short = (name.length > 20) ? name.substr(0,20) + " ..." : name;
+        					//products
+        					jsonData += "          <div id=\"" + bpName +"\" class=\"tile " + statusClass + "\" title=\"" + name + "\">" + name_short + "</div>\n";
+        				});
+        
+        				jsonData += "    </div>\n";
+        				if (watermark == 0) watermark = 1;
+        
+        				helper_keys--;
+        				if 	(inrow_count == inrow_val) {
+        					jsonData += "      </div>\n";
+        					inrow_count = 1;
+        					 return true;
+        				}
+        				if (helper_keys == 0 && inrow_count != inrow_val && inrow_val != 1) {
+        						inrow_count++;
+        					while (inrow_count != inrow_val) {
+        						jsonData += "      <div class=\"groupTilesEmpty" + groupTiles + "\">\n      <div class=\"groups\">&nbsp;</div>\n</div>\n";
+        						inrow_count++;
+        
+        					}
+        					if 	(inrow_count == inrow_val) {
+        						jsonData += "      <div class=\"groupTilesEmpty groupTilesRight\">&nbsp;</div>\n";
+        						jsonData += "      </div>\n";
+        					}					
+        				}
+        				inrow_count++;
+        			
+    				});
+    				jsonData += "      </div>\n";
+    			}
 					
             });
             jsonData += "  </div>\n";

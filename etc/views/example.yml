@@ -6,20 +6,30 @@ Dashboard 1:
 
   views:
     "environment":
-      "topic":
-        "product 1":
-        "product 2":
+      __display:
+        order: 1
+        inrow: 1
+        sort: maxfirst
+      __topics:
+        "topic":
+          "product 1":
+          "product 2":
     "production":
-      "Trading":
-        "DAX":
-        "NASDAQ":
-        "AIX":
-        "ASE":
-        "TASE":
-      "Sales":
-        "Online-Shop":
-        "POS at Store Wien":
-        "POS at Store St. Andrä-Wördern":
-        "POS at Store München":
-        "POS at Store Lahnsattel":
-        "POS at Store Graz":
+      __display:
+        order: 1
+        inrow: 2
+        sort: maxfirst
+      __topics:
+        "Trading":
+          "DAX":
+          "NASDAQ":
+          "AIX":
+          "ASE":
+          "TASE":
+        "Sales":
+          "Online-Shop":
+          "POS at Store Wien":
+          "POS at Store St. Andrä-Wördern":
+          "POS at Store München":
+          "POS at Store Lahnsattel":
+          "POS at Store Graz":

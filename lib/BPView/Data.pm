@@ -184,18 +184,16 @@ sub get_status {
   # go through views hash
   # name required for BP is -> environment-group-product
   foreach my $environment (keys %{ $self->{ 'views' } }){
-  	foreach my $topic (keys %{ $self->{ 'views' }{ $environment } }){
-		next if ($topic =~ m/^__display*/);
-		foreach my $product (keys %{ $self->{ 'views' }{ $environment }{ $topic } }){
+  	foreach my $topic (keys %{ $self->{ 'views' }{ $environment }{ '__topics' } }){
+		foreach my $product (keys %{ $self->{ 'views' }{ $environment }{ '__topics' }{ $topic } }){
 			my $bp = $environment . "-" . $topic . "-" . $product;
 			# replace non-chars with _ except -, due to Nagios limitations
-			#$bp =~ s/[^a-zA-Z0-9-]+/_/g;
 			$bp =~ s/[^a-zA-Z0-9-]/_/g;
 			push @{ $service_names }, $bp;
 		}
   	}
   }
-  
+
   my $result = undef;
   # fetch data from Icinga/Nagios
   if ($self->{'provider'} eq "ido"){
@@ -221,40 +219,42 @@ sub get_status {
 
 	# sorting the hash 
 	my $views = dclone $self->{ 'views' };
+
 	while(my($view_key, $view) = each %$views) {
+		next if $view_key =~ m/^__display/;
+		
 		while(my($topic, $prods) = each %$view) {
-			next if $topic =~ m/^__display/;
 			tie my %new_prods, 'Tie::IxHash', (map { ($_ => $prods->{$_}) } sort { lc($a) cmp lc($b) } keys %$prods);
 			$view->{$topic} = \%new_prods;
 		}
+		
+		# sort alphabetically
 		tie my %new_view, 'Tie::IxHash', (map { ($_ => $view->{$_}) } sort { lc($a) cmp lc($b) } keys %$view);
+
+		# write new hash
 		$views->{$view_key} = \%new_view;
 	}
-	tie my %new_views, 'Tie::IxHash', (map { ($_ => $views->{$_}) } sort { $views->{$a}->{__displayorder} <=> $views->{$b}->{__displayorder} } keys %$views);
+	tie my %new_views, 'Tie::IxHash', (map { ($_ => $views->{$_}) } sort { $views->{$a}->{'__display'}{'order'} <=> $views->{$b}->{'__display'}{'order'} } keys %$views);
 	my $viewOut = \%new_views;
-	
+
   # verify if status is given for all products
   # note: if product is missing in Icinga/Nagios there's no state for it
   # we use status code 99 for this (0-3 are reserved as Nagios plugin exit codes)
   # we use status code 4 for major problems (host down)
   
   foreach my $environment (keys %{ $viewOut }){
-    foreach my $topic (keys %{ $viewOut->{ $environment } }){
+    foreach my $topic (keys %{ $viewOut->{ $environment }{ '__topics' } }){
       
-      # don't process order information
-      next if ( $topic eq "__displayorder" || $topic eq "__displayinrow" );
-      
-      foreach my $product (keys %{ $viewOut->{ $environment }{ $topic } }){
+      foreach my $product (keys %{ $viewOut->{ $environment }{ '__topics' }{ $topic } }){
       	
     	# see _get_ido for example output!
   	    my $service = lc($environment . "-" . $topic . "-" . $product);
   	    # replace non-chars with _ except -, due to Nagios limitations
-        #$service =~ s/[^a-zA-Z0-9-]+/_/g;
         $service =~ s/[^a-zA-Z0-9-]/_/g;
-        
+
     	if (defined ($result->{ $service }{ 'state' })){
   	      # found status in IDO database
-	      $viewOut->{ $environment }{ $topic }{ $product }{ 'state' } = $result->{ $service }{ 'state' };
+	      $viewOut->{ $environment }{ '__topics' }{ $topic }{ $product }{ 'state' } = $result->{ $service }{ 'state' };
 	      
 #	      # Due to exit code limitations in Nagios/Icinga we use state 4 for host down issues
 
@@ -275,12 +275,12 @@ sub get_status {
 	      
 	    }else{
 	      # didn't found status in IDO database
-  	      $viewOut->{ $environment }{ $topic }{ $product }{ 'state' } = 99;
+  	      $viewOut->{ $environment }{ '__topics' }{ $topic }{ $product }{ 'state' } = 99;
 	    }
 	    
 	    # return also business process name
-	    $viewOut->{ $environment }{ $topic }{ $product }{ 'bpname' } = $service;
-	    $viewOut->{ $environment }{ $topic }{ $product }{ 'name' } = $self->{ 'bps' }{ $service }{ 'BP' }{ 'NAME' };
+	    $viewOut->{ $environment }{ '__topics' }{ $topic }{ $product }{ 'bpname' } = $service;
+	    $viewOut->{ $environment }{ '__topics' }{ $topic }{ $product }{ 'name' } = $self->{ 'bps' }{ $service }{ 'BP' }{ 'NAME' };
 
 	    # filter objects
 	    if (defined $self->{ 'filter' }{ 'state' }){
@@ -297,7 +297,7 @@ sub get_status {
 				$del = 0 if $result->{ $service }{ 'state' } == 3;
 		        }
 		}
-	        delete $viewOut->{ $environment }{ $topic }{ $product } if $del == 1;
+	        delete $viewOut->{ $environment }{ '__topics' }{ $topic }{ $product } if $del == 1;
 	    }
 	    
 	    # filter hostnames
@@ -309,18 +309,18 @@ sub get_status {
 	              $del = 0 if lc( $hostname ) =~ lc ( $self->{ 'filter' }{ 'name' }->[ $i ]);
         	    }
           	}
-          	delete $viewOut->{ $environment }{ $topic }{ $product } if $del == 1;
+          	delete $viewOut->{ $environment }{ '__topics' }{ $topic }{ $product } if $del == 1;
 	    }
 	      
       }
       
       # delete empty topics
-      delete $viewOut->{ $environment }{ $topic} if scalar keys %{ $viewOut->{ $environment }{ $topic } } == 0;
+      delete $viewOut->{ $environment }{ '__topics' }{ $topic} if scalar keys %{ $viewOut->{ $environment }{ '__topics' }{ $topic } } == 0;
       
     }
     
     # delete empty environments
-    delete $viewOut->{ $environment } if scalar keys %{ $viewOut->{ $environment } } <= 2;
+    delete $viewOut->{ $environment } if scalar keys %{ $viewOut->{ $environment }{ '__topics' } } == 0;
     
   }
 

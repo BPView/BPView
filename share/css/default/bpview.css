@@ -49,6 +49,7 @@ body {
   border: 1px solid black;
   overflow: auto;
   background: rgb(220, 220, 220);
+  margin-bottom: 5px;
 }
 
 .groupTilesEmpty {
@@ -59,13 +60,9 @@ body {
 }
 
 .groupTilesRow {
-margin: 0px 5px 0px 10px;
+margin: 15px 5px 0px 10px;
 padding: 0px;
 overflow: auto;
-}
-
-.groupTilesRowEmpty {
-height: 15px;
 }
 
 .groupTilesRow1 {
@@ -79,25 +76,25 @@ height: 15px;
 .groupTilesLeft50 {
   width: 50%;
   float: left;
-  margin: 0px 20px 0px 0px;
+  margin: 0px 20px 5px 0px;
 }
 
 .groupTilesLeft33 {
   width: 31%;
   float: left;
-  margin: 0px 20px 0px 0px;
+  margin: 0px 20px 5px 0px;
 }
 
 .groupTilesLeft25 {
   width: 23%;
   float: left;
-  margin: 0px 20px 0px 0px;
+  margin: 0px 20px 5px 0px;
 }
 
 .groupTilesLeft20 {
   width: 18%;
   float: left;
-  margin: 0px 20px 0px 0px;
+  margin: 0px 20px 5px 0px;
 }
 
 .groupTilesRight {
