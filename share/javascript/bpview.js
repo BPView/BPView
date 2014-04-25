@@ -108,7 +108,7 @@ function getDbOverview(){
         }
         $.each(data, function(environment, envval){
 			// main environments
-            jsonData += "<div class=\"environment\"><div class=\"environmentTitle\">" + environment + "<div class=\"environmentEditBtn\"><a href=\"javascript:;\" class=\"\"><img src=\"/bpview/share/images/global/settings2.png\" height=\"20\" width=\"20\" alt=\"Settings\" title=\"Settings\"></a></div></div>";
+            jsonData += "<div class=\"environment\"><div class=\"environmentTitle\">" + environment + "<div class=\"environmentEditBtn\"><a href=\"javascript:editEnv('" + environment + "');\" class=\"\"><img src=\"/bpview/share/images/global/settings2.png\" height=\"20\" width=\"20\" alt=\"Settings\" title=\"Settings\"></a></div></div>";
 
 			var inrow_val;
 			var helper_val;
@@ -116,71 +116,72 @@ function getDbOverview(){
 			var inrow_count = 1;
 			$.each(envval, function(sections, sectionval){
 
-    			if (sections == "__display") {
-    				$.each(sectionval, function(display, displayval){
-    					if (display == "order") return true;
-    					if (display  == "inrow") {
-    						inrow_val = displayval;
-    						return true;
-    					}
-    				});
-    			}else{ //__topics
-    				$.each(sectionval, function(topic, topicval){
-    			
-    				if 	(inrow_count == 1) {
-        
-        					if (inrow_val == 1) jsonData += "    <div class=\"groupTilesRow\">\n";
-        					else jsonData += "    <div class=\"groupTilesRow\">\n";
-        					helper_val = inrow_val;
-        				}
-        				var groupTiles;
-        				switch (inrow_val) {
-        					case 2:		groupTiles = " groupTilesLeft50"; break;
-        					case 3:		groupTiles = " groupTilesLeft33"; break;
-        					case 4:		groupTiles = " groupTilesLeft25"; break;
-        					case 5:		groupTiles = " groupTilesLeft20"; break;
-        					default:	groupTiles = ""; break;
-        				}
-        				helper_val--; 
-        				if (helper_val == 0 && inrow_val > 1) groupTiles = " groupTilesRight";
-        				jsonData += "      <div class=\"groupTiles" + groupTiles + "\">\n      <div class=\"groups\">" + topic + "</div>\n";
-        
-        				$.each(topicval, function(products, productval){
-        					// set class for status code
-        					var statusClass = "state" + productval.state;
-        					var bpName      = productval.bpname;
-        					var name		= productval.name;
-        					var name_short = (name.length > 20) ? name.substr(0,20) + " ..." : name;
-        					//products
-        					jsonData += "          <div id=\"" + bpName +"\" class=\"tile " + statusClass + "\" title=\"" + name + "\">" + name_short + "</div>\n";
-        				});
-        
-        				jsonData += "    </div>\n";
-        				if (watermark == 0) watermark = 1;
-        
-        				helper_keys--;
-        				if 	(inrow_count == inrow_val) {
-        					jsonData += "      </div>\n";
-        					inrow_count = 1;
-        					 return true;
-        				}
-        				if (helper_keys == 0 && inrow_count != inrow_val && inrow_val != 1) {
-        						inrow_count++;
-        					while (inrow_count != inrow_val) {
-        						jsonData += "      <div class=\"groupTilesEmpty" + groupTiles + "\">\n      <div class=\"groups\">&nbsp;</div>\n</div>\n";
-        						inrow_count++;
-        
-        					}
-        					if 	(inrow_count == inrow_val) {
-        						jsonData += "      <div class=\"groupTilesEmpty groupTilesRight\">&nbsp;</div>\n";
-        						jsonData += "      </div>\n";
-        					}					
-        				}
-        				inrow_count++;
-        			
-    				});
-    				jsonData += "      </div>\n";
-    			}
+//			if (topic == "__displayorder") return true;// {
+			if (sections == "__display") {
+				$.each(sectionval, function(display, displayval){
+					if (display == "order") return true;
+					if (display  == "inrow") {
+						inrow_val = displayval;
+						return true;
+					}
+				});
+			}else{ //__topics
+				$.each(sectionval, function(topic, topicval){
+			
+				if 	(inrow_count == 1) {
+
+					if (inrow_val == 1) jsonData += "    <div class=\"groupTilesRow\">\n";
+					else jsonData += "    <div class=\"groupTilesRow\">\n";
+					helper_val = inrow_val;
+				}
+				var groupTiles;
+				switch (inrow_val) {
+					case 2:		groupTiles = " groupTilesLeft50"; break;
+					case 3:		groupTiles = " groupTilesLeft33"; break;
+					case 4:		groupTiles = " groupTilesLeft25"; break;
+					case 5:		groupTiles = " groupTilesLeft20"; break;
+					default:	groupTiles = ""; break;
+				}
+				helper_val--; 
+				if (helper_val == 0 && inrow_val > 1) groupTiles = " groupTilesRight";
+				jsonData += "      <div class=\"groupTiles" + groupTiles + "\">\n      <div class=\"groups\">" + topic + "</div>\n";
+
+				$.each(topicval, function(products, productval){
+					// set class for status code
+					var statusClass = "state" + productval.state;
+					var bpName      = productval.bpname;
+					var name		= productval.name;
+					var name_short = (name.length > 20) ? name.substr(0,20) + " ..." : name;
+					//products
+					jsonData += "          <div id=\"" + bpName +"\" class=\"tile " + statusClass + "\" title=\"" + name + "\">" + name_short + "</div>\n";
+				});
+
+				jsonData += "    </div>\n";
+				if (watermark == 0) watermark = 1;
+
+				helper_keys--;
+				if 	(inrow_count == inrow_val) {
+					jsonData += "      </div>\n";
+					inrow_count = 1;
+					 return true;
+				}
+				if (helper_keys == 0 && inrow_count != inrow_val && inrow_val != 1) {
+						inrow_count++;
+					while (inrow_count != inrow_val) {
+						jsonData += "      <div class=\"groupTilesEmpty" + groupTiles + "\">\n      <div class=\"groups\">&nbsp;</div>\n</div>\n";
+						inrow_count++;
+
+					}
+					if 	(inrow_count == inrow_val) {
+						jsonData += "      <div class=\"groupTilesEmpty groupTilesRight\">&nbsp;</div>\n";
+						jsonData += "      </div>\n";
+					}					
+				}
+				inrow_count++;
+			
+				});
+				jsonData += "      </div>\n";
+			}
 					
             });
             jsonData += "  </div>\n";
@@ -462,4 +463,17 @@ function deleteCookie() {
 	document.cookie = "BPView_FilterJsonHost=; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
 	document.cookie = "BPView_FilterJsonState=; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
 	document.cookie = "BPView_activeDashboard=; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+}
+
+function editEnv(env){
+
+        $.magnificPopup.open({
+                enableEscapeKey: true,
+                closeOnBgClick: true,
+                showCloseBtn: false,
+        items: {
+                src: '<div class="error-popup"><div id="details_subject" class="topBar">Edit: Settings of Environment "' + env  + '"</div><div id="details_data" class="details_data_error"><div class="details_data_copyright_content"></div></div><button title="Close (Esc)" type="button" class="mfp-close" style="color: white;">×</button></div>',
+                type: 'inline'
+        }
+        });
 }
