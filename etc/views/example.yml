@@ -1,3 +1,15 @@
+# Possible Options:
+#   order: N
+#       N specifies positionnumber of environment in overall-view
+#
+#   inrow: N
+#       N specifies number of products displayed in one line. Range of 1 to 5 is
+#       implemented.
+#
+#   sort: alphabetical | productnumbers
+#       - alphabetical: sort environmnet alphabetical
+#       - productnumbers: sort environment descending according productnumbers.
+
 Dashboard 1:
   permissions:
     - users: hans
@@ -9,7 +21,7 @@ Dashboard 1:
       __display:
         order: 1
         inrow: 1
-        sort: maxfirst
+        sort: alphabetical
       __topics:
         "topic":
           "product 1":
@@ -18,7 +30,7 @@ Dashboard 1:
       __display:
         order: 1
         inrow: 2
-        sort: maxfirst
+        sort: productnumbers
       __topics:
         "Trading":
           "DAX":

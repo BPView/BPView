@@ -219,24 +219,33 @@ sub get_status {
 
 	# sorting the hash 
 	my $views = dclone $self->{ 'views' };
+	my %views_empty;
 
 	while(my($view_key, $view) = each %$views) {
-		next if $view_key =~ m/^__display/;
-		
-		while(my($topic, $prods) = each %$view) {
+		while(my($topic, $prods) = each %{ $view->{'__topics'}}) {
 			tie my %new_prods, 'Tie::IxHash', (map { ($_ => $prods->{$_}) } sort { lc($a) cmp lc($b) } keys %$prods);
-			$view->{$topic} = \%new_prods;
+			$view->{ '__topics' }{$topic} = \%new_prods;
 		}
 		
+		my %new_view;
 		# sort alphabetically
-		tie my %new_view, 'Tie::IxHash', (map { ($_ => $view->{$_}) } sort { lc($a) cmp lc($b) } keys %$view);
+		if($view->{ '__display' }{ 'sort' } eq 'alphabetical'){
+			tie %new_view, 'Tie::IxHash', (map { ($_ => $view->{'__topics'}{$_}) } sort { lc($a) cmp lc($b) } keys %{ $view->{'__topics'}});
+		}
+		elsif($view->{ '__display' }{ 'sort' } eq 'productnumbers'){
+			# sort based on # entries
+			tie %new_view, 'Tie::IxHash', (map { ($_ => $view->{ '__topics' }{$_}) } sort { keys %{ $view->{'__topics'}{$b} } <=> keys %{ $view->{'__topics'}{$a} } } keys %{ $view->{'__topics'}});
+		}
+
 
 		# write new hash
-		$views->{$view_key} = \%new_view;
+		$views->{$view_key}{ '__display' } = $view->{ '__display' };
+		$views->{$view_key}{ '__topics' } = \%new_view;
 	}
 	tie my %new_views, 'Tie::IxHash', (map { ($_ => $views->{$_}) } sort { $views->{$a}->{'__display'}{'order'} <=> $views->{$b}->{'__display'}{'order'} } keys %$views);
 	my $viewOut = \%new_views;
 
+	
   # verify if status is given for all products
   # note: if product is missing in Icinga/Nagios there's no state for it
   # we use status code 99 for this (0-3 are reserved as Nagios plugin exit codes)
