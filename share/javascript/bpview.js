@@ -131,9 +131,7 @@ function getDbOverview(){
 				$.each(sectionval, function(topic, topicval){
 			
 				if 	(inrow_count == 1) {
-
-					if (inrow_val == 1) jsonData += "    <div class=\"groupTilesRow\">\n";
-					else jsonData += "    <div class=\"groupTilesRow\">\n";
+					jsonData += "    <div class=\"groupTilesRow\">\n";
 					helper_val = inrow_val;
 				}
 				var groupTiles;
