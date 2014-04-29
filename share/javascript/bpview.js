@@ -388,6 +388,13 @@ function custom_filter() {
 	updateDashSub();
 }
 
+function uri_filter(s) {
+    FilterJsonState = "state+" + s + "";
+    document.cookie = "BPView_FilterJsonState=" + FilterJsonState;
+    getDbOverview();
+    updateDashSub();
+}
+
 function filterState(state) {
 	if (state == "all") FilterJsonState="";
 	else FilterJsonState = state;
@@ -477,3 +484,4 @@ function editEnv(env){
         }
         });
 }
+
