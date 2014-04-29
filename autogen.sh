@@ -6,7 +6,6 @@ autoconf
 automake --add-missing
 
 # rename files
-mv bin/bpview_cfg_writer.pl bin/bpview_cfg_writer.pl.in
 mv bin/bpviewd.pl bin/bpviewd.pl.in
 mv bin/check_bp_status.pl bin/check_bp_status.pl.in
 mv bin/bpview_reload.pl bin/bpview_reload.pl.in
