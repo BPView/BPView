@@ -33,6 +33,7 @@ Make sure the following requirements are fulfilled:
     - DBI
     - DBD::Pg
     - Log4perl
+    - Tie::IxHash
     
 
 When installing BPView via RPM package all dependencies are resolved automatically:
