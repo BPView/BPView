@@ -33,7 +33,8 @@ use File::Spec;
 use Getopt::Long;
 #use Log::Log4perl;
 #use Cache::Memcached;
-#use threads;
+use threads;
+use JSON::PP;
 
 # for debugging only
 use Data::Dumper;
@@ -145,6 +146,55 @@ my $data = BPView::Data->new(
 my $counter = 0;
 my $repeater = 300/$sleepMainLoop;
 
+# creating a listening socket
+my $socket = new IO::Socket::INET (
+    LocalHost => '0.0.0.0',
+    LocalPort => '7777',
+    Proto => 'tcp',
+    Listen => 5,
+    Reuse => 1
+);
+die "cannot create socket $!\n" unless $socket;
+
+my %hash;
+
+# create thread with no return value
+my $socket_thread = threads->create({'void' => 1},
+    sub {
+        while(1)
+        {
+            # waiting for a new client connection
+            my $client_socket = $socket->accept();
+
+            # get information about a newly connected client
+            my $client_address = $client_socket->peerhost();
+            my $client_port = $client_socket->peerport();
+
+            # read up to 1024 characters from the connected client
+            my $socket_data= "";
+            $client_socket->recv($socket_data, 1024);
+
+            # expect parameters in json-format
+            my $json = JSON::PP->new->pretty;
+            $json->utf8('true');
+            %hash = $json->decode($socket_data);
+
+            my $response = '';
+            if ($hash{'GET'} == 'businessprocesses'){
+                $response = 'businessprocesses';
+            }
+            elsif ($hash{'GET'} == 'services'){
+                $response = 'services';
+            }
+
+            $client_socket->send($response);
+
+            # notify client that response has been sent
+            shutdown($client_socket, 1);
+        }
+        $socket->close();
+    }
+);
 
 # "infinite" loop where some useful process happens
 until ($dieNow) {
