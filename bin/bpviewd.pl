@@ -156,7 +156,7 @@ my $socket = new IO::Socket::INET (
 );
 die "cannot create socket $!\n" unless $socket;
 
-my %hash;
+my $hash;
 
 # create thread with no return value
 my $socket_thread = threads->create({'void' => 1},
@@ -177,14 +177,34 @@ my $socket_thread = threads->create({'void' => 1},
             # expect parameters in json-format
             my $json = JSON::PP->new->pretty;
             $json->utf8('true');
-            %hash = $json->decode($socket_data);
+            $hash = $json->decode($socket_data);
 
             my $response = '';
-            if ($hash{'GET'} == 'businessprocesses'){
-                $response = 'businessprocesses';
+            if ($hash->{'GET'} eq 'businessprocesses'){
+                my $filter_hash = $hash->{'FILTER'};
+                if ( exists $filter_hash->{'dashboard'} ) {
+                    my $dashboard = $filter_hash->{'dashboard'};
+                    $response = $dashboard;
+                } else {
+                    logEntry("ERROR: wrong API-Call. dashboard Filter is missing", 0);
+                }
             }
-            elsif ($hash{'GET'} == 'services'){
-                $response = 'services';
+            elsif ($hash->{'GET'} eq 'services'){
+                my $businessprocess;
+                my $state;
+                my $filter_hash = $hash->{'FILTER'};
+                if ( exists $filter_hash->{'businessprocess'} ) {
+                    $businessprocess = $filter_hash->{'businessprocess'};
+                } else {
+                    logEntry("ERROR: wrong API-Call. businessprocess Filter is missing", 0);
+                }
+                if ( exists $filter_hash->{'state'} ) {
+                    $state = $filter_hash->{'state'};
+                } else {
+                    logEntry("ERROR: wrong API-Call. state Filter is missing", 0);
+                }
+
+                $response = "GOT: $businessprocess -- $state";
             }
 
             $client_socket->send($response);
