@@ -244,6 +244,11 @@ sub get_status {
 		# write new hash
 		$views->{$view_key}{ DISPLAY } = $view->{ DISPLAY };
 		$views->{$view_key}{ TOPICS } = \%new_view;
+		
+		# sort hash alphabetically - __display need to be before __topics
+		tie my %new_topics, 'Tie::IxHash', (map { ($_ => $views->{$view_key}{$_}) } sort { $a cmp $b } keys %{ $views->{$view_key}});
+		$views->{$view_key} = \%new_topics;
+		
 	}
 	tie my %new_views, 'Tie::IxHash', (map { ($_ => $views->{$_}) } sort { $views->{$a}->{ DISPLAY }{'order'} <=> $views->{$b}->{ DISPLAY }{'order'} } keys %$views);
 	my $viewOut = \%new_views;
