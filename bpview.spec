@@ -1,11 +1,11 @@
 Name: bpview
-Version: 0.9
-Release: 2%{?dist}
+Version: 0.9.1
+Release: 1%{?dist}
 Summary: Business Process view for Nagios/Icinga 
 
 Group: Applications/System
 License: GPLv3+
-URL: https://github.com/ovido/BPView
+URL: https://github.com/BPView/BPView
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
@@ -136,6 +136,7 @@ fi
 %{_libdir}/perl5/vendor_perl
 %attr(0755,root,root) %{_libdir}/%{name}/plugins/check_bp_status.pl
 %attr(0755,root,root) %{_libdir}/%{name}/bpview.pl
+%attr(0755,root,root) %{_bindir}/bpview_cfg_writer.pl
 %attr(0755,root,root) %{_bindir}/bpviewd
 %attr(0755,root,root) %{_bindir}/bpview_reload
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/bp-config
@@ -157,6 +158,10 @@ fi
 
 
 %changelog
+* Wed May 14 2014 Rene Koch <rkoch@linuxland.at> 0.9.1-1
+- bump to 0.9.1 bugfix release
+- readded bpview_cfg_writer.pl
+
 * Fri Apr 25 2014 Rene Koch <rkoch@linuxland.at> 0.9-2
 - cleanup of old files
 
