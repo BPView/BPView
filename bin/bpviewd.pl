@@ -182,14 +182,22 @@ my $socket_thread = threads->create({'void' => 1},
             my $response = '';
             if ($hash->{'GET'} eq 'businessprocesses'){
                 my $filter_hash = $hash->{'FILTER'};
-                if ( exists $filter_hash->{'dashboard'} ) {
-                    my $dashboard = $filter_hash->{'dashboard'};
-                    $response = $dashboard;
-                } else {
+                if ( ! exists $filter_hash->{'dashboard'} ) {
                     logEntry("ERROR: wrong API-Call. dashboard Filter is missing", 0);
                 }
+
+                my $dashboard_API = BPView::Data->new(
+                     config     => $config,
+                     views      => $views->{ $filter_hash->{'dashboard'} }{ 'views' },
+                     provider   => $config->{ 'bpview' }{ 'datasource' },
+                     provdata   => $config->{ 'bpview'}{ $config->{ 'bpview' }{ 'datasource' } },
+                     bps        => $bps,
+                   );
+
+                $response = $dashboard_API->get_status();
             }
             elsif ($hash->{'GET'} eq 'services'){
+                my $filter = {};
                 my $businessprocess;
                 my $state;
                 my $filter_hash = $hash->{'FILTER'};
@@ -199,12 +207,22 @@ my $socket_thread = threads->create({'void' => 1},
                     logEntry("ERROR: wrong API-Call. businessprocess Filter is missing", 0);
                 }
                 if ( exists $filter_hash->{'state'} ) {
-                    $state = $filter_hash->{'state'};
-                } else {
-                    logEntry("ERROR: wrong API-Call. state Filter is missing", 0);
+                    push @{ $filter->{ 'state' } }, $filter_hash->{'state'};
+                } 
+                if ( exists $filter_hash->{'name'} ) {
+                    push @{ $filter->{ 'name' } }, $filter_hash->{'name'};
                 }
 
-                $response = "GOT: $businessprocess -- $state";
+                my $details_API = BPView::Data->new(
+                    config      => $config,
+                    bp          => $businessprocess,
+                    provider    => $config->{ 'provider' }{ 'source' },
+                    provdata    => $config->{ $config->{ 'provider' }{ 'source' } },
+                    bps         => $bps,
+                    filter      => $filter,
+                   );
+
+                $response = $details_API->get_details();
             }
 
             $client_socket->send($response);
