@@ -46,7 +46,6 @@ BEGIN {
 # load custom Perl modules
 use lib "$lib_path";
 use BPView::Config;
-use BPView::Data;
 use BPView::Web;
 
 
@@ -168,66 +167,20 @@ while ( my $q = new CGI::Fast ){
       # bpview.pl?dashboard=db&filter=name+loadbalancer
       
       if (defined param("filter")){
-      	$log->error_die("Unsupported parameter options: " . param("filter")) unless ( param("filter") =~ /^state/ || param("filter") =~  /^name/);
-      	my @filterval = split / /, param("filter");
-      	
-      	my $filtername = undef;
-        for (my $i=0;$i<=$#filterval; $i++){
-                      
-          # get name for filter
-          if ($filterval[$i] eq "state"){
-            $filtername = $filterval[$i];
-            next;
-          }elsif ($filterval[$i] eq "name"){
-            $filtername = $filterval[$i];
-            next;
-          }
-                      
-          # state filter
-          if ( ( $filtername eq "state" ) && ( $filterval[$i] ne "ok" && $filterval[$i] ne "warning" && $filterval[$i] ne "critical" && $filterval[$i] ne "unknown" ) ){
-            $log->error_die("Invalid filter option: " . $filterval[$i]);
-          }elsif ($filtername eq "state"){
-            push @{ $filter->{ $filtername } }, $filterval[$i];        
-          }
-              
-              
-          # hostname filter
-          if ( ( $filtername eq "name" ) && ( $filterval[$i] !~ /^[a-zA-Z0-9_.-]*$/ ) ){
-            $log->error_die("Invalid filter characters option: " . $filterval[$i]);
-          }elsif ($filtername eq "name"){
-            push @{ $filter->{ $filtername } }, $filterval[$i];
-          }
-              
-        }
-      	
+      	$filter = _get_filter( param("filter") );
       }
+       
+      my $data = {
+      	'GET'		=> 'businessprocesses',
+      	'FILTER'	=> { 'dashboard'	=> param('dashboard'),
+      						'state'				=> $filter->{ 'state' },
+      						'name'				=> $filter->{ 'name' }, 
+        },
+      };
       
-  	
-      # get dashboard data
-      my $dashboard = BPView::Data->new(
-  		   config	=> $config,
-    	   views	=> $views->{ param("dashboard") }{ 'views' },
-    	   provider	=> $config->{ 'bpview' }{ 'datasource' },
-    	   provdata	=> $config->{ 'bpview'}{ $config->{ 'bpview' }{ 'datasource' } },
-    	   bps		=> $bps,
-    	   filter	=> $filter,
-         );
-      $json = eval { $dashboard->get_status() };
-#	  $log->error_die($@) if $@;
-      if ($@){
-      	my $error_message->{ 'error' } = $@;
-      	$log->error($error_message->{ 'error' });
-      	
-      	# make output more pretty for users
-        $error_message->{ 'error' } =~ s/\n/<br>/g;
-        $error_message->{ 'error' } =~ s/:  at.*//;
-        
-      	$json = JSON::PP->new->pretty;
-        $json->utf8('true');
-        $json = $json->encode($error_message);
-      }
-       
-       
+      $json = _connect_api( $data );
+
+
     #----------------------------------------------------------------
     # Get details for given business process in JSON format
     
@@ -240,65 +193,20 @@ while ( my $q = new CGI::Fast ){
       # bpview.pl?dashboard=db&filter=state+ok
       # bpview.pl?dashboard=db&filter=name+loadbalancer
       
-       if (defined param("filter")){
-      	$log->error_die("Unsupported parameter options: " . param("filter")) unless ( param("filter") =~ /^state/ || param("filter") =~  /^name/);
-      	my @filterval = split / /, param("filter");
-      	
-      	my $filtername = undef;
-        for (my $i=0;$i<=$#filterval; $i++){
-                      
-          # get name for filter
-          if ($filterval[$i] eq "state"){
-             $filtername = $filterval[$i];
-             next;
-          }elsif ($filterval[$i] eq "name"){
-             $filtername = $filterval[$i];
-             next;
-          }
-                    
-          # state filter
-          if ( ( $filtername eq "state" ) && ( $filterval[$i] ne "ok" && $filterval[$i] ne "warning" && $filterval[$i] ne "critical" && $filterval[$i] ne "unknown" ) ){
-             $log->error_die("Invalid filter option: " . $filterval[$i]);
-          }elsif ($filtername eq "state"){
-            push @{ $filter->{ $filtername } }, $filterval[$i];        
-          }
-              
-              
-          # hostname filter
-          if ( ( $filtername eq "name" ) && ( $filterval[$i] !~ /^[a-zA-Z0-9_.-]*$/ ) ){
-            $log->error_die("Invalid filter characters option: " . $filterval[$i]);
-          }elsif ($filtername eq "name"){
-            push @{ $filter->{ $filtername } }, $filterval[$i];
-          }
-              
-        }
-      	
+      if (defined param("filter")){
+      	$filter = _get_filter( param("filter") );
       }
       
-  	  # get details for this business process
-  	  my $details = BPView::Data->new(
-  		  config	=> $config,
-  		  bp		=> param("details"),
-  		  provider	=> $config->{ 'provider' }{ 'source' },
-    	  provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
-		  bps		=> $bps,
-   	      filter	=> $filter,
-  	     );
-  	  $json = eval { $details->get_details() };
-#	  $log->error_die($@) if $@;
-      if ($@){
-      	my $error_message->{ 'error' } = $@;
-      	$log->error($error_message->{ 'error' });
-      	
-      	# make output more pretty for users
-        $error_message->{ 'error' } =~ s/\n/<br>/g;
-        $error_message->{ 'error' } =~ s/:  at.*//;
-      	
-      	$json = JSON::PP->new->pretty;
-        $json->utf8('true');
-        $json = $json->encode($error_message);
-      }
-  	
+      my $data = {
+      	'GET'		=> 'services',
+      	'FILTER'	=> { 	'businessprocess'	=> param('details'),
+      						'state'				=> $filter->{ 'state' },
+      						'name'				=> $filter->{ 'name' }, 
+      	},
+      };
+      
+      $json = _connect_api( $data );
+      
   	
   	#----------------------------------------------------------------
     # Display requested web page
@@ -385,6 +293,123 @@ while ( my $q = new CGI::Fast ){
 
   }
 
+}
+
+
+#----------------------------------------------------------------
+
+# internal methods
+##################
+
+# connect to bpviewd socket
+sub _connect_api {
+
+  use IO::Socket::INET;
+  
+  my $query = shift or die "Missing query for API connect!";
+  
+  # prepare JSON data
+  my $json = JSON::PP->new->pretty;
+  $json->utf8('true');
+  $json = $json->encode($query);
+  
+  # auto-flush on socket
+  $| = 1;
+  
+  # create a connection socket
+  my $socket = new IO::Socket::INET (
+  	PeerHost	=> '127.0.0.1',
+  	PeerPort	=> 7777,
+  	Proto		=> 'tcp',
+  );
+  
+  my $error = undef;
+  
+  if (! $socket){
+    $error = "Can't connect to API: $!\n";
+    return _handle_error( $error );
+  }
+  
+  # send data to server
+  if (! $socket->send($json) ){
+  	$error = "Can't send data to socket: $!\n";
+  	return _handle_error( $error );
+  }
+  shutdown($socket, 1);
+  
+  # receive a response of up to 5024 characters from server
+  my $response = "";
+  $socket->recv($response, 50240);
+  
+  # close socket
+  $socket->close();
+
+  return $response;
+
+}
+
+
+# get filter from GET parameter
+sub _get_filter {
+
+  my $filter = shift or die "Missing filter!";
+  
+  $log->error_die("Unsupported parameter options: " . $filter) unless ( $filter =~ /^state/ || $filter =~  /^name/);
+  my @filterval = split / /, $filter;
+      	
+  my $filtername = undef;
+  my $return = undef;
+  
+  for (my $i=0;$i<=$#filterval; $i++){
+                      
+    # get name for filter
+    if ($filterval[$i] eq "state"){
+      $filtername = $filterval[$i];
+      next;
+    }elsif ($filterval[$i] eq "name"){
+      $filtername = $filterval[$i];
+      next;
+    }
+                    
+    # state filter
+    if ( ( $filtername eq "state" ) && ( $filterval[$i] ne "ok" && $filterval[$i] ne "warning" && $filterval[$i] ne "critical" && $filterval[$i] ne "unknown" ) ){
+      $log->error_die("Invalid filter option: " . $filterval[$i]);
+    }elsif ($filtername eq "state"){
+      push @{ $return->{ $filtername } }, $filterval[$i];        
+    }
+              
+              
+    # hostname filter
+    if ( ( $filtername eq "name" ) && ( $filterval[$i] !~ /^[a-zA-Z0-9_.-]*$/ ) ){
+      $log->error_die("Invalid filter characters option: " . $filterval[$i]);
+    }elsif ($filtername eq "name"){
+      push @{ $return->{ $filtername } }, $filterval[$i];
+    }
+              
+  }
+  
+  return $return;
+        
+}
+
+
+# handle error messages
+sub _handle_error {
+
+  my $msg->{ 'error' } = shift or die "Missing error message in function _handle_error!\n";
+
+  # write issue into log file
+  $log->error($msg->{ 'error' });
+  
+  # make output more pretty for users
+  $msg->{ 'error' } =~ s/\n/<br>/g;
+  $msg->{ 'error' } =~ s/:  at.*//;
+  
+  my $json = JSON::PP->new->pretty;
+  $json->utf8('true');
+  $json = $json->encode($msg);
+  return $json;
+  
 }
 
 exit 0;
