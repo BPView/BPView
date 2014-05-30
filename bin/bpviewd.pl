@@ -181,9 +181,19 @@ my $socket_thread = threads->create({'void' => 1},
 
             my $response = '';
             if ($hash->{'GET'} eq 'businessprocesses'){
+                my $filter = {};
                 my $filter_hash = $hash->{'FILTER'};
+                
                 if ( ! exists $filter_hash->{'dashboard'} ) {
                     logEntry("ERROR: wrong API-Call. dashboard Filter is missing", 0);
+                }
+                
+                if ( exists $filter_hash->{'state'} ) {
+					$filter->{ 'state' } = $filter_hash->{ 'state' };
+                } 
+                
+                if ( exists $filter_hash->{'name'} ) {
+					$filter->{ 'name' } = $filter_hash->{ 'name' };
                 }
 
                 my $dashboard_API = BPView::Data->new(
@@ -192,6 +202,7 @@ my $socket_thread = threads->create({'void' => 1},
                      provider   => $config->{ 'bpview' }{ 'datasource' },
                      provdata   => $config->{ 'bpview'}{ $config->{ 'bpview' }{ 'datasource' } },
                      bps        => $bps,
+                     filter     => $filter,
                    );
 
                 $response = $dashboard_API->get_status();
@@ -199,18 +210,20 @@ my $socket_thread = threads->create({'void' => 1},
             elsif ($hash->{'GET'} eq 'services'){
                 my $filter = {};
                 my $businessprocess;
-                my $state;
                 my $filter_hash = $hash->{'FILTER'};
+                
                 if ( exists $filter_hash->{'businessprocess'} ) {
                     $businessprocess = $filter_hash->{'businessprocess'};
                 } else {
                     logEntry("ERROR: wrong API-Call. businessprocess Filter is missing", 0);
                 }
+                
                 if ( exists $filter_hash->{'state'} ) {
-                    push @{ $filter->{ 'state' } }, $filter_hash->{'state'};
+					$filter->{ 'state' } = $filter_hash->{ 'state' };
                 } 
+                
                 if ( exists $filter_hash->{'name'} ) {
-                    push @{ $filter->{ 'name' } }, $filter_hash->{'name'};
+					$filter->{ 'name' } = $filter_hash->{ 'name' };
                 }
 
                 my $details_API = BPView::Data->new(
