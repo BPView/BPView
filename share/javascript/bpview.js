@@ -102,12 +102,18 @@ function getDbOverview(){
 			else filter += "+name+" + FilterJsonHost;
 	}
 	$.getJSON( "?json=1&dashboard=" + dashboard + filter, function(data){
-		var jsonData = "";
         if (data == 1){
 			showErrorMessage();
         }
+		var jsonData = "";
         $.each(data, function(environment, envval){
 			// main environments
+        	
+        	// error handling
+        	if (environment == "error"){
+        		showDetailedErrorMessage(envval);
+        		return false;
+        	}
 // temporary disabled for 0.9 release
 //            jsonData += "<div class=\"environment\"><div class=\"environmentTitle\">" + environment + "<div class=\"environmentEditBtn\"><a href=\"javascript:editEnv('" + environment + "');\" class=\"\"><img src=\"/bpview/share/images/global/settings2.png\" height=\"20\" width=\"20\" alt=\"Settings\" title=\"Settings\"></a></div></div>";
             jsonData += "<div class=\"environment\"><div class=\"environmentTitle\">" + environment + "</div>";
@@ -242,7 +248,7 @@ function getDetails(businessProcess) {
 		// did we receive an error message?
 		if (host == "error"){
 		  showDetailedErrorMessage(hostval);
-		  exit;
+		  return false;
 		}
 
 		// host names
