@@ -26,12 +26,12 @@
 . /etc/init.d/functions
 PATH=/sbin:/bin:/usr/bin:/usr/sbin
 RETVAL=0
+PROG_BIN="/usr/bin/bpviewd"
 PROG="bpviewd"
 PID_FILE="/var/run/bpviewd.pid"
 
 start() {
-	[ -f /usr/bin/bpviewd ] || exit 5
-#	[ -f /etc/bpview/bpviewd.yml ] || exit 6
+	[ -f $PROG_BIN ] || exit 5
 	# this is suitable way considering SELinux is guarding write
 	# access to PID file
 	[ $EUID -eq 0 ] || exit 4

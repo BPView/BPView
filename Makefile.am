@@ -1,15 +1,25 @@
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# COPYRIGHT:
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
+# This software is Copyright (c) 2013 by ovido
+#                            (c) 2014 BPView Development Team
+#                                     http://github.com/BPView/BPView
+#
+# This file is part of Business Process View (BPView).
+#
+# (Except where explicitly superseded by other copyright notices)
+# BPView is free software: you can redistribute it and/or modify it 
+# under the terms of the GNU General Public License as published by 
+# the Free Software Foundation, either version 3 of the License, or 
+# any later version.
+#
+# BPView is distributed in the hope that it will be useful, but WITHOUT 
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+# for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# along with BPView.  
+# If not, see <http://www.gnu.org/licenses/>.
 
 # directories
 BIN_DIR=@srcdir@/bin
@@ -24,8 +34,10 @@ WEBCONF=@web_conf@
 HTTPCONF=httpd
 BPVIEWTMPL=bpview_templates
 CGIDIR=@sbindir@
+BINDIR=@bindir@
 ETCDIR=@sysconfdir@
 DATAROOTDIR=@datarootdir@
+LOCALSTATEDIR=@localstatedir@
 
 PACKAGE=@PACKAGE@
 VERSION=@VERSION@
@@ -58,6 +70,12 @@ all:
 	sed -i -e 's!/usr/lib64/nagios/plugins/check_bpview_status.pl!$(CGIDIR)/plugins/check_bpview_status.pl!' sample-config/$(BPVIEWTMPL).tmp
 	cp sample-config/$(BPVIEWTMPL).tmp sample-config/$(BPVIEWTMPL).cfg
 	rm -f sample-config/$(BPVIEWTMPL).tmp
+	
+	cp bpview.rh6.init.in bpview.rh6.init.tmp
+	sed -i -e 's!PROG_BIN=.*!PROG="$(BINDIR)"!' bpview.rh6.init.tmp
+	sed -i -e 's!PID_FILE=.*!PID_FILE="$(LOCALSTATEDIR)/run/bpviewd.pid"!' bpview.rh6.init.tmp
+	cp bpview.rh6.init.tmp bpview.rh6.init
+	rm -f bpview.rh6.init.tmp
 	
 
 # Install

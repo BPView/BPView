@@ -15,5 +15,6 @@ mv etc/bpview.yml etc/bpview.yml.in
 mv etc/datasource.yml etc/datasource.yml.in
 mv sample-config/httpd.conf sample-config/httpd.conf.in
 mv sample-config/bpview_templates.cfg sample-config/bpview_templates.cfg.in 
+mv bpview.rh6.init bpview.rh6.init.in
 
 exit 0
