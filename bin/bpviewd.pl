@@ -3,7 +3,8 @@
 # COPYRIGHT:
 #
 # This software is Copyright (c) 2013 by ovido
-#                             <sales@ovido.at>
+#                            (c) 2014 BPView Development Team
+#                                     http://github.com/BPView/BPView
 #
 # This file is part of Business Process View (BPView).
 #
@@ -21,8 +22,6 @@
 # You should have received a copy of the GNU General Public License
 # along with BPView.  
 # If not, see <http://www.gnu.org/licenses/>.
-
-# /usr/lib64/nagios/plugins/check_procs --ereg-argument-array=bpviewd.pid
 
 use strict;
 use warnings;
@@ -42,9 +41,10 @@ use Data::Dumper;
 my ($lib_path, $cfg_path, $log_path, $pid_path, $daemonName, $dieNow);
 my ($sleepMainLoop, $logging, $logFile, $pidFile);
 BEGIN {
-  $lib_path	 = "/usr/lib64/perl5/vendor_perl";        # path to BPView lib directory
-  $cfg_path	 = "/etc/bpview";                         # path to BPView etc directory
-  $log_path  	 = "/var/log/bpview/";                    # log file path
+  $lib_path	= "/usr/lib64/perl5/vendor_perl";        # path to BPView lib directory
+  $cfg_path	= "/etc/bpview";                         # path to BPView etc directory
+  $log_path = "/var/log/bpview/";                    # log file path
+  $pid_path = "/var/run/";							 # path to /run or /var/run
   $daemonName    = "bpviewd";                             # the name of this daemon
   $dieNow        = 0;                                     # used for "infinte loop" construct - allows daemon mode to gracefully exit
   $sleepMainLoop = 10;                                    # number of seconds to wait between "do something" execution after queue is clear
@@ -52,7 +52,7 @@ BEGIN {
   $logFile       = $log_path. $daemonName . ".log";
 }
 
-my $pidfile = "/var/run/$daemonName" . ".pid";
+my $pidfile = $pid_path . $daemonName . ".pid";
 
 # check arguments
 Getopt::Long::Configure ("bundling");
