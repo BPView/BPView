@@ -41,8 +41,8 @@ use Data::Dumper;
 my ($lib_path, $cfg_path, $log_path, $pid_path, $daemonName, $dieNow);
 my ($sleepMainLoop, $logging, $logFile, $pidFile);
 BEGIN {
-  $lib_path	= "/usr/lib64/perl5/vendor_perl";        # path to BPView lib directory
-  $cfg_path	= "/etc/bpview";                         # path to BPView etc directory
+  $lib_path = "/usr/lib64/perl5/vendor_perl";        # path to BPView lib directory
+  $cfg_path = "/etc/bpview";                         # path to BPView etc directory
   $log_path = "/var/log/bpview/";                    # log file path
   $pid_path = "/var/run/";							 # path to /run or /var/run
   $daemonName    = "bpviewd";                             # the name of this daemon
