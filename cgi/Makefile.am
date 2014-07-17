@@ -15,6 +15,7 @@
 CGIDIR=@sbindir@
 LIBDIR=@libdir@
 SYSCONFDIR=@sysconfdir@
+LOCALSTATEDIR=@localstatedir@
 INSTALL=@INSTALL@
 INSTALL_OPTS=@INSTALL_OPTS@
 SCRIPT=bpview
@@ -24,6 +25,7 @@ all:
 	cp $(SCRIPT).pl.in $(SCRIPT).tmp
 	sed -i -e 's!lib_path = .*!lib_path = "$(LIBDIR)";!' $(SCRIPT).tmp
 	sed -i -e 's!cfg_path = .*!cfg_path = "$(SYSCONFDIR)";!' $(SCRIPT).tmp
+	sed -i -e 's!$reload_log = .*!$reload_log = "$(LOCALSTATEDIR)/log/bpview/reload.log";!' $(SCRIPT).tmp
 	cp $(SCRIPT).tmp $(SCRIPT).pl
 	rm -f $(SCRIPT).tmp
 
