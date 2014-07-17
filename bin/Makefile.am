@@ -27,7 +27,6 @@ LIBDIR=@libdir@
 CGIDIR=@sbindir@
 SYSCONFDIR=@sysconfdir@
 LOCALSTATEDIR=@localstatedir@
-RUNSTATEDIR=@runstatedir@
 INSTALL=@INSTALL@
 INSTALL_OPTS=@INSTALL_OPTS@
 SCRIPT1=bpview_cfg_writer
@@ -53,7 +52,7 @@ all:
 	sed -i -e 's!lib_path = .*!lib_path = "$(LIBDIR)";!' $(SCRIPT3).tmp
 	sed -i -e 's!cfg_path = .*!cfg_path = "$(SYSCONFDIR)";!' $(SCRIPT3).tmp
 	sed -i -e 's!log_path = .*!log_path = "$(LOCALSTATEDIR)/log/bpview/";!' $(SCRIPT3).tmp
-	sed -i -e 's!pid_path = .*!pid_path = "$(RUNSTATEDIR)/;"!' $(SCRIPT3).tmp
+	sed -i -e 's!pid_path = .*!pid_path = "$(LOCALSTATEDIR)/run/";!' $(SCRIPT3).tmp
 	cp $(SCRIPT3).tmp $(SCRIPT3)
 	rm -f $(SCRIPT3).tmp
 	
