@@ -32,6 +32,7 @@ SELINUX_DIR=@srcdir@/selinux
 DOCDIR=@docdir@
 WEBCONF=@web_conf@
 HTTPCONF=httpd
+INITRH6=bpview.rh6.init
 BPVIEWTMPL=bpview_templates
 CGIDIR=@sbindir@
 BINDIR=@bindir@
@@ -71,11 +72,11 @@ all:
 	cp sample-config/$(BPVIEWTMPL).tmp sample-config/$(BPVIEWTMPL).cfg
 	rm -f sample-config/$(BPVIEWTMPL).tmp
 	
-	cp bpview.rh6.init.in bpview.rh6.init.tmp
-	sed -i -e 's!PROG_BIN=.*!PROG="$(BINDIR)"!' bpview.rh6.init.tmp
-	sed -i -e 's!PID_FILE=.*!PID_FILE="$(LOCALSTATEDIR)/run/bpviewd.pid"!' bpview.rh6.init.tmp
-	cp bpview.rh6.init.tmp bpview.rh6.init
-	rm -f bpview.rh6.init.tmp
+	cp $(INITRH6).in $(INITRH6).tmp
+	sed -i -e 's!PROG_BIN=.*!PROG_BIN="$(BINDIR)"!' $(INITRH6).tmp
+	sed -i -e 's!PID_FILE=.*!PID_FILE="$(LOCALSTATEDIR)/run/bpviewd.pid"!' $(INITRH6).tmp
+	cp $(INITRH6).tmp $(INITRH6)
+	rm -f $(INITRH6).tmp
 	
 
 # Install
