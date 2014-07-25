@@ -35,8 +35,10 @@
 [% IF db == "" %]
       var activeDashboard = "dummy";
 [% END %]
-   [% FOR db = select_content %]
-      var activeDashboard = "[% db %]";
+   [% FOREACH section IN select_content.keys.sort %]
+      [% FOR db = select_content.$section %]
+         var activeDashboard = "[% db %]";
+      [% END %]
    [% END %]
 [% IF uri_dashb != "0" %]
 	  var  activeDashboard = "[% uri_dashb %]";

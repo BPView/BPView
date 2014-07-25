@@ -25,7 +25,7 @@
 package BPView::Web;
 
 BEGIN {
-    $VERSION = '1.100'; # Don't forget to set version and release
+    $VERSION = '1.200'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -272,7 +272,7 @@ Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.100  (January 29 2014))
+Version 1.200  (July 25 2014))
 
 =head1 COPYRIGHT AND LICENSE
 

@@ -16,6 +16,8 @@ Dashboard 1:
     - users: sepp
     - groups: testgroup
 
+  section: "Department 1"
+
   views:
     "environment":
       __display:
