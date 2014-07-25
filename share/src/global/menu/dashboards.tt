@@ -6,17 +6,33 @@
 	</a>
 	
 	<ul style="display: none;">
-		[% FOREACH db IN select_content %]
+		[% FOREACH section IN select_content.keys.sort %]
 			[% IF loop.last %]
 			<li style=" border-bottom: 0;">
-  			[% ELSE %]
+			[% ELSE %]
 			<li>
 			[% END %]
-				<a href="javascript:changeDash('[% db %]');">[% db %]&nbsp;&nbsp;
-					<sub>
-						<img src="[% site_url %]/share/images/global/dashboard2.png" height="22" width="22" alt="" title="" />
-					</sub>
-				</a>
+				[% section %]&nbsp;&nbsp;
+				<sub>
+					<img src="[% site_url %]/share/images/global/dashboard2.png" height="22" width="22" alt="" title="" />
+				</sub>
+				
+				<ul style="display: none;">
+					[% FOREACH db IN select_content.$section %]
+						[% IF loop.last %]
+						<li style=" border-bottom: 0;">
+  						[% ELSE %]
+						<li>
+						[% END %]
+							<a href="javascript:changeDash('[% db %]');">[% db %]&nbsp;&nbsp;
+								<sub>
+									<img src="[% site_url %]/share/images/global/dashboard2.png" height="22" width="22" alt="" title="" />
+								</sub>
+							</a>
+						</li>
+					[% END %]
+				</ul>
+				
 			</li>
 		[% END %]
 	</ul>

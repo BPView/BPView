@@ -26,7 +26,7 @@
 package BPView::Config;
 
 BEGIN {
-    $VERSION = '1.200'; # Don't forget to set version and release
+    $VERSION = '1.300'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -414,12 +414,17 @@ sub get_dashboards {
   # validation
   croak ("Missing dashboards!") unless defined $self->{ 'config' };
   
-  my $dashboards = [];
+  my $dashboards = {};
   
   # go through view hash
   foreach my $dashboard (keys %{ $self->{ 'config' } }){
-  	
-   push @{ $dashboards }, $dashboard;
+
+  # split dashboards into section and put dashboards without defined section into
+  # default section
+  my $section = 'Default';
+  $section = $self->{ 'config' }{ $dashboard }{ 'section' } if defined $self->{ 'config' }{ $dashboard }{ 'section' };
+
+   push @{ $dashboards->{ $section } }, $dashboard;
    
   }
   
@@ -646,7 +651,7 @@ Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.200  (January 29 2014))
+Version 1.300  (July 25 2014))
 
 =head1 COPYRIGHT AND LICENSE
 
