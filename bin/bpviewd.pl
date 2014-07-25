@@ -39,7 +39,7 @@ use JSON::PP;
 use Data::Dumper;
 
 my ($lib_path, $cfg_path, $log_path, $pid_path, $daemonName, $dieNow);
-my ($sleepMainLoop, $logging, $logFile, $pidFile);
+my ($logging, $logFile, $pidFile);
 BEGIN {
   $lib_path = "/usr/lib64/perl5/vendor_perl";        # path to BPView lib directory
   $cfg_path = "/etc/bpview";                         # path to BPView etc directory
@@ -47,7 +47,6 @@ BEGIN {
   $pid_path = "/var/run/";							 # path to /run or /var/run
   $daemonName    = "bpviewd";                             # the name of this daemon
   $dieNow        = 0;                                     # used for "infinte loop" construct - allows daemon mode to gracefully exit
-  $sleepMainLoop = 10;                                    # number of seconds to wait between "do something" execution after queue is clear
   $logging       = 1;                                     # 1= logging is on
   $logFile       = $log_path. $daemonName . ".log";
 }
@@ -144,13 +143,13 @@ my $data = BPView::Data->new(
 
 
 my $counter = 0;
-my $repeater = 300/$sleepMainLoop;
+my $repeater = 300/$config->{ 'bpviewd' }{ 'sleep' };
 
 # creating a listening socket
 my $socket = new IO::Socket::INET (
-    LocalHost => '0.0.0.0',
-    LocalPort => '7777',
-    Proto => 'tcp',
+    LocalHost => $config->{ 'bpviewd' }{ 'local_host' },
+    LocalPort => $config->{ 'bpviewd' }{ 'local_port' },
+    Proto => $config->{ 'bpviewd' }{ 'proto' },
     Listen => 5,
     Reuse => 1
 );
@@ -170,9 +169,9 @@ my $socket_thread = threads->create({'void' => 1},
             my $client_address = $client_socket->peerhost();
             my $client_port = $client_socket->peerport();
 
-            # read up to 1024 characters from the connected client
+            # read characters from the connected client
             my $socket_data= "";
-            $client_socket->recv($socket_data, 1024);
+            $client_socket->recv($socket_data, $config->{ 'bpviewd' }{ 'read_chars' });
 
             # expect parameters in json-format
             my $json = JSON::PP->new->pretty;
@@ -265,7 +264,7 @@ until ($dieNow) {
         
         $counter++;
 
-        sleep($sleepMainLoop);
+        sleep($config->{ 'bpviewd' }{ 'sleep' });
 
 }
 
