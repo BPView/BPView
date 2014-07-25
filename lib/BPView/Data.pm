@@ -26,7 +26,7 @@
 package BPView::Data;
 
 BEGIN {
-    $VERSION = '1.510'; # Don't forget to set version and release
+    $VERSION = '1.600'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -44,7 +44,7 @@ use constant TOPICS => '__topics';
 use constant VIEWS => 'views';
 
 # for debugging only
-#use Data::Dumper;
+use Data::Dumper;
 
 
 =head1 NAME
@@ -132,7 +132,7 @@ sub new {
   # parameter validation
   # TODO!
   # don't use views and bps together
-  if (defined $self->{ VIEWS } && defined $self->{ 'bp' }){
+  if (defined $self->{ VIEWS() } && defined $self->{ 'bp' }){
   	croak ("Can't use views and bp together!");
   }
   
@@ -186,9 +186,9 @@ sub get_status {
   my $service_names;
   # go through views hash
   # name required for BP is -> environment-group-product
-  foreach my $environment (keys %{ $self->{ VIEWS } }){
-  	foreach my $topic (keys %{ $self->{ VIEWS }{ $environment }{ TOPICS } }){
-		foreach my $product (keys %{ $self->{ VIEWS }{ $environment }{ TOPICS }{ $topic } }){
+  foreach my $environment (keys %{ $self->{ VIEWS() } }){
+  	foreach my $topic (keys %{ $self->{ VIEWS() }{ $environment }{ TOPICS() } }){
+		foreach my $product (keys %{ $self->{ VIEWS() }{ $environment }{ TOPICS() }{ $topic } }){
 			my $bp = $environment . "-" . $topic . "-" . $product;
 			# replace non-chars with _ except -, due to Nagios limitations
 			$bp =~ s/[^a-zA-Z0-9-]/_/g;
@@ -221,36 +221,36 @@ sub get_status {
   }
 
 	# sorting the hash 
-	my $views = dclone $self->{ VIEWS };
+	my $views = dclone $self->{ VIEWS() };
 	my %views_empty;
 
 	while(my($view_key, $view) = each %$views) {
-		while(my($topic, $prods) = each %{ $view->{ TOPICS }}) {
+		while(my($topic, $prods) = each %{ $view->{ TOPICS() }}) {
 			tie my %new_prods, 'Tie::IxHash', (map { ($_ => $prods->{$_}) } sort { lc($a) cmp lc($b) } keys %$prods);
-			$view->{ TOPICS }{$topic} = \%new_prods;
+			$view->{ TOPICS() }{$topic} = \%new_prods;
 		}
 		
 		my %new_view;
 		# sort alphabetically
-		if($view->{ DISPLAY }{ 'sort' } eq 'alphabetical'){
-			tie %new_view, 'Tie::IxHash', (map { ($_ => $view->{ TOPICS }{$_}) } sort { lc($a) cmp lc($b) } keys %{ $view->{ TOPICS }});
+		if($view->{ DISPLAY() }{ 'sort' } eq 'alphabetical'){
+			tie %new_view, 'Tie::IxHash', (map { ($_ => $view->{ TOPICS() }{$_}) } sort { lc($a) cmp lc($b) } keys %{ $view->{ TOPICS() }});
 		}
-		elsif($view->{ DISPLAY }{ 'sort' } eq 'productnumbers'){
+		elsif($view->{ DISPLAY() }{ 'sort' } eq 'productnumbers'){
 			# sort based on # entries
-			tie %new_view, 'Tie::IxHash', (map { ($_ => $view->{ TOPICS }{$_}) } sort { keys %{ $view->{ TOPICS }{$b} } <=> keys %{ $view->{ TOPICS }{$a} } } keys %{ $view->{ TOPICS }});
+			tie %new_view, 'Tie::IxHash', (map { ($_ => $view->{ TOPICS() }{$_}) } sort { keys %{ $view->{ TOPICS() }{$b} } <=> keys %{ $view->{ TOPICS() }{$a} } } keys %{ $view->{ TOPICS() }});
 		}
 
 
 		# write new hash
-		$views->{$view_key}{ DISPLAY } = $view->{ DISPLAY };
-		$views->{$view_key}{ TOPICS } = \%new_view;
+		$views->{$view_key}{ DISPLAY() } = $view->{ DISPLAY() };
+		$views->{$view_key}{ TOPICS() } = \%new_view;
 		
 		# sort hash alphabetically - __display need to be before __topics
 		tie my %new_topics, 'Tie::IxHash', (map { ($_ => $views->{$view_key}{$_}) } sort { $a cmp $b } keys %{ $views->{$view_key}});
 		$views->{$view_key} = \%new_topics;
 		
 	}
-	tie my %new_views, 'Tie::IxHash', (map { ($_ => $views->{$_}) } sort { $views->{$a}->{ DISPLAY }{'order'} <=> $views->{$b}->{ DISPLAY }{'order'} } keys %$views);
+	tie my %new_views, 'Tie::IxHash', (map { ($_ => $views->{$_}) } sort { $views->{$a}->{ DISPLAY() }{'order'} <=> $views->{$b}->{ DISPLAY() }{'order'} } keys %$views);
 	my $viewOut = \%new_views;
 
 	
@@ -260,9 +260,9 @@ sub get_status {
   # we use status code 4 for major problems (host down)
   
   foreach my $environment (keys %{ $viewOut }){
-    foreach my $topic (keys %{ $viewOut->{ $environment }{ TOPICS } }){
+    foreach my $topic (keys %{ $viewOut->{ $environment }{ TOPICS() } }){
       
-      foreach my $product (keys %{ $viewOut->{ $environment }{ TOPICS }{ $topic } }){
+      foreach my $product (keys %{ $viewOut->{ $environment }{ TOPICS() }{ $topic } }){
       	
     	# see _get_ido for example output!
   	    my $service = lc($environment . "-" . $topic . "-" . $product);
@@ -271,7 +271,7 @@ sub get_status {
 
     	if (defined ($result->{ $service }{ 'state' })){
   	      # found status in IDO database
-	      $viewOut->{ $environment }{ TOPICS }{ $topic }{ $product }{ 'state' } = $result->{ $service }{ 'state' };
+	      $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'state' } = $result->{ $service }{ 'state' };
 	      
 #	      # Due to exit code limitations in Nagios/Icinga we use state 4 for host down issues
 
@@ -292,12 +292,12 @@ sub get_status {
 	      
 	    }else{
 	      # didn't found status in IDO database
-  	      $viewOut->{ $environment }{ TOPICS }{ $topic }{ $product }{ 'state' } = 99;
+  	      $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'state' } = 99;
 	    }
 	    
 	    # return also business process name
-	    $viewOut->{ $environment }{ TOPICS }{ $topic }{ $product }{ 'bpname' } = $service;
-	    $viewOut->{ $environment }{ TOPICS }{ $topic }{ $product }{ 'name' } = $self->{ 'bps' }{ $service }{ 'BP' }{ 'NAME' };
+	    $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'bpname' } = $service;
+	    $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'name' } = $self->{ 'bps' }{ $service }{ 'BP' }{ 'NAME' };
 
 	    # filter objects
 	    if (defined $self->{ 'filter' }{ 'state' }){
@@ -314,7 +314,7 @@ sub get_status {
 				$del = 0 if $result->{ $service }{ 'state' } == 3;
 		        }
 		}
-	        delete $viewOut->{ $environment }{ TOPICS }{ $topic }{ $product } if $del == 1;
+	        delete $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product } if $del == 1;
 	    }
 	    
 	    # filter hostnames
@@ -326,18 +326,18 @@ sub get_status {
 	              $del = 0 if lc( $hostname ) =~ lc ( $self->{ 'filter' }{ 'name' }->[ $i ]);
         	    }
           	}
-          	delete $viewOut->{ $environment }{ TOPICS }{ $topic }{ $product } if $del == 1;
+          	delete $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product } if $del == 1;
 	    }
 	      
       }
       
       # delete empty topics
-      delete $viewOut->{ $environment }{ TOPICS }{ $topic} if scalar keys %{ $viewOut->{ $environment }{ TOPICS }{ $topic } } == 0;
+      delete $viewOut->{ $environment }{ TOPICS() }{ $topic} if scalar keys %{ $viewOut->{ $environment }{ TOPICS() }{ $topic } } == 0;
       
     }
     
     # delete empty environments
-    delete $viewOut->{ $environment } if scalar keys %{ $viewOut->{ $environment }{ TOPICS } } == 0;
+    delete $viewOut->{ $environment } if scalar keys %{ $viewOut->{ $environment }{ TOPICS() } } == 0;
     
   }
 
@@ -1053,7 +1053,7 @@ Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.510  (November 05 2013))
+Version 1.600  (July 25 2014))
 
 =head1 COPYRIGHT AND LICENSE
 
