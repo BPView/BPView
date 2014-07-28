@@ -19,6 +19,9 @@
 #   proto: <tcp|udp>
 #   sleep: <seconds>
 #   read_chars: <number of characters>
+#   cache_host: <cache host>
+#   cache_port: <cache port>
+#   check_interval: <interval in sec>
 #
 
 bpviewd:
@@ -58,6 +61,26 @@ bpviewd:
 #
   
   read_chars: 1024
+
+#
+# cache_host: Cache host bind address
+#    ip address to listen for memcache
+#
+
+  cache_host: 127.0.0.1
+
+#
+# cache_port: Cache host bind port
+#    port to listen for memcache
+#
+
+  cache_port: 11211
+
+#
+# interval in sec
+#
+
+  check_interval: 5000
   
 # ---
 
