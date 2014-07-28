@@ -1,5 +1,5 @@
 Name: bpview
-Version: 0.9.1
+Version: 0.9.2
 Release: 1%{?dist}
 Summary: Business Process view for Nagios/Icinga 
 
@@ -158,6 +158,9 @@ fi
 
 
 %changelog
+* Mon Jul 28 2014 Rene Koch <rkoch@linuxland.at> 0.9.2-1
+- bump to 0.9.2 release
+
 * Wed May 14 2014 Rene Koch <rkoch@linuxland.at> 0.9.1-1
 - bump to 0.9.1 bugfix release
 - readded bpview_cfg_writer.pl
