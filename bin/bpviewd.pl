@@ -31,7 +31,7 @@ use File::Pid;
 use File::Spec;
 use Getopt::Long;
 #use Log::Log4perl;
-#use Cache::Memcached;
+use Cache::Memcached;
 use threads;
 use JSON::PP;
 
@@ -108,6 +108,10 @@ my $conf = BPView::Config->new();
 # open config file directory and push configs into hash
 my $config = eval{ $conf->read_dir( dir => $cfg_path ) };
 
+my $cache =  new Cache::Memcached {
+                 'servers' => [ $config->{ 'bpviewd' }{ 'cache_host' } . ':' . $config->{ 'bpviewd' }{ 'cache_port' }],
+                 'compress_threshold' => 10_000,
+             };
 
 # validate config
 eval { $conf->validate( 'config' => $config ) };
@@ -140,6 +144,59 @@ my $data = BPView::Data->new(
 #        logEntry("ERROR: Can't create a bpview directory on a tmpfs filesystem. You need to create a tmpfs at /run or /dev/shm", 1);
 #}
 
+my $bp_dir      = $cfg_path . "/bp-config";
+my $check_status_thread = threads->create({'void' => 1},
+    sub {
+        while(1)
+        {
+            my @files = <$bp_dir/*.yml>;
+            foreach $file (@files) {
+                $file =~ s/$bp_dir//g;
+                $file =~ s/\///;
+                $file =~ s/.yml//;
+                my $bp_name = $file;
+                my $service_state = '';
+    
+                ## TODO: extract to own sub functions
+                my $data = BPView::Data->new(
+                			provider	=> $config->{ 'provider' }{ 'source' },
+                			provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
+                         );
+                my $status = eval { $data->get_bpstatus() };
+                if ($@) {
+                  logEntry("ERROR: Faild to read status data.\nReason: $@", 0);
+                  $service_state = $result{'unknown'};
+                }
+    
+                my $bpconfig = eval{ $conf->read_config( file => $file ) };
+                if ($@) {
+                  logEntry("ERROR: Reading configuration files failed.\nReason: $@", 0);
+                  $bpconfig = '';
+                }
+    
+                # process BPs
+                my $bp = BPView::BP->new(
+                		bps			=> $status,
+                		bpconfig	=> $bpconfig,
+                		);
+                my $result = eval { $bp->get_bpstatus() };
+                if ($@) {
+                  logEntry("ERROR: Processing BPs failed.\nReason: $@", 0);
+                  $result = '';
+                }
+    
+                # If value already exists in cache -> update
+                # if not -> add
+                if($cache->get($bp_name)){
+                    $cache->set($bp_name, uc( $result ));
+                } else {
+                    $cache->add($bp_name, uc( $result ));
+                }
+            }
+            sleep($config->{ 'bpviewd' }{ 'check_interval' });
+        }
+    }
+);
 
 
 my $counter = 0;
