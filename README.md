@@ -56,6 +56,7 @@ When installing BPView via RPM package all dependencies are resolved automatical
 
 - René Koch (scrat14) _<r.koch@ovido.at>_ ( Blog: [http://ovido.at/blog](http://ovido.at/blog) )
 - Peter Stöckl (PetziAt) _<p.stoeckl@ovido.at>_ ( Blog: [http://ovido.at/blog](http://ovido.at/blog) )
+- Max Oberberger (chiemseesurfer) _<max@oberbergers.de>_ ( Blog: [http://maxoberberger.net/blog](http://maxoberberger.net/blog) )
 
 ## CONTRIBUTORS
 
