@@ -149,8 +149,14 @@ my $check_status_thread = threads->create({'void' => 1},
     sub {
         while(1)
         {
+            ## get all config files and iterate
             my @files = <$bp_dir/*.yml>;
             foreach $file (@files) {
+                ## check if config file is empty
+                if ( -z $file){
+                    logEntry("ERROR: config file $file is empty. Will be ignored", 0);
+                    continue;
+                }
                 $file =~ s/$bp_dir//g;
                 $file =~ s/\///;
                 $file =~ s/.yml//;
