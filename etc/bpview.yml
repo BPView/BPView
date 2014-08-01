@@ -220,7 +220,6 @@ businessprocess:
 #
 
   check_plugin_path: /usr/lib64/bpview/plugins
-  check_plugin: check_bp_status.pl
 
 #
 # name and path from the cmdb exporter program (system call)
