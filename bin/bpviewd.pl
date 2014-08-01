@@ -170,7 +170,7 @@ my $check_status_thread = threads->create({'void' => 1},
                          );
                 my $status = eval { $data->get_bpstatus() };
                 if ($@) {
-                  logEntry("ERROR: Faild to read status data.\nReason: $@", 0);
+                  logEntry("ERROR: Failed to read status data.\nReason: $@", 0);
                   $service_state = $result{'unknown'};
                 }
     
