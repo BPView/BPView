@@ -75,9 +75,6 @@ $log->error_die($@) if $@;
 my $gencfg = BPView::BPWriter->new();
 
 if ($config->{'businessprocess'}{'provider'} eq "bp-addon") {
-# not longer needed (pst)
-#	eval {$gencfg->gen_bpaddoncfg( 'bpcfg' => $yaml, 'config' => $config )};
-#	$log->error_die($@) if $@;
 
 	eval {$gencfg->gen_nicfg( 'bpcfg' => $yaml, 'config' => $config )};
 	$log->error_die($@) if $@;	
