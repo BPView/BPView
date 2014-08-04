@@ -151,13 +151,14 @@ my $check_status_thread = threads->create({'void' => 1},
         {
             ## get all config files and iterate
             my @files = <$bp_dir/*.yml>;
+            my $file;
             foreach $file (@files) {
 
                 ## check if config file is empty (see man perlfunc to get more
                 # informations)
                 if ( -z $file){
                     logEntry("ERROR: config file $file is empty. Will be ignored", 0);
-                    continue;
+                    next;
                 }
                 $file =~ s/$bp_dir//g;
                 $file =~ s/\///;
@@ -173,7 +174,7 @@ my $check_status_thread = threads->create({'void' => 1},
                 my $status = eval { $data->get_bpstatus() };
                 if ($@) {
                   logEntry("ERROR: Failed to read status data.\nReason: $@", 0);
-                  $service_state = $result{'unknown'};
+                  #$service_state = $result{'unknown'};
                 }
     
                 my $bpconfig = eval{ $conf->read_config( file => $file ) };
