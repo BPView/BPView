@@ -3,7 +3,8 @@
 # COPYRIGHT:
 #
 # This software is Copyright (c) 2013 by ovido
-# <sales@ovido.at>
+#                            (c) 2014 BPView Development Team
+#                                     http://github.com/BPView/BPView
 #
 # This file is part of Business Process View (BPView).
 #
@@ -26,7 +27,7 @@
 package BPView::Operations;
 
 BEGIN {
-    $VERSION = '1.100'; # Don't forget to set version and release
+    $VERSION = '1.200'; # Don't forget to set version and release
 }                                                 # date in POD below!
 
 use strict;
@@ -170,22 +171,10 @@ sub generate_config {
       $self->{ 'log' }->info($script_output);
     }
     
-    # generate Icinga config
-    $self->{ 'log' }->info("Generating Icinga configuration");
-    $script_output = `/usr/bin/bpview_cfg_writer.pl`;
-    if ($? eq 0){
-      $self->{ 'log' }->info("Sucessfully created Icinga configuration");
-    }else{
-      $self->_error_die("Failed to create Icinga configuration");
-    }
-    if ($script_output ne ""){
-      $self->{ 'log' }->info($script_output);
-    }
-
     # we have to change the service names to configuration options!
     $self->{ 'log' }->info("Restarting services");
-    if (! `/usr/bin/sudo /sbin/service icinga reload`){
-      $self->_error_die("Failed to reload Icinga: $!");
+    if (! `/usr/bin/sudo /sbin/service bpviewd restart`){
+      $self->_error_die("Failed to restart bpviewd: $!");
     }
 	if (! `/usr/bin/sudo /sbin/service httpd restart`){
 	  $self->_error_die("Failed to restart Apache: $!");
@@ -311,11 +300,12 @@ Rene Koch, E<lt>rkoch@linuxland.atE<gt>
 
 =head1 VERSION
 
-Version 1.100 (March 06 2014))
+Version 1.200 (September 02 2014))
 
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2013 by ovido gmbh
+          (C) 2014 by BPView Development Team
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as BPView itself.

@@ -79,9 +79,6 @@ eval { $conf->validate( 'config' => $config ) };
 $log->error_die($@) if $@;
 
 # open config file directory and push configs into hash
-my $bps = eval {$conf->read_dir( dir => $cfg_path . "/bp-config" )};
-$log->error_die($@) if $@;
-
 my $views = eval { $conf->read_dir( dir	=> $cfg_path . "/views" ) };
 $log->error_die($@) if $@;
 # replaces possible arrays in views with hashes
