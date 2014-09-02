@@ -40,7 +40,6 @@ Requires: httpd
 Requires: perl-suidperl
 Requires: perl-Tie-IxHash
 Requires: perl-File-Pid
-Requires: icinga
 Requires: sudo
 Requires: memcached
 
@@ -49,8 +48,6 @@ Requires(postun): /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
 
 %define apacheuser apache
 %define apachegroup apache
-%define icingauser icinga
-%define icingagroup icingacmd
 
 %global selinux_variants mls targeted
 
@@ -68,7 +65,7 @@ in a Business Process.
            --libdir=%{_libdir}/perl5/vendor_perl \
            --sysconfdir=%{_sysconfdir}/%{name} \
            --datarootdir=%{_datarootdir}/%{name} \
-           --docdir=%{_docdir}/%{name}-%{version} \
+           --docdir=%{_docdir}/%{name} \
            --with-web-user=%{apacheuser} \
            --with-web-group=%{apachegroup} \
            --with-web-conf=/etc/httpd/conf.d/bpview.conf
@@ -129,6 +126,7 @@ fi
 %files
 %defattr(-,root,root)
 %config(noreplace) %{_sysconfdir}/%{name}/bpview.yml
+%config(noreplace) %{_sysconfdir}/%{name}/bpviewd.yml
 %config(noreplace) %{_sysconfdir}/%{name}/datasource.yml
 %config(noreplace) %{_sysconfdir}/%{name}/views
 %config(noreplace) %{_sysconfdir}/%{name}/backup
@@ -136,17 +134,12 @@ fi
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/bpview.conf
 %config(noreplace) %{_sysconfdir}/sudoers.d/bpview
 %{_libdir}/perl5/vendor_perl
-%attr(0755,root,root) %{_libdir}/%{name}/plugins/check_bp_status.pl
 %attr(0755,root,root) %{_libdir}/%{name}/bpview.pl
-%attr(0755,root,root) %{_bindir}/bpview_cfg_writer.pl
 %attr(0755,root,root) %{_bindir}/bpviewd
 %attr(0755,root,root) %{_bindir}/bpview_reload
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/bp-config
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/views
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/backup
-%attr(0775,root,apache) %{_sysconfdir}/%{name}/icinga
-%attr(0664,root,apache) %{_sysconfdir}/%{name}/icinga/bpview_templates.cfg
-%attr(0664,root,apache) %{_sysconfdir}/%{name}/icinga/bpview_businessprocesses.cfg
 %attr(0775,root,root) %{_sysconfdir}/init.d/bpviewd
 %{_datarootdir}/%{name}/css
 %{_datarootdir}/%{name}/images
@@ -160,6 +153,11 @@ fi
 
 
 %changelog
+* Tue Sep 02 2014 Rene Koch <rkoch@rk-it.at> 0.10-1
+- bump to 0.10 release
+- cleanup of old unused scripts
+- install bpviewd.yml config file
+
 * Wed May 14 2014 Rene Koch <rkoch@linuxland.at> 0.9.1-1
 - bump to 0.9.1 bugfix release
 - readded bpview_cfg_writer.pl

@@ -45,7 +45,7 @@ VERSION=@VERSION@
 
 distdir=$(PACKAGE)-$(VERSION)
 DIST_COMMON=config.sub configure.ac configure NEWS INSTALL missing aclocal.m4 install-sh Makefile.am ChangeLog COPYING README.md AUTHORS Makefile.in config.guess autogen.sh bpview.spec
-DISTFILES=$(DIST_COMMON) $(BIN_DIR) $(CGI_DIR) $(ETC_DIR) $(LIB_DIR) $(LOG_DIR) $(SHARE_DIR) $(SELINUX_DIR) sample-config docs tools bpview.rh6.init
+DISTFILES=$(DIST_COMMON) $(BIN_DIR) $(CGI_DIR) $(ETC_DIR) $(LIB_DIR) $(LOG_DIR) $(SHARE_DIR) $(SELINUX_DIR) sample-config docs tools bpview.rh6.init.in
 
 # compiler settings
 prefix=@prefix@
@@ -66,11 +66,6 @@ all:
 	sed -i 's!/data/www/BPView/share!$(DATAROOTDIR)!' sample-config/$(HTTPCONF).tmp
 	cp sample-config/$(HTTPCONF).tmp sample-config/$(HTTPCONF).conf
 	rm -f sample-config/$(HTTPCONF).tmp
-	
-	cp sample-config/$(BPVIEWTMPL).cfg.in sample-config/$(BPVIEWTMPL).tmp
-	sed -i -e 's!/usr/lib64/nagios/plugins/check_bpview_status.pl!$(CGIDIR)/plugins/check_bpview_status.pl!' sample-config/$(BPVIEWTMPL).tmp
-	cp sample-config/$(BPVIEWTMPL).tmp sample-config/$(BPVIEWTMPL).cfg
-	rm -f sample-config/$(BPVIEWTMPL).tmp
 	
 	cp $(INITRH6).in $(INITRH6).tmp
 	sed -i -e 's!PROG_BIN=.*!PROG_BIN="$(BINDIR)"!' $(INITRH6).tmp
@@ -93,11 +88,7 @@ install:
 	done
 	
 	$(INSTALL) -D -m 644 $(INSTALL_OPTS) sample-config/httpd.conf $(DESTDIR)$(WEBCONF)
-	$(INSTALL) -D -m 664 $(INSTALL_OPTS) sample-config/bpview_templates.cfg $(DESTDIR)$(ETCDIR)/icinga/bpview_templates.cfg
-	$(INSTALL) -D -m 664 $(INSTALL_OPTS) sample-config/bpview_businessprocesses.cfg $(DESTDIR)$(ETCDIR)/icinga/bpview_businessprocesses.cfg
 	$(INSTALL) -D -m 440 $(INSTALL_OPTS) sample-config/sudoers $(DESTDIR)/etc/sudoers.d/bpview
-	
-	$(INSTALL) -d $(DESTDIR)/var/cache/bpview
 	
 	$(INSTALL) -D -m 775 $(INSTALL_OPTS) bpview.rh6.init $(DESTDIR)/etc/init.d/bpviewd
 
