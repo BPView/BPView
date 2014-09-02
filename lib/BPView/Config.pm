@@ -112,7 +112,7 @@ sub new {
   	if (exists $self->{ $key }){
   	  $self->{ $key } = $options{ $key };
   	}else{
-  	  croak "Unknown option: $key";
+  	  die "Unknown option: $key";
   	}
   }
   
@@ -153,12 +153,12 @@ sub read_config {
   	if (exists $self->{ $key }){
   	  $self->{ $key } = $options{ $key };
   	}else{
-  	  croak "Unknown option: $key";
+  	  die "Unknown option: $key";
   	}
   }
   
   # validation
-  croak ("Missing file!") unless defined $self->{ 'file' };
+  die ("Missing file!") unless defined $self->{ 'file' };
   
   my %return;
   
@@ -166,7 +166,7 @@ sub read_config {
 #  chomp $file;
   $YAML::Syck::ImplicitTyping = 1;
   my $yaml = eval { LoadFile( $self->{ 'file' } ) };
-  croak ("Failed to parse config file $self->{ 'file' }\n") if $@;
+  die ("Failed to parse config file $self->{ 'file' }\n") if $@;
   
   return $yaml;
   
@@ -203,13 +203,13 @@ sub read_dir {
   	if (exists $self->{ $key }){
   	  $self->{ $key } = $options{ $key };
   	}else{
-  	  croak "Unknown option: $key";
+  	  die "Unknown option: $key";
   	}
   }
   
   # validation
-  croak ("Missing directory!") unless defined $self->{ 'dir' };
-  croak ("$self->{ 'dir' } isn't a directory!") if ! -d $self->{ 'dir' };
+  die ("Missing directory!") unless defined $self->{ 'dir' };
+  die ("$self->{ 'dir' } isn't a directory!") if ! -d $self->{ 'dir' };
   
   my %conf;
   
@@ -266,20 +266,20 @@ sub validate {
   	if (exists $self->{ $key }){
   	  $self->{ $key } = $options{ $key };
   	}else{
-  	  croak "Unknown option: $key";
+  	  die "Unknown option: $key";
   	}
   }
   
   # validation
-  croak ("Missing config!") unless defined $self->{ 'config' };
+  die ("Missing config!") unless defined $self->{ 'config' };
   
   # go through config values
   my $config = $self->{ 'config' };
   # parameters given?
-  croak "src_dir missing in bpview.yml!"  unless $config->{'bpview'}{'src_dir'};
-  croak "data_dir missing in bpview.yml!" unless $config->{'bpview'}{'data_dir'};
-  croak "site_url missing in bpview.yml!" unless $config->{'bpview'}{'site_url'};
-  croak "provider missing in bpview.yml!" unless $config->{'provider'}{'source'};
+  die "src_dir missing in bpview.yml!"  unless $config->{'bpview'}{'src_dir'};
+  die "data_dir missing in bpview.yml!" unless $config->{'bpview'}{'data_dir'};
+  die "site_url missing in bpview.yml!" unless $config->{'bpview'}{'site_url'};
+  die "provider missing in bpview.yml!" unless $config->{'provider'}{'source'};
   
   # check if directories exist
   $self->_check_dir( "src_dir", $config->{'bpview'}{'src_dir'} );
@@ -332,12 +332,12 @@ sub process_views {
   	if (exists $self->{ $key }){
   	  $self->{ $key } = $options{ $key };
   	}else{
-  	  croak "Unknown option: $key";
+  	  die "Unknown option: $key";
   	}
   }
   
   # validation
-  croak ("Missing config!") unless defined $self->{ 'config' };
+  die ("Missing config!") unless defined $self->{ 'config' };
   
   # go through config values
   my $config = $self->{ 'config' };
@@ -345,16 +345,16 @@ sub process_views {
   # go through hash
   foreach my $view ( keys %{ $config }){
   	
-  	croak ("Missing 'views' option for view $view") unless ( exists $config->{ $view }{ 'views' } );
-  	croak ("Empty view $view") unless ( $config->{ $view }{ 'views' } );
+  	die ("Missing 'views' option for view $view") unless ( exists $config->{ $view }{ 'views' } );
+  	die ("Empty view $view") unless ( $config->{ $view }{ 'views' } );
   	
   	foreach my $environment ( keys %{ $config->{ $view }{ 'views' } } ){
   		
-  	  croak ("Missing topic in environment $environment ($view)") unless ( $config->{ $view }{ 'views' }{ $environment });
+  	  die ("Missing topic in environment $environment ($view)") unless ( $config->{ $view }{ 'views' }{ $environment });
   	  
   	  foreach my $topic ( keys %{ $config->{ $view }{ 'views' }{ $environment } }){
   	  	
-  	    croak ("Missing product in topic $topic ($view -> $environment)") unless ( $config->{ $view }{ 'views' }{ $environment }{ $topic });
+  	    die ("Missing product in topic $topic ($view -> $environment)") unless ( $config->{ $view }{ 'views' }{ $environment }{ $topic });
   	    
   	    if (ref ($config->{$view}{'views'}{$environment}{$topic}) eq "ARRAY"){
   	    	

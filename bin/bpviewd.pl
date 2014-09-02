@@ -334,6 +334,7 @@ my $socket_thread = threads->create({'void' => 1},
                      provdata   => $config->{ 'bpview'}{ $config->{ 'bpview' }{ 'datasource' } },
                      bps        => $bps,
                      filter     => $filter,
+                     cache		=> $cache,
                    );
 
 				$log->debug("Getting business process status.");

@@ -26,7 +26,7 @@
 package BPView::BP;
 
 BEGIN {
-    $VERSION = '1.000'; # Don't forget to set version and release
+    $VERSION = '1.010'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -108,13 +108,13 @@ sub new {
   	if (exists $self->{ $key }){
   	  $self->{ $key } = $options{ $key };
   	}else{
-  	  croak "Unknown option: $key";
+  	  die "Unknown option: $key";
   	}
   }
   
   # parameter validation
-  croak "Missing business process hash!" unless defined $self->{ 'bps' };
-  croak "Missing business process config!" unless defined $self->{ 'bpconfig' };
+  die "Missing business process hash!" unless defined $self->{ 'bps' };
+  die "Missing business process config!" unless defined $self->{ 'bpconfig' };
   
   bless $self, $class;
   return $self;
@@ -148,12 +148,12 @@ sub get_bpstatus {
   	if (exists $self->{ $key }){
   	  $self->{ $key } = $options{ $key };
   	}else{
-  	  croak "Unknown option: $key";
+  	  die "Unknown option: $key";
   	}
   }
 
-  croak "Missing business process hash!" unless defined $self->{ 'bps' };
-  croak "Missing business process config!" unless defined $self->{ 'bpconfig' };
+  die "Missing business process hash!" unless defined $self->{ 'bps' };
+  die "Missing business process config!" unless defined $self->{ 'bpconfig' };
   
   my $result = undef;
   
@@ -171,17 +171,11 @@ sub get_bpstatus {
   	  $result = $self->_min( $self->{ 'bpconfig' }{ $bp_name }{ 'HOSTS' }, $self->{ 'bpconfig' }{ $bp_name }{ 'BP' }{ 'MIND' } );	
   	}else{
   	  # unknown conjunction
-  	  croak "Unknown conjunction: " . $self->{ 'bpconfig' }{ $bp_name }{ 'BP' }{ 'TYPE' };
+  	  die "Unknown conjunction: " . $self->{ 'bpconfig' }{ $bp_name }{ 'BP' }{ 'TYPE' };
   	}
   	
   }
  
-  # human readable results 
-  $result = "ok" if $result eq 0;
-  $result = "warning" if $result eq 1;
-  $result = "critical" if $result eq 2;
-  $result = "unknown" if $result eq 3;
-  
   return $result;
 
 }
@@ -336,7 +330,7 @@ Rene Koch, E<lt>r.koch@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.000  (October 18 2013))
+Version 1.010  (September 02 2014))
 
 =head1 COPYRIGHT AND LICENSE
 

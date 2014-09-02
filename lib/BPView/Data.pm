@@ -26,13 +26,14 @@
 package BPView::Data;
 
 BEGIN {
-    $VERSION = '1.600'; # Don't forget to set version and release
+    $VERSION = '1.700'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
 use warnings;
 use YAML::Syck;
 use Carp;
+use Cache::Memcached;
 use File::Spec;
 use File::stat;
 use JSON::PP;
@@ -119,6 +120,7 @@ sub new {
   	"config"	=> undef,
   	"bps"		=> undef,
   	"filter"	=> undef,	# filter states (e.g. don't display bps with state ok)
+  	"cache"		=> undef,	# memcached object
   };
   
   for my $key (keys %options){
@@ -152,7 +154,7 @@ sub new {
  get_status ( 'views' => $views )
 
 Connects to backend and queries status of business process.
-Business process must be available in Icinga/Nagios!
+Business process must be available in memcached!
 Returns JSON data.
 
   my $json = $get_status( 'views' => $views );
@@ -179,7 +181,7 @@ sub get_status {
   	if (exists $self->{ $key }){
   	  $self->{ $key } = $options{ $key };
   	}else{
-  	  croak "Unknown option: $key";
+  	  die "Unknown option: $key";
   	}
   }
   
@@ -192,34 +194,41 @@ sub get_status {
 			my $bp = $environment . "-" . $topic . "-" . $product;
 			# replace non-chars with _ except -, due to Nagios limitations
 			$bp =~ s/[^a-zA-Z0-9-]/_/g;
-			push @{ $service_names }, $bp;
+			push @{ $service_names }, lc($bp);
 		}
   	}
   }
+  
+  my $result = {};
+  # fetch data from memcached
+  my $cache = $self->{ 'cache' };
 
-  my $result = undef;
-  # fetch data from Icinga/Nagios
-  if ($self->{'provider'} eq "ido"){
-  	
-  	# construct SQL query
-  	my $sql = $self->_query_ido( $service_names );
-  	# get results
-  	$result = $self->_get_ido( $sql );
-  	
-  }elsif ($self->{'provider'} eq "mk-livestatus"){
-  	
-  	# construct query
-  	my $query = $self->_query_livestatus( $service_names );
-  	# get results
-  	$result = eval { $self->_get_livestatus( $query ) };
-  	
-  	# mk-livestatus error handling
-  	croak "No data received via mk-livestatus." unless $result;
-  	
-  }else{
-  	carp ("Unsupported provider: $self->{'provider'}!");
+  for (my $i=0;$i<=@{ $service_names };$i++){
+    $result->{ $service_names->[$i] }{ 'service' }	= $service_names->[$i];
+    $result->{ $service_names->[$i] }{ 'state' }	= $cache->get( $service_names->[$i] ); # or die "Couldn't fetch data from memcached: $!"; 
   }
-
+  
+#  if ($self->{'provider'} eq "ido"){
+#  	
+#  	# construct SQL query
+#  	my $sql = $self->_query_ido( $service_names );
+#  	# get results
+#  	$result = $self->_get_ido( $sql );
+#  	
+#  }elsif ($self->{'provider'} eq "mk-livestatus"){
+#  	
+#  	# construct query
+#  	my $query = $self->_query_livestatus( $service_names );
+#  	# get results
+#  	$result = eval { $self->_get_livestatus( $query ) };
+#  	
+#  	# mk-livestatus error handling
+#  	die "No data received via mk-livestatus." unless $result;
+#  	
+#  }else{
+#  	die ("Unsupported provider: $self->{'provider'}!");
+#  }
+  
 	# sorting the hash 
 	my $views = dclone $self->{ VIEWS() };
 	my %views_empty;
@@ -711,7 +720,7 @@ sub query_provider {
 sub _query_ido {
 	
   my $self			= shift;
-  my $service_names	= shift or croak ("Missing service_names!");
+  my $service_names	= shift or die ("Missing service_names!");
   
   my $sql = undef;
   
@@ -762,7 +771,7 @@ sub _query_ido {
 sub _query_livestatus {
 	
   my $self			= shift;
-  my $service_names	= shift or croak ("Missing service_names!");
+  my $service_names	= shift or die ("Missing service_names!");
   
   my $query = undef;
    
@@ -793,7 +802,7 @@ Columns: display_name state\n";
 sub _get_ido {
 	
   my $self	= shift;
-  my $sql	= shift or croak ("Missing SQL query!");
+  my $sql	= shift or die ("Missing SQL query!");
   my $fetch	= shift;	# how to handle results
   
   my $result;
@@ -807,18 +816,18 @@ sub _get_ido {
 	use DBD::Pg;  # PostgreSQL
   	$dsn = "DBI:Pg:dbname=$self->{'provdata'}{'database'};host=$self->{'provdata'}{'host'};port=$self->{'provdata'}{'port'}";
   }else{
-  	croak "Unsupported database type: $self->{'provdata'}{'type'}";
+  	die "Unsupported database type: $self->{'provdata'}{'type'}";
   }
   
   # connect to database
   my $dbh   = eval { DBI->connect_cached($dsn, $self->{'provdata'}{'username'}, $self->{'provdata'}{'password'}) };
   if ($DBI::errstr){
-  	croak "$DBI::errstr: $@";
+  	die "$DBI::errstr: $@";
   }
   my $query = eval { $dbh->prepare( $sql ) };
   eval { $query->execute };
   if ($DBI::errstr){
-  	croak "$DBI::errstr: $@";
+  	die "$DBI::errstr: $@";
   }
   
   # prepare return
@@ -857,7 +866,7 @@ sub _get_ido {
   	}
   	
   }else{
-  	croak "Unsupported fetch method: " . $fetch;
+  	die "Unsupported fetch method: " . $fetch;
   }
   
   
@@ -940,11 +949,11 @@ sub _get_livestatus {
   	}
 
   }else{
-  	croak "Unsupported fetch method: " . $fetch;
+  	die "Unsupported fetch method: " . $fetch;
   }
   
   if($Monitoring::Livestatus::ErrorCode) {
-    croak "Getting Monitoring checkresults failed: $Monitoring::Livestatus::ErrorMessage";
+    die "Getting Monitoring checkresults failed: $Monitoring::Livestatus::ErrorMessage";
   }
   
   return $result;
@@ -958,8 +967,8 @@ sub _get_livestatus {
 sub _open_cache {
 
   my $self = shift;
-  my $cache_time = shift or croak ("Missing cache time!");
-  my $cache_file = shift or croak ("Missing cache file!");
+  my $cache_time = shift or die ("Missing cache time!");
+  my $cache_file = shift or die ("Missing cache file!");
   
   return 1 unless -f $cache_file;
   
@@ -988,13 +997,13 @@ sub _open_cache {
 sub _write_cache {
 
   my $self = shift;
-  my $cache_time = shift or croak ("Missing cache time!");
-  my $cache_file = shift or croak ("Missing cache file!");
-  my $data = shift or croak ("Missing data to write to cache file!");
+  my $cache_time = shift or die ("Missing cache time!");
+  my $cache_file = shift or die ("Missing cache file!");
+  my $data = shift or die ("Missing data to write to cache file!");
   
   my $yaml = Dump ( $data );
   # write into YAML file
-  open (CACHE, "> $cache_file") or croak ("Can't open file $cache_file for writing: $!");
+  open (CACHE, "> $cache_file") or die ("Can't open file $cache_file for writing: $!");
   print CACHE $yaml;
   close CACHE;
   
@@ -1053,7 +1062,7 @@ Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.600  (July 25 2014))
+Version 1.700  (September 02 2014))
 
 =head1 COPYRIGHT AND LICENSE
 
