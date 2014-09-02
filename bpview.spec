@@ -1,5 +1,5 @@
 Name: bpview
-Version: 0.9.1
+Version: 0.10
 Release: 1%{?dist}
 Summary: Business Process view for Nagios/Icinga 
 
@@ -34,6 +34,7 @@ Requires: perl-Time-HiRes
 Requires: perl-Crypt-SSLeay
 Requires: perl-File-Copy-Recursive
 Requires: perl-Proc-Daemon
+Requires: perl-Cache-Memcached
 Requires: mod_fcgid
 Requires: httpd
 Requires: perl-suidperl
@@ -41,6 +42,7 @@ Requires: perl-Tie-IxHash
 Requires: perl-File-Pid
 Requires: icinga
 Requires: sudo
+Requires: memcached
 
 Requires(post):   /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
 Requires(postun): /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
