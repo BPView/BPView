@@ -82,17 +82,65 @@ bpview:
   
   template: default
 
-    
+
 # ---
   
 #
-# This is the BPView refresh interval config block.
-# behaviour of BPView. The configuration format is YAML.
+# This is the BPViewd config block which controls the connection
+# details to BPView daemon. The configuration format is YAML.
 #
 # Make sure to use correct YAML syntax and especially don't use
 # tabs instead of spaces!
 #
-# The structure and shifting hast to be:
+# The structure and shifting has to be:
+# bpviewd:
+#   peer_host: <hostname|ip address>
+#   peer_port: <port>
+#   proto: <tcp|udp>
+#   response_chars: <characters>
+#
+
+bpviewd:
+
+#
+# peer_port: Peer bpviewd host address
+#    Peer ip address to connect for API calls.
+#
+
+  peer_host: "127.0.0.1"
+
+#
+# peer_port: Peer bpviewd host port
+#    Peer port to connect for API calls.
+#
+
+  peer_port: 7777
+
+#
+# proto: Protocol to use for API calls
+#    valid values are: tcp | udp
+#
+  
+  proto: tcp
+
+#
+# response_chars: number of characters to send to daemon
+#    Increase this number when dealing with many dashboards and
+#    a lot of data (hosts and services).
+#
+  
+  response_chars: 50240
+
+# ---
+  
+#
+# This is the BPView refresh interval config block.
+# The configuration format is YAML.
+#
+# Make sure to use correct YAML syntax and especially don't use
+# tabs instead of spaces!
+#
+# The structure and shifting has to be:
 # refresh:
 #   interval: <interval>
 #

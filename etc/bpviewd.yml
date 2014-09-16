@@ -28,7 +28,7 @@ bpviewd:
 
 #
 # local_host: Local host bind address
-#    Local ip address to listen for API calls
+#    Local ip address to listen for API calls.
 #
   local_host: "0.0.0.0"
 
@@ -38,7 +38,7 @@ bpviewd:
 #
 
   local_port: 7777
-  
+
 #
 # proto: Protocol to use for API calls
 #    valid values are: tcp | udp
@@ -60,7 +60,7 @@ bpviewd:
 #    a lot of data (hosts and services).
 #
   
-  read_chars: 1024
+  read_chars: 10240
 
 #
 # cache_host: Cache host bind address

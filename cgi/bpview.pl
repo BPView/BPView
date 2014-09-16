@@ -31,16 +31,31 @@ use CGI::Carp qw(fatalsToBrowser);
 use Log::Log4perl;
 use JSON::PP;
 
-
 # for debugging only
 use Data::Dumper;
 
 # define default paths required to read config files
-my ($lib_path, $cfg_path);
+my ($lib_path, $cfg_path, $cfg_file, $log_path, $reload_log);
+
+
+#----------------------------------------------------------------
+#
+# Configuration
+#
+
 BEGIN {
   $lib_path = "/usr/lib64/perl5/vendor_perl";   # path to BPView lib directory
   $cfg_path = "/etc/bpview";                    # path to BPView etc directory
+  $cfg_file = "bpview.yml";                     # BPView config file
+  $log_path = "/var/log/bpview/";               # log file path
+  $reload_log = $log_path . "reload.log";   	# path to BPView reload log file (default: /var/log/bpview/reload.log)
 }
+
+#
+# End of configuration block - don't change anything below
+# this line!
+#
+#----------------------------------------------------------------
 
 
 # load custom Perl modules
@@ -53,11 +68,10 @@ use BPView::Web;
 my $conf = BPView::Config->new();
 
 # open config file directory and push configs into hash
-my $config = eval{ $conf->read_dir( dir => $cfg_path ) };
+my $config = eval{ $conf->read_config( file => $cfg_path . "/" . $cfg_file ) };
 die "Reading configuration files failed.\nReason: $@" if $@;
 
 # initialize Log4perl
-my $reload_log = "/var/log/bpview/reload.log";
 my $logconf = "
     log4perl.category.BPView.Log		= INFO, BPViewLog
     log4perl.category.BPViewReload.Log	= INFO, BPViewReloadLog
@@ -75,7 +89,7 @@ my $log = Log::Log4perl::get_logger("BPView::Log");
 
 
 # validate config
-eval { $conf->validate( 'config' => $config ) };
+eval { $conf->validate_bpview( 'config' => $config ) };
 $log->error_die($@) if $@;
 
 # open config file directory and push configs into hash
@@ -315,9 +329,9 @@ sub _connect_api {
   
   # create a connection socket
   my $socket = new IO::Socket::INET (
-  	PeerHost	=> '127.0.0.1',
-  	PeerPort	=> 7777,
-  	Proto		=> 'tcp',
+  	PeerHost	=> $config->{ 'bpviewd' }{ 'peer_host' },
+  	PeerPort	=> $config->{ 'bpviewd' }{ 'peer_port' },
+  	Proto		=> $config->{ 'bpviewd' }{ 'proto' },
   );
   
   my $error = undef;
@@ -336,7 +350,7 @@ sub _connect_api {
   
   # receive a response of up to 5024 characters from server
   my $response = "";
-  $socket->recv($response, 50240);
+  $socket->recv($response, $config->{ 'bpviewd' }{ 'response_chars' });
   
   # close socket
   $socket->close();

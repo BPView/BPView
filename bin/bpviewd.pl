@@ -38,16 +38,33 @@ use JSON::PP;
 # for debugging only
 use Data::Dumper;
 
-my ($lib_path, $cfg_path, $log_path, $pid_path, $daemonName, $dieNow);
+my ($lib_path, $cfg_path, $cfg_files, $log_path, $pid_path, $daemonName, $dieNow);
 my ($debug, $logFile, $pidFile);
+
+
+#----------------------------------------------------------------
+#
+# Configuration
+#
+
 BEGIN {
   $lib_path = "/usr/lib64/perl5/vendor_perl";        # path to BPView lib directory
-  $cfg_path = "/etc/bpview";                         # path to BPView etc directory
+  $cfg_path = "/etc/bpview";                         # path to BPViewd etc directory
+  $cfg_files = "bpviewd.yml datasource.yml";         # bpviewd config files
   $log_path = "/var/log/bpview/";                    # log file path
   $pid_path = "/var/run/";							 # path to /run or /var/run
-  $daemonName    = "bpviewd";                             # the name of this daemon
-  $dieNow        = 0;                                     # used for "infinte loop" construct - allows daemon mode to gracefully exit
-  $logFile       = $log_path. $daemonName . ".log";
+  $daemonName = "bpviewd";                           # the name of this daemon
+  $logFile = $log_path. $daemonName . ".log";		 # logfile (default: /var/log/bpview/bpviewd.log)
+}
+
+#
+# End of configuration block - don't change anything below
+# this line!
+#
+#----------------------------------------------------------------
+
+BEGIN {
+  $dieNow = 0;		# used for "infinte loop" construct - allows daemon mode to gracefully exit
 }
 
 my $pidfile = $pid_path . $daemonName . ".pid";
@@ -114,12 +131,19 @@ $SIG{PIPE} = 'ignore';
 my $conf = BPView::Config->new();
 
 # open config file directory and push configs into hash
-$log->info("Opening main config files in $cfg_path.");
-my $config = eval{ $conf->read_dir( dir => $cfg_path ) };
-if ($@){
+my $config = {};
+my @cfg_files_arr = split(" ", $cfg_files);
+foreach my $cfg_file (@cfg_files_arr){
+  $log->info("Opening config files $cfg_path/$cfg_file.");
+  my $tmp = eval{ $conf->read_config( file => $cfg_path . "/" . $cfg_file ) };
+  foreach my $val (keys %{ $tmp }){
+  	$config->{ $val } = $tmp->{ $val };
+  }
+  if ($@){
 	$log->error_die("Failed to read configuration: $@");
-}else{
+  }else{
 	$log->debug("Reading main configuration succeeded.");
+  }
 }
 
 my $cache =  new Cache::Memcached {
@@ -129,7 +153,7 @@ my $cache =  new Cache::Memcached {
 
 # validate config
 $log->info("Validating configuration.");
-eval { $conf->validate( 'config' => $config ) };
+eval { $conf->validate_bpviewd( 'config' => $config ) };
 if ($@){
 	$log->error_die("Failed to validate config: $@");
 }else{
@@ -172,18 +196,8 @@ my $data = BPView::Data->new(
      filter       => "",
    );
 
-## Create a working dir on a tmpfs filesystem
-#if (-d "/run") {
-#        mkdir "/run/bpview" unless -d "/run/bpview";
-#}
-#elsif (-d "/dev/shm") {
-#        mkdir "/dev/shm/bpview" unless -d "/dev/shm/bpview";
-#}
-#else {
-#        logEntry("ERROR: Can't create a bpview directory on a tmpfs filesystem. You need to create a tmpfs at /run or /dev/shm", 1);
-#}
-
 my $bp_dir      = $cfg_path . "/bp-config";
+$log->debug("Creating threads.");
 my $check_status_thread = threads->create({'void' => 1},
     sub {
         while(1)
@@ -416,8 +430,11 @@ sub signalHandler {
 
 # do this stuff when exit() is called.
 END {
-#	if ($logging) { close LOG }
-	$log->debug("Stopping bpviewd.");
-	$log->debug("Removing PID file $pidfile.");
-	$pid_file->remove if defined $pid_file;
+	if (defined $pid_file){
+		$log->debug("Stopping bpviewd.");
+		$log->debug("Removing PID file $pidfile.");
+		$pid_file->remove if defined $pid_file;
+	}else{
+		$log->debug("Stopping bpviewd child.");
+	}
 }

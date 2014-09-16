@@ -208,27 +208,6 @@ sub get_status {
     $result->{ $service_names->[$i] }{ 'state' }	= $cache->get( $service_names->[$i] ); # or die "Couldn't fetch data from memcached: $!"; 
   }
   
-#  if ($self->{'provider'} eq "ido"){
-#  	
-#  	# construct SQL query
-#  	my $sql = $self->_query_ido( $service_names );
-#  	# get results
-#  	$result = $self->_get_ido( $sql );
-#  	
-#  }elsif ($self->{'provider'} eq "mk-livestatus"){
-#  	
-#  	# construct query
-#  	my $query = $self->_query_livestatus( $service_names );
-#  	# get results
-#  	$result = eval { $self->_get_livestatus( $query ) };
-#  	
-#  	# mk-livestatus error handling
-#  	die "No data received via mk-livestatus." unless $result;
-#  	
-#  }else{
-#  	die ("Unsupported provider: $self->{'provider'}!");
-#  }
-  
 	# sorting the hash 
 	my $views = dclone $self->{ VIEWS() };
 	my %views_empty;
@@ -281,23 +260,6 @@ sub get_status {
     	if (defined ($result->{ $service }{ 'state' })){
   	      # found status in IDO database
 	      $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'state' } = $result->{ $service }{ 'state' };
-	      
-#	      # Due to exit code limitations in Nagios/Icinga we use state 4 for host down issues
-
-# temporary disabled host check due too performance issues
-# rewrite of this logic is required!
-#
-#	      if ($result->{ $service }{ 'state' } != 0){
-#	      	my $details = $self->get_details( 'bp' => $service );
-#	      	my $json = JSON::PP->new->pretty;
-#            $json->utf8('true');
-#            $details = $json->decode($details);
-#	      	foreach my $host (keys %{ $details }){
-#	      	  if (defined $details->{ $host }{ '__HOSTCHECK' } ){
-#	      	  	$viewOut->{ $environment }{ $topic }{ $product }{ 'state' } = 4 if $details->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } ne "OK";
-#	      	  }
-#	      	}
-#	      }
 	      
 	    }else{
 	      # didn't found status in IDO database

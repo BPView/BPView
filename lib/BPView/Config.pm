@@ -26,7 +26,7 @@
 package BPView::Config;
 
 BEGIN {
-    $VERSION = '1.300'; # Don't forget to set version and release
+    $VERSION = '1.310'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -246,18 +246,18 @@ sub read_dir {
 
 #----------------------------------------------------------------
 
-=head2 validate
+=head2 validate_bpview
 
- validate ( 'config' => $config)
+ validate_bpview ( 'config' => $config)
 
 Validates a specified config hashref if required parameters for BPView are present.
 Croaks on error.
 
-  $conf->validate( 'config' => $config);
+  $conf->validate_bpview( 'config' => $config);
 
 =cut
 
-sub validate {
+sub validate_bpview {
 	
   my $self		= shift;
   my %options	= @_;
@@ -279,11 +279,47 @@ sub validate {
   die "src_dir missing in bpview.yml!"  unless $config->{'bpview'}{'src_dir'};
   die "data_dir missing in bpview.yml!" unless $config->{'bpview'}{'data_dir'};
   die "site_url missing in bpview.yml!" unless $config->{'bpview'}{'site_url'};
-  die "provider missing in bpview.yml!" unless $config->{'provider'}{'source'};
   
   # check if directories exist
   $self->_check_dir( "src_dir", $config->{'bpview'}{'src_dir'} );
   $self->_check_dir( "data_dir", $config->{'bpview'}{'data_dir'} );
+  
+}
+
+
+#----------------------------------------------------------------
+
+=head2 validate_bpviewd
+
+ validate_bpviewd ( 'config' => $config)
+
+Validates a specified config hashref if required parameters for BPView are present.
+Croaks on error.
+
+  $conf->validate_bpviewd( 'config' => $config);
+
+=cut
+
+sub validate_bpviewd {
+	
+  my $self		= shift;
+  my %options	= @_;
+  
+  for my $key (keys %options){
+  	if (exists $self->{ $key }){
+  	  $self->{ $key } = $options{ $key };
+  	}else{
+  	  die "Unknown option: $key";
+  	}
+  }
+  
+  # validation
+  die ("Missing config!") unless defined $self->{ 'config' };
+  
+  # go through config values
+  my $config = $self->{ 'config' };
+  # parameters given?
+  die "provider missing in bpview.yml!" unless $config->{'provider'}{'source'};
   
   # check data backend provider
   $self->_check_provider( "provider", $config->{'provider'}{'source'}, $config->{ $config->{'provider'}{'source'} } );
@@ -481,70 +517,6 @@ sub get_css {
 }
 
 
-#----------------------------------------------------------------
-
-=head2 validate_bpconfig
-
- validate_bpconfig ( 'config' => $config)
-
-Validates a specified hashref if required parameters are present.
-Errors are printed out.
-Returns 0 or 1 (Config failure).
-
-  my $config = $conf->validate_bpconfig( 'config' => $config);
-
-=cut
-
-sub validate_bpconfig {
-	
-	my $self	= shift;
-	my %options	= @_;
-	
-	for my $key (keys %options){
-		if (exists $self->{ $key }){
-			$self->{ $key } = $options{ $key };
-		}else{
-			croak "Unknown option: $key";
-		}
-	}
-
-	# validation
-	croak ("Missing config!") unless defined $self->{ 'config' };
-
-	# go through config values
-	my $config = $self->{ 'config' };
-	# parameters given?
-
-	foreach my $bp_host (keys %{ $config }) {
-		push @{ $self->{'errors'} }, "HOSTS value missing!"  unless $config->{$bp_host}{'HOSTS'};
-		push @{ $self->{'errors'} }, "BP value missing!"  unless $config->{$bp_host}{'BP'};
-
-		foreach my $key0 (keys %{ $config->{$bp_host}{'HOSTS'} }) {
-			push @{ $self->{'errors'} }, "Host definition or BPROC definition missing!"  unless $config->{$bp_host}{'HOSTS'}{$key0};
-
-			unless ($config->{$bp_host}{'BP'}) {
-				foreach my $key1 (keys %{ $config->{$bp_host}{'HOSTS'}{ $key0 } }) {
-					push @{ $self->{'errors'} }, "Service definition definition missing!"  unless $config->{$bp_host}{'HOSTS'}{$key0}{$key1};
-				}
-			}
-		}
-	}
-	# print errors
-	if ($self->{'errors'}){
-		print "<p>";
-		print "Configuration validation failed: <br />";
-	 
-		for (my $x=0;$x< scalar @{ $self->{'errors'} };$x++){
-			print $self->{'errors'}->[$x] . "<br />";
-		}
-	  
-		print "</p>";
-		return 1;
-	}
-	return 0;
-}
-
-
 
 
 #----------------------------------------------------------------
@@ -629,7 +601,7 @@ Read all config files from a given directory and validate its parameters.
   
   my $conf = BPView::Config->new( 'directory' => $directory ));
   my $config = $conf->read_dir();
-  $conf->validate( 'config' => $config);
+  $conf->validate_bpview( 'config' => $config);
   
 Read view config files and get dashboard names.
 
@@ -651,7 +623,7 @@ Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.300  (July 25 2014))
+Version 1.310  (September 16 2014))
 
 =head1 COPYRIGHT AND LICENSE
 

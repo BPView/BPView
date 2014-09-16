@@ -29,11 +29,26 @@ use warnings;
 use Log::Log4perl;
 
 # define default paths required to read config files
-my ($lib_path, $cfg_path);
+my ($lib_path, $cfg_path, $log_path, $reload_log);
+
+
+#----------------------------------------------------------------
+#
+# Configuration
+#
+
 BEGIN {
   $lib_path = "/usr/lib64/perl5/vendor_perl";   # path to BPView lib directory
   $cfg_path = "/etc/bpview";                    # path to BPView etc directory
+  $log_path = "/var/log/bpview/";               # log file path
+  $reload_log = $log_path . "reload.log";   	# path to BPView reload log file (default: /var/log/bpview/reload.log)
 }
+
+#
+# End of configuration block - don't change anything below
+# this line!
+#
+#----------------------------------------------------------------
 
 
 # load custom Perl modules
@@ -49,7 +64,6 @@ my $config = eval{ $conf->read_dir( dir => $cfg_path ) };
 die "Reading configuration files failed.\nReason: $@" if $@;
 
 # initialize Log4perl
-my $reload_log = "/var/log/bpview/reload.log";
 my $logconf = "
     log4perl.category.BPViewReload.Log			= INFO, BPViewReloadLog
     log4perl.appender.BPViewReloadLog			= Log::Log4perl::Appender::File
