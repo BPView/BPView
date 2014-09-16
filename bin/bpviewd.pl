@@ -221,7 +221,7 @@ my $check_status_thread = threads->create({'void' => 1},
                 }else{
                 	$log->debug("Successfully fetched status data.");
                 }
-    
+ 
     			$log->debug("Reading config file $file.");
                 my $bpconfig = eval{ $conf->read_config( file => $file ) };
                 #$log->debug(Dumper $bpconfig);
@@ -325,8 +325,6 @@ my $socket_thread = threads->create({'void' => 1},
 					$filter->{ 'name' } = $filter_hash->{ 'name' };
                 }
                 
-                $log->debug("Client filter request: " . Dumper $filter_hash);
-
                 my $dashboard_API = BPView::Data->new(
                      config     => $config,
                      views      => $views->{ $filter_hash->{'dashboard'} }{ 'views' },
@@ -341,8 +339,6 @@ my $socket_thread = threads->create({'void' => 1},
                 $response = eval { $dashboard_API->get_status() };
                 if ($@){
                 	$log->error("Failed to get status: $@");
-                }else{
-                	$log->debug("Got status: " . Dumper $response);
                 }
             }
             elsif ($hash->{'GET'} eq 'services'){
@@ -374,7 +370,11 @@ my $socket_thread = threads->create({'void' => 1},
                     filter      => $filter,
                    );
 
-                $response = $details_API->get_details();
+				$log->debug("Getting business process service stati.");
+                $response = eval { $details_API->get_details() };
+                if ($@){
+                	$log->error("Failed to get status: $@");
+                }
             }
 
             $client_socket->send($response);
@@ -408,20 +408,6 @@ until ($dieNow) {
 
 }
 
-
-# add a line to the log file
-#sub logEntry {
-#	my ($logText, $code) = @_;
-#	my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = localtime(time);
-#	my $dateTime = sprintf "%4d-%02d-%02d %02d:%02d:%02d", $year + 1900, $mon + 1, $mday, $hour, $min, $sec;
-#	if ($logging) {
-#		print LOG "$dateTime $logText\n";
-#	}
-#	if ($code == 1){
-#		print "$logText\n";
-#	}
-#	$dieNow = 1 if ($code == 1);
-#}
 
 # catch signals and end the program if one is caught.
 sub signalHandler {
