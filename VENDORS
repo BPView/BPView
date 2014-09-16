@@ -1,0 +1,34 @@
+A list of foreign components and frameworks used by BPView
+
+* Monitoring::Livestatus
+  Perl API for check_mk livestatus to access runtime data from Nagios and Icinga
+
+* jQuery (MIT)
+  jQuery is a fast, small, and feature-rich JavaScript library.
+  
+  share/javascript/jQuery.LICENSE
+
+* tipys - Facebook-style tooltip plugin for jQuery (MIT)
+  Tipsy is a jQuery plugin for creating a Facebook-like tooltips effect based on an anchor 
+  tag's title attribute.
+
+  share/javascript/jQuery.LICENSE
+
+* Magnific Popup (MIT)
+  Magnific Popup is a responsive lightbox & dialog script with focus on performance and providing 
+  best experience for user with any device (for jQuery or Zepto.js).
+
+  share/javascript/jQuery.LICENSE
+
+* Moment.js (MIT)
+  Parse, validate, manipulate, and display dates in javascript.
+  
+  share/javascript/jQuery.LICENSE
+
+* jQuery Superfish Menu Plugin (MIT/GPL)
+  Superfish is a jQuery plugin that adds usability enhancements to multi-level drop-down menus. 
+  Fully supports touch devices and keyboard interaction.
+
+  share/javascript/jQuery.LICENSE
+  COPYING
+
