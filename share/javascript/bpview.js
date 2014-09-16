@@ -435,6 +435,7 @@ function updateDashSub() {
 		if (FilterJsonState.search(/warning/) != -1) filters += "W ";
 		if (FilterJsonState.search(/unknown/) != -1) filters += "U ";
 		if (FilterJsonState.search(/critical/) != -1) filters += "C ";
+		if (FilterJsonState.search(/down/) != -1) filters += "D ";
 		if (FilterJsonState.search(/ok/) != -1) filters += "OK ";
 		filters += "</span>";
 	        if (FilterJsonHost != "") filters += "<span style=\"color: rgb(255,127,36);\" title=\"" + FilterJsonHost  + "\">+ HOST</<span>";

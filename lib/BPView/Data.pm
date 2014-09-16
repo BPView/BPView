@@ -245,7 +245,6 @@ sub get_status {
   # verify if status is given for all products
   # note: if product is missing in Icinga/Nagios there's no state for it
   # we use status code 99 for this (0-3 are reserved as Nagios plugin exit codes)
-  # we use status code 4 for major problems (host down)
   
   foreach my $environment (keys %{ $viewOut }){
     foreach my $topic (keys %{ $viewOut->{ $environment }{ TOPICS() } }){
@@ -282,11 +281,13 @@ sub get_status {
           		if (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "ok"){
 		        	$del = 0 if $result->{ $service }{ 'state' } == 0;
 		        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "warning"){
-				$del = 0 if $result->{ $service }{ 'state' } == 1;
+					$del = 0 if $result->{ $service }{ 'state' } == 1;
 		        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "critical"){
-				$del = 0 if $result->{ $service }{ 'state' } == 2;
-			}elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "unknown"){
-				$del = 0 if $result->{ $service }{ 'state' } == 3;
+					$del = 0 if $result->{ $service }{ 'state' } == 2;
+				}elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "unknown"){
+					$del = 0 if $result->{ $service }{ 'state' } == 3;
+		        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "down"){
+		        	$del = 0 if $result->{ $service }{ 'state' } == 98;
 		        }
 		}
 	        delete $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product } if $del == 1;
@@ -585,6 +586,9 @@ sub get_details {
 	        $del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "down";
 	      }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "unknown"){
 	        $del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "unknown";
+	      }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "down"){
+	        $del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "critical";
+	        $del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "down";
 	      }
 	    }
 	    delete $return->{ $host }{ $service } if $del == 1;

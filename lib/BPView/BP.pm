@@ -213,9 +213,9 @@ sub _and {
           my $lh_state =  $self->{ 'bps' }{ $host }->[ $i ]->{ 'last_hard_state' };
           $state = $lh_state if ( $lh_state == 3 && $state == 0 );
           $state = $lh_state if ( $lh_state >= $state || $state == 3 ) && ($lh_state != 3 && $lh_state > 0);
-  	  	  # set state to 4 for hosts down
+  	  	  # set state to 98 for hosts down
   	  	  if ($self->{ 'bps' }{ $host }->[ $i ]->{ 'name2' } eq "__HOSTCHECK"){
-  	  		$state = 4 if $lh_state != 0;
+  	  		$state = 98 if $lh_state != 0;
   	  	  }
   	  	  $tmp_state = $state;
   	  	}

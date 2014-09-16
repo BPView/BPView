@@ -383,7 +383,7 @@ sub _get_filter {
     }
                     
     # state filter
-    if ( ( $filtername eq "state" ) && ( $filterval[$i] ne "ok" && $filterval[$i] ne "warning" && $filterval[$i] ne "critical" && $filterval[$i] ne "unknown" ) ){
+    if ( ( $filtername eq "state" ) && ( $filterval[$i] ne "ok" && $filterval[$i] ne "warning" && $filterval[$i] ne "critical" && $filterval[$i] ne "unknown" && $filterval[$i] ne "down" ) ){
       $log->error_die("Invalid filter option: " . $filterval[$i]);
     }elsif ($filtername eq "state"){
       push @{ $return->{ $filtername } }, $filterval[$i];        

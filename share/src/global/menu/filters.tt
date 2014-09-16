@@ -7,14 +7,14 @@
 	
 	<ul style="display: none;">
 		<li>
-			<a href="javascript:filterState('state+warning+unknown+critical');">Hide OK Events&nbsp;&nbsp;&nbsp;
+			<a href="javascript:filterState('state+warning+unknown+critical+down');">Hide OK Events&nbsp;&nbsp;&nbsp;
 				<sub>
 					<img src="[% site_url %]/share/images/global/circle_green_minus.png" height="22" width="22" alt="" title="" />
 				</sub>
 			</a>
 		</li>
 		<li>
-			<a href="javascript:filterState('state+unknown+critical');">Display CRITICALs only&nbsp;&nbsp;&nbsp;
+			<a href="javascript:filterState('state+unknown+critical+down');">Display CRITICALs only&nbsp;&nbsp;&nbsp;
 				<sub>
 					<img src="[% site_url %]/share/images/global/alert_warning2.png" height="22" width="22" alt="" title="" />
 				</sub>
