@@ -15,33 +15,28 @@ BuildRequires: perl-JSON
 BuildRequires: perl-YAML-Syck
 BuildRequires: perl-DBI
 BuildRequires: perl-DBD-Pg
-BuildRequires: perl-libwww-perl
 BuildRequires: selinux-policy
 
-Requires: perl
-Requires: perl-CGI
-Requires: perl-FCGI
-Requires: perl-Log-Log4perl
-Requires: perl-Template-Toolkit
-Requires: perl-JSON
-Requires: perl-YAML-Syck
-Requires: perl-DBI
-Requires: perl-DBD-Pg
-Requires: perl-DBD-MySQL
-Requires: perl-JSON-XS
-Requires: perl-libwww-perl
-Requires: perl-Time-HiRes
-Requires: perl-Crypt-SSLeay
-Requires: perl-File-Copy-Recursive
-Requires: perl-Proc-Daemon
-Requires: perl-Cache-Memcached
-Requires: mod_fcgid
 Requires: httpd
-Requires: perl-suidperl
-Requires: perl-Tie-IxHash
-Requires: perl-File-Pid
-Requires: sudo
 Requires: memcached
+Requires: mod_fcgid
+Requires: perl
+Requires: perl-Cache-Memcached
+Requires: perl-CGI
+Requires: perl-DBI
+Requires: perl-DBD-MySQL
+Requires: perl-DBD-Pg
+Requires: perl-FCGI
+Requires: perl-File-Pid
+Requires: perl-JSON
+Requires: perl-JSON-XS
+Requires: perl-Log-Log4perl
+Requires: perl-suidperl
+Requires: perl-Template-Toolkit
+Requires: perl-Tie-IxHash
+Requires: perl-Time-HiRes
+Requires: perl-YAML-Syck
+Requires: sudo
 
 Requires(post):   /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
 Requires(postun): /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles

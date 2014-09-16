@@ -45,7 +45,7 @@ use constant TOPICS => '__topics';
 use constant VIEWS => 'views';
 
 # for debugging only
-use Data::Dumper;
+#use Data::Dumper;
 
 
 =head1 NAME

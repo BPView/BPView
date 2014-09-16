@@ -25,10 +25,8 @@
 
 use strict;
 use warnings;
-use YAML::Syck;
 use POSIX;
 use File::Pid;
-use File::Spec;
 use Getopt::Long;
 use Log::Log4perl;
 use Cache::Memcached;
@@ -36,7 +34,7 @@ use threads;
 use JSON::PP;
 
 # for debugging only
-use Data::Dumper;
+#use Data::Dumper;
 
 my ($lib_path, $cfg_path, $cfg_files, $log_path, $pid_path, $daemonName, $dieNow);
 my ($debug, $logFile, $pidFile);
@@ -238,7 +236,6 @@ my $check_status_thread = threads->create({'void' => 1},
  
     			$log->debug("Reading config file $file.");
                 my $bpconfig = eval{ $conf->read_config( file => $file ) };
-                #$log->debug(Dumper $bpconfig);
                 if ($@) {
                   $log->error("Reading configuration files failed: $@");
                   $bpconfig = '';

@@ -32,7 +32,7 @@ use Log::Log4perl;
 use JSON::PP;
 
 # for debugging only
-use Data::Dumper;
+#use Data::Dumper;
 
 # define default paths required to read config files
 my ($lib_path, $cfg_path, $cfg_file, $log_path, $reload_log);

@@ -40,7 +40,7 @@ use File::Pid;
 use File::Path qw(make_path remove_tree);
 
 # for debugging only
-use Data::Dumper;
+#use Data::Dumper;
 
 =head1 NAME
 
