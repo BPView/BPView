@@ -26,7 +26,7 @@
 package BPView::Data;
 
 BEGIN {
-    $VERSION = '1.700'; # Don't forget to set version and release
+    $VERSION = '1.710'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -268,7 +268,11 @@ sub get_status {
 	    
 	    # return also business process name
 	    $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'bpname' } = $service;
-	    $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'name' } = $self->{ 'bps' }{ $service }{ 'BP' }{ 'NAME' };
+	    if (defined $self->{ 'bps' }{ $service }{ 'BP' }{ 'NAME' }){
+	      $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'name' } = $self->{ 'bps' }{ $service }{ 'BP' }{ 'NAME' };
+	    }else{
+	      $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'name' } = "Missing BP-Config!";
+	    }
 
 	    # filter objects
 	    if (defined $self->{ 'filter' }{ 'state' }){
@@ -1024,7 +1028,7 @@ Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.700  (September 02 2014))
+Version 1.710  (September 16 2014))
 
 =head1 COPYRIGHT AND LICENSE
 
