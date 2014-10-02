@@ -29,8 +29,9 @@ all:
 	sed -i -e 's!^  logfile:.*!  logfile: $(LOCALSTATEDIR)/log/bpview/bpview.log!' $(CONF).tmp
 	cp $(CONF).tmp $(CONF).yml
 	cp datasource.yml.in datasource.yml
+	cp bpviewd.yml.in bpviewd.yml
 	rm -f $(CONF).tmp
-
+	
 # install
 install:
 	for file in *.yml views/*.yml; do \
