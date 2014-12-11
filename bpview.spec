@@ -60,7 +60,7 @@ in a Business Process.
            --libdir=%{_libdir}/perl5/vendor_perl \
            --sysconfdir=%{_sysconfdir}/%{name} \
            --datarootdir=%{_datarootdir}/%{name} \
-           --docdir=%{_docdir}/%{name} \
+           --docdir=%{_docdir}/%{name}-%{version} \
            --with-web-user=%{apacheuser} \
            --with-web-group=%{apachegroup} \
            --with-web-conf=/etc/httpd/conf.d/bpview.conf

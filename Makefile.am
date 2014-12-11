@@ -68,7 +68,7 @@ all:
 	rm -f sample-config/$(HTTPCONF).tmp
 	
 	cp $(INITRH6).in $(INITRH6).tmp
-	sed -i -e 's!PROG_BIN=.*!PROG_BIN="$(BINDIR)"!' $(INITRH6).tmp
+	sed -i -e 's!PROG_BIN=.*!PROG_BIN="$(BINDIR)/bpviewd"!' $(INITRH6).tmp
 	sed -i -e 's!PID_FILE=.*!PID_FILE="$(LOCALSTATEDIR)/run/bpviewd.pid"!' $(INITRH6).tmp
 	cp $(INITRH6).tmp $(INITRH6)
 	rm -f $(INITRH6).tmp
