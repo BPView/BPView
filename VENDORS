@@ -1,7 +1,10 @@
 A list of foreign components and frameworks used by BPView
 
-* Monitoring::Livestatus
+* Monitoring::Livestatus (Artistic 1 & GPL 1)
   Perl API for check_mk livestatus to access runtime data from Nagios and Icinga
+
+  lib/Monitoring/ARTISTIC.LICENSE
+  lib/Monitoring/GPL.LICENSE
 
 * jQuery (MIT)
   jQuery is a fast, small, and feature-rich JavaScript library.
