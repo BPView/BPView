@@ -52,7 +52,7 @@ bpviewd:
 #    after queue is clear.
 #
   
-  sleep: 10
+  sleep: 60
 
 #
 # read_chars: number of characters to read from daemon
