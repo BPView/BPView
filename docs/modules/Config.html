@@ -6,7 +6,7 @@
 	<meta name="description" content="Pod documentation for &lt;pre&gt;  BPView::Config" />
 	<meta name="inputfile" content="../lib/BPView/Config.pm" />
 	<meta name="outputfile" content="../docs/modules/Config.html" />
-	<meta name="created" content="Tue Oct 29 14:51:12 2013" />
+	<meta name="created" content="Fri Dec 12 00:12:16 2014" />
 	<meta name="generator" content="Pod::Xhtml 1.61" />
 </head>
 <body>
@@ -24,10 +24,11 @@
 <li><a href="#METHODS">METHODS	</a>
 <ul><li><a href="#read_config">read_config</a></li>
 <li><a href="#read_dir">read_dir</a></li>
-<li><a href="#validate">validate</a></li>
+<li><a href="#validate_bpview">validate_bpview</a></li>
+<li><a href="#validate_bpviewd">validate_bpviewd</a></li>
 <li><a href="#process_views">process_views</a></li>
 <li><a href="#get_dashboards">get_dashboards</a></li>
-<li><a href="#validate_bpconfig">validate_bpconfig</a></li>
+<li><a href="#get_css">get_css</a></li>
 </ul>
 </li>
 <li><a href="#EXAMPLES">EXAMPLES</a></li>
@@ -141,14 +142,26 @@ Returns Hash.</p>
         };</p>
 
 </div>
-<h2 id="validate">validate</h2>
-<div id="validate_CONTENT">
-<pre> validate ( 'config' =&gt; $config)
+<h2 id="validate_bpview">validate_bpview</h2>
+<div id="validate_bpview_CONTENT">
+<pre> validate_bpview ( 'config' =&gt; $config)
 
 </pre>
 		<p>Validates a specified config hashref if required parameters for BPView are present.
 Croaks on error.</p>
-<pre>  $conf-&gt;validate( 'config' =&gt; $config);
+<pre>  $conf-&gt;validate_bpview( 'config' =&gt; $config);
+
+</pre>
+
+</div>
+<h2 id="validate_bpviewd">validate_bpviewd</h2>
+<div id="validate_bpviewd_CONTENT">
+<pre> validate_bpviewd ( 'config' =&gt; $config)
+
+</pre>
+		<p>Validates a specified config hashref if required parameters for BPView are present.
+Croaks on error.</p>
+<pre>  $conf-&gt;validate_bpviewd( 'config' =&gt; $config);
 
 </pre>
 
@@ -193,15 +206,14 @@ Returns dashboard names arrayref.</p>
 </pre>
 
 </div>
-<h2 id="validate_bpconfig">validate_bpconfig</h2>
-<div id="validate_bpconfig_CONTENT">
-<pre> validate_bpconfig ( 'config' =&gt; $config)
+<h2 id="get_css">get_css</h2>
+<div id="get_css_CONTENT">
+<pre> get_css ( 'config' =&gt; $config)
 
 </pre>
-		<p>Validates a specified hashref if required parameters are present.
-Errors are printed out.
-Returns 0 or 1 (Config failure).</p>
-<pre>  my $config = $conf-&gt;validate_bpconfig( 'config' =&gt; $config);
+		<p>Searches for css files on filesystem.
+Returns dashboard names arrayref.</p>
+<pre>  my $css_files = $conf-&gt;get_css( 'config' =&gt; $config);
 
 </pre>
 
@@ -214,7 +226,7 @@ Returns 0 or 1 (Config failure).</p>
 
   my $conf = BPView::Config-&gt;new( 'directory' =&gt; $directory ));
   my $config = $conf-&gt;read_dir();
-  $conf-&gt;validate( 'config' =&gt; $config);
+  $conf-&gt;validate_bpview( 'config' =&gt; $config);
 
 </pre>
 		<p>Read view config files and get dashboard names.</p>
@@ -244,7 +256,7 @@ Peter Stoeckl, &lt;p.stoeckl@ovido.at&gt;</p>
 </div>
 <h1 id="VERSION">VERSION</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="VERSION_CONTENT">
-		<p>Version 1.110  (August 28 2013))</p>
+		<p>Version 1.310  (September 16 2014))</p>
 
 </div>
 <h1 id="COPYRIGHT_AND_LICENSE">COPYRIGHT AND LICENSE</h1><p><a href="#TOP" class="toplink">Top</a></p>

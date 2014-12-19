@@ -2,11 +2,11 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-	<title>&lt;pre&gt;  BPView::Operations</title>
-	<meta name="description" content="Pod documentation for &lt;pre&gt;  BPView::Operations" />
+	<title>BPView::Operations</title>
+	<meta name="description" content="Pod documentation for BPView::Operations" />
 	<meta name="inputfile" content="../lib/BPView/Operations.pm" />
 	<meta name="outputfile" content="../docs/modules/Operations.html" />
-	<meta name="created" content="Tue Oct 29 14:51:12 2013" />
+	<meta name="created" content="Fri Dec 12 00:12:16 2014" />
 	<meta name="generator" content="Pod::Xhtml 1.61" />
 </head>
 <body>
@@ -17,16 +17,8 @@
 <ul><li><a href="#NAME">NAME</a></li>
 <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
 <li><a href="#DESCRIPTION">DESCRIPTION</a></li>
-<li><a href="#METHODS">METHODS	</a>
+<li><a href="#METHODS">METHODS        </a>
 <ul><li><a href="#import_cmdb">import_cmdb</a></li>
-</ul>
-</li>
-<li><a href="#METHODS-2">METHODS	</a>
-<ul><li><a href="#write_cfgs">write_cfgs</a></li>
-</ul>
-</li>
-<li><a href="#METHODS-3">METHODS	</a>
-<ul><li><a href="#reload">reload</a></li>
 </ul>
 </li>
 <li><a href="#EXAMPLES">EXAMPLES</a></li>
@@ -39,20 +31,16 @@
 
 <h1 id="NAME">NAME</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="NAME_CONTENT">
-<pre>  BPView::Operations - Some BPView Operations
-
-</pre>
+<p>BPView::Operations - Some BPView Operations</p>
 
 </div>
 <h1 id="SYNOPSIS">SYNOPSIS</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="SYNOPSIS_CONTENT">
-<pre>  use BPView::Operations;
-  my $operations = BPView::Operations-&gt;new(
-   	   config	=&gt; $config,
-	);
-  $operations-&gt;import_cmdb();
-
-</pre>
+<p>use BPView::Operations;
+my $operations = BPView::Operations-&gt;new(
+         config        =&gt; $config,
+        );
+$operations-&gt;import_cmdb();</p>
 
 </div>
 <h1 id="DESCRIPTION">DESCRIPTION</h1><p><a href="#TOP" class="toplink">Top</a></p>
@@ -60,78 +48,45 @@
 <p>This module includes different functions for BPViews.</p>
 
 </div>
-<h1 id="METHODS">METHODS	</h1><p><a href="#TOP" class="toplink">Top</a></p>
+<h1 id="METHODS">METHODS        </h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="METHODS_CONTENT">
 
 </div>
 <h2 id="import_cmdb">import_cmdb</h2>
 <div id="import_cmdb_CONTENT">
-<pre> import_cmdb() ( 'config' =&gt; $config )
-
-</pre>
+<p>import_cmdb() ( 'config' =&gt; $config )</p>
 <p>Execute a import script which is configured at
 bpview.yml config file as
 scripts:
-  cmdb:</p>
-
-</div>
-<h1 id="METHODS-2">METHODS	</h1><p><a href="#TOP" class="toplink">Top</a></p>
-<div id="METHODS_CONTENT-2">
-
-</div>
-<h2 id="write_cfgs">write_cfgs</h2>
-<div id="write_cfgs_CONTENT">
-<pre> write_cfgs() ( 'config' =&gt; $config )
-
-</pre>
-<p>Execute the script bpview_cfg_writer.pl</p>
-
-</div>
-<h1 id="METHODS-3">METHODS	</h1><p><a href="#TOP" class="toplink">Top</a></p>
-<div id="METHODS_CONTENT-3">
-
-</div>
-<h2 id="reload">reload</h2>
-<div id="reload_CONTENT">
-<pre> reload() ( 'config' =&gt; $config )
-
-</pre>
-<p>Reload any processes and daemons.</p>
-<p>Need to configure SUDO</p>
-<pre>  apache  ALL=(ALL)       NOPASSWD: /sbin/service icinga reload
-
-</pre>
+cmdb:</p>
 
 </div>
 <h1 id="EXAMPLES">EXAMPLES</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="EXAMPLES_CONTENT">
-<pre>    use BPView::Operations;
-	my $operations = BPView::Operations-&gt;new(
-    	   config	=&gt; $config,
-         );
-	$operations-&gt;import_cmdb();
-	$operations-&gt;write_cfgs();
-	$operations-&gt;reload();   
-
-
-
-
-</pre>
+<p>use BPView::Operations;
+        my $operations = BPView::Operations-&gt;new(
+         config        =&gt; $config,
+);
+        $operations-&gt;import_cmdb();
+        $operations-&gt;write_cfgs();
+        $operations-&gt;reload();</p>
 
 </div>
 <h1 id="AUTHOR">AUTHOR</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="AUTHOR_CONTENT">
-<p>Peter Stoeckl, &lt;p.stoeckl@ovido.at&gt;</p>
+<p>Peter Stoeckl, &lt;p.stoeckl@ovido.at&gt;
+Rene Koch, &lt;rkoch@linuxland.at&gt;</p>
 
 </div>
 <h1 id="VERSION">VERSION</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="VERSION_CONTENT">
-<p>Version 1.000  (September 12 2013))</p>
+<p>Version 1.200 (September 02 2014))</p>
 
 </div>
 <h1 id="COPYRIGHT_AND_LICENSE">COPYRIGHT AND LICENSE</h1><p><a href="#TOP" class="toplink">Top</a></p>
 <div id="COPYRIGHT_AND_LICENSE_CONTENT">
-<p>Copyright (C) 2013 by ovido gmbh</p>
+<p>Copyright (C) 2013 by ovido gmbh
+          (C) 2014 by BPView Development Team</p>
 <p>This library is free software; you can redistribute it and/or modify
 it under the same terms as BPView itself.</p>
 
