@@ -560,6 +560,8 @@ sub _check_provider {
      
   }elsif ($provider eq "mk-livestatus"){
    	 
+   	# TODO: change to Plugin
+   	 
     # mk-livestatus 
     # requires socket or server
     if (! $config->{'socket'} && ! $config->{'server'}){

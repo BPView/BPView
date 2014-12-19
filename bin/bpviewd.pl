@@ -267,6 +267,9 @@ my $check_status_thread = threads->create({'void' => 1},
                 }
                 
             }
+		# TODO: add new option in config file
+		# to make bp processing independent from
+		# data fetching!
             $log->debug("Sleeping for $config->{ 'bpviewd' }{ 'check_interval' } seconds.");
             sleep($config->{ 'bpviewd' }{ 'check_interval' });
         }
@@ -399,6 +402,9 @@ my $socket_thread = threads->create({'void' => 1},
 
 # "infinite" loop where some useful process happens
 until ($dieNow) {
+
+	# Fetching data from monitoring backends
+	# TODO: Rename sleep option in config file
 
         eval { $data->query_provider() };
 

@@ -39,6 +39,7 @@ use File::stat;
 use JSON::PP;
 use Tie::IxHash;
 use Storable 'dclone';
+use Module::Pluggable search_path => "Plugins", instantiate => 'new';;
 
 use constant DISPLAY => '__display';
 use constant TOPICS => '__topics';
@@ -388,6 +389,9 @@ sub get_bpstatus {
   }elsif ($self->{'provider'} eq "mk-livestatus"){
   	
   	# construct query
+  	
+  	# TODO: change to Plugin
+  	
   	my $query = $self->_query_livestatus( '__all' );
   	# get results
   	$result = eval { $self->_get_livestatus( $query, "row" ) };
@@ -649,6 +653,8 @@ sub query_provider {
         $result = $self->_get_ido( $sql, "row" );
 
   }elsif ($self->{'provider'} eq "mk-livestatus"){
+
+		# TODO: change to Plugin
 
         # construct query
         my $query = $self->_query_livestatus( '__all' );
