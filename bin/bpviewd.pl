@@ -3,7 +3,7 @@
 # COPYRIGHT:
 #
 # This software is Copyright (c) 2013 by ovido
-#                            (c) 2014 BPView Development Team
+#                            (c) 2014-2015 BPView Development Team
 #                                     http://github.com/BPView/BPView
 #
 # This file is part of Business Process View (BPView).
@@ -61,6 +61,7 @@ BEGIN {
 #
 #----------------------------------------------------------------
 
+
 BEGIN {
   $dieNow = 0;		# used for "infinte loop" construct - allows daemon mode to gracefully exit
 }
@@ -92,10 +93,21 @@ use lib "$lib_path";
 use BPView::Config;
 use BPView::Data;
 use BPView::BP;
+use BPView::Daemon;
 
 
 # Code Section
 ##############
+
+my $daemon = BPView::Daemon->new(
+	log		=> $log,
+#     config       => $config,
+#     views        => $views,
+#     provider     => $config->{ 'provider' }{ 'source' },
+#     provdata     => $config->{ $config->{ 'provider' }{ 'source' } },
+#     bps          => $bps,
+#     filter       => "",
+   );
 
 chdir '/';
 umask 0;
@@ -195,90 +207,22 @@ my $data = BPView::Data->new(
    );
 
 my $bp_dir      = $cfg_path . "/bp-config";
-$log->debug("Creating threads.");
-my $check_status_thread = threads->create({'void' => 1},
-    sub {
-        while(1)
-        {
-            ## get all config files and iterate
-            $log->debug("Getting config files.");
-            my @files = <$bp_dir/*.yml>;
-            my $file;
-            foreach $file (@files) {
 
-				$log->debug("Processing file $file.");
-				
-                ## check if config file is empty (see man perlfunc to get more
-                # informations)
-                if ( -z $file){
-                    $log->error("Config file $file is empty. Will be ignored");
-                    next;
-                }
-                my $bp_name = $file;
-                $bp_name	=~ s/$bp_dir//g;
-                $bp_name	=~ s/\///;
-                $bp_name	=~ s/.yml//;
-                my $service_state = '';
-    
-                ## TODO: extract to own sub functions
-                my $data = BPView::Data->new(
-                			provider	=> $config->{ 'provider' }{ 'source' },
-                			provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
-                         );
-				$log->debug("Fetching status data.");
-                my $status = eval { $data->get_bpstatus() };
-                if ($@) {
-                  $log->error("Failed to read status data: $@.");
-                  #$service_state = $result{'unknown'};
-                }else{
-                	$log->debug("Successfully fetched status data.");
-                }
- 
-    			$log->debug("Reading config file $file.");
-                my $bpconfig = eval{ $conf->read_config( file => $file ) };
-                if ($@) {
-                  $log->error("Reading configuration files failed: $@");
-                  $bpconfig = '';
-                }else{
-                	$log->debug("Successfully read config file.");
-                }
-    
-                # process BPs
-                my $bp = BPView::BP->new(
-                		bps			=> $status,
-                		bpconfig	=> $bpconfig,
-                		);
-                $log->debug("Processing business processes.");
-                my $result = eval { $bp->get_bpstatus() };
-                if ($@) {
-                  $log->error("Processing BPs failed: $@");
-                  $result = '';
-                }else{
-                	$log->debug("Successfully processed business processes.");
-                }
-    
-                # If value already exists in cache -> update
-                # if not -> add
-                $log->debug("Updating cache.");
-                if($cache->get($bp_name)){
-                    $cache->set($bp_name, uc( $result ));
-                } else {
-                    $cache->add($bp_name, uc( $result ));
-                }
-                
-            }
-		# TODO: add new option in config file
-		# to make bp processing independent from
-		# data fetching!
-            $log->debug("Sleeping for $config->{ 'bpviewd' }{ 'check_interval' } seconds.");
-            sleep($config->{ 'bpviewd' }{ 'check_interval' });
-        }
-    }
+
+# Create threads
+$log->debug("Creating threads.");
+
+
+# Business status processing thread
+my $status_thread = $daemon->create_status_thread(
+	bp_dir		=> $bp_dir,
+	config		=> $config,
+	conf		=> $conf,
+	cache		=> $cache,
 );
 
 
-my $counter = 0;
-my $repeater = 300/$config->{ 'bpviewd' }{ 'sleep' };
+# Client connection thread
 
 # creating a listening socket
 $log->info("Creating new listinging socket on $config->{ 'bpviewd' }{ 'local_host' }:$config->{ 'bpviewd' }{ 'local_port' }");
@@ -292,113 +236,18 @@ my $socket = new IO::Socket::INET (
 $log->error_dir("Cannot create socket: $!") unless $socket;
 $log->info("Successfully created socket.");
 
-my $hash;
-
-# create thread with no return value
-my $socket_thread = threads->create({'void' => 1},
-    sub {
-        while(1)
-        {
-            # waiting for a new client connection
-            $log->debug("Waiting for client connections.");
-            my $client_socket = $socket->accept();
-
-            # get information about a newly connected client
-            my $client_address = $client_socket->peerhost();
-            my $client_port = $client_socket->peerport();
-            $log->debug("Connection establised from $client_address:$client_port.");
-
-            # read characters from the connected client
-            my $socket_data= "";
-            $log->debug("Receiving data from client.");
-            $client_socket->recv($socket_data, $config->{ 'bpviewd' }{ 'read_chars' });
-            $log->error("Failed to receive data: $!") if $!;
-
-            # expect parameters in json-format
-            my $json = JSON::PP->new->pretty;
-            $json->utf8('true');
-            $log->debug("Decoding data.");
-            $hash = $json->decode($socket_data);
-            $log->error("Failed to decode data: $!") if $!;
-
-            my $response = '';
-            if ($hash->{'GET'} eq 'businessprocesses'){
-            	$log->debug("Client requested business process data.");
-                my $filter = {};
-                my $filter_hash = $hash->{'FILTER'};
-                
-                if ( ! exists $filter_hash->{'dashboard'} ) {
-                    $log->error("Wrong API-Call. dashboard Filter is missing");
-                }
-                
-                if ( exists $filter_hash->{'state'} ) {
-					$filter->{ 'state' } = $filter_hash->{ 'state' };
-                } 
-                
-                if ( exists $filter_hash->{'name'} ) {
-					$filter->{ 'name' } = $filter_hash->{ 'name' };
-                }
-                
-                my $dashboard_API = BPView::Data->new(
-                     config     => $config,
-                     views      => $views->{ $filter_hash->{'dashboard'} }{ 'views' },
-                     provider   => $config->{ 'bpview' }{ 'datasource' },
-                     provdata   => $config->{ 'bpview'}{ $config->{ 'bpview' }{ 'datasource' } },
-                     bps        => $bps,
-                     filter     => $filter,
-                     cache		=> $cache,
-                   );
-
-				$log->debug("Getting business process status.");
-                $response = eval { $dashboard_API->get_status() };
-                if ($@){
-                	$log->error("Failed to get status: $@");
-                }
-            }
-            elsif ($hash->{'GET'} eq 'services'){
-            	$log->debug("Client requested service data.");
-                my $filter = {};
-                my $businessprocess;
-                my $filter_hash = $hash->{'FILTER'};
-                
-                if ( exists $filter_hash->{'businessprocess'} ) {
-                    $businessprocess = $filter_hash->{'businessprocess'};
-                } else {
-                    $log->error("Wrong API-Call. businessprocess Filter is missing");
-                }
-                
-                if ( exists $filter_hash->{'state'} ) {
-					$filter->{ 'state' } = $filter_hash->{ 'state' };
-                } 
-                
-                if ( exists $filter_hash->{'name'} ) {
-					$filter->{ 'name' } = $filter_hash->{ 'name' };
-                }
-
-                my $details_API = BPView::Data->new(
-                    config      => $config,
-                    bp          => $businessprocess,
-                    provider    => $config->{ 'provider' }{ 'source' },
-                    provdata    => $config->{ $config->{ 'provider' }{ 'source' } },
-                    bps         => $bps,
-                    filter      => $filter,
-                   );
-
-				$log->debug("Getting business process service stati.");
-                $response = eval { $details_API->get_details() };
-                if ($@){
-                	$log->error("Failed to get status: $@");
-                }
-            }
-
-            $client_socket->send($response);
-
-            # notify client that response has been sent
-            shutdown($client_socket, 1);
-        }
-        $socket->close();
-    }
+# Client connection thread
+my $client_thread = $daemon->create_client_thread(
+	'config'		=> $config,
+	'socket'		=> $socket,
+	'views'			=> $views,
+	'bps'			=> $bps,
+	'cache'			=> $cache,
 );
+
+
+my $counter = 0;
+my $repeater = 300/$config->{ 'bpviewd' }{ 'sleep' };
 
 # "infinite" loop where some useful process happens
 until ($dieNow) {
@@ -420,7 +269,7 @@ until ($dieNow) {
         }
         
         $counter++;
-
+        
         sleep($config->{ 'bpviewd' }{ 'sleep' });
 
 }
