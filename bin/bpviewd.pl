@@ -246,6 +246,35 @@ my $client_thread = $daemon->create_client_thread(
 );
 
 
+# Verify status of threads and restart it in case one dies
+until ($dieNow) {
+
+  if ($status_thread->is_running() != 1){
+  	$log->error("Status thread isn't running - restarting it.");
+  	$status_thread = $daemon->create_status_thread(
+		bp_dir		=> $bp_dir,
+		config		=> $config,
+		conf		=> $conf,
+		cache		=> $cache,
+	);
+  }
+  
+  if ($client_thread->is_running() != 1){
+  	$log->error("Client thread isn't running - restarting it.");
+  	$client_thread = $daemon->create_client_thread(
+		'config'		=> $config,
+		'socket'		=> $socket,
+		'views'			=> $views,
+		'bps'			=> $bps,
+		'cache'			=> $cache,
+	);
+  }
+  
+  sleep (10);
+
+}
+
+
 my $counter = 0;
 my $repeater = 300/$config->{ 'bpviewd' }{ 'sleep' };
 
