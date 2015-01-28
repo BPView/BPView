@@ -34,6 +34,7 @@ use strict;
 use warnings;
 use Carp;
 use threads;
+use Thread::Queue;
 
 # for debugging only
 #use Data::Dumper;
@@ -168,79 +169,101 @@ sub create_status_thread {
   my $config	= $self->{ 'config' };
   my $conf		= $self->{ 'conf' };
   my $cache		= $self->{ 'cache' };
+  my $threads_bp	= $config->{ 'bpviewd' }{ 'threads_bp' };
   
   my $check_status_thread = threads->create({'void' => 1},
 	sub {
         while(1)
         {
+        	$log->info("Processing business processes.");
             ## get all config files and iterate
             $log->debug("Getting config files.");
             my @files = <$bp_dir/*.yml>;
             my $file;
-            foreach $file (@files) {
+            
+            # create new threads for parallel processing
+            my $queue = Thread::Queue->new();
+            my @workers = map {
+            	threads->create(
+            		sub {
+            			# Loop until no more work
+            			while (defined (my $file = $queue->dequeue())){
+            				# end
+            				return unless defined $file;
 
-				$log->debug("Processing file $file.");
+							$log->debug("Processing file $file.");
 				
-                ## check if config file is empty (see man perlfunc to get more
-                # informations)
-                if ( -z $file){
-                    $log->error("Config file $file is empty. Will be ignored");
-                    next;
-                }
-                my $bp_name = $file;
-                $bp_name	=~ s/$bp_dir//g;
-                $bp_name	=~ s/\///;
-                $bp_name	=~ s/.yml//;
-                my $service_state = '';
+                			## check if config file is empty (see man perlfunc to get more
+                			# informations)
+                			if ( -z $file){
+                    			$log->error("Config file $file is empty. Will be ignored");
+                    			next;
+                			}
+                			my $bp_name = $file;
+                			$bp_name	=~ s/$bp_dir//g;
+                			$bp_name	=~ s/\///;
+                			$bp_name	=~ s/.yml//;
+                			my $service_state = '';
     
-                ## TODO: extract to own sub functions
-                my $data = BPView::Data->new(
-                			provider	=> $config->{ 'provider' }{ 'source' },
-                			provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
-                         );
-				$log->debug("Fetching status data.");
-                my $status = eval { $data->get_bpstatus() };
-                if ($@) {
-                  $log->error("Failed to read status data: $@.");
-                  #$service_state = $result{'unknown'};
-                }else{
-                	$log->debug("Successfully fetched status data.");
-                }
+                			## TODO: extract to own sub functions
+                			my $data = BPView::Data->new(
+                				provider	=> $config->{ 'provider' }{ 'source' },
+                				provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
+                         	);
+							$log->debug("Fetching status data.");
+                			my $status = eval { $data->get_bpstatus() };
+                			if ($@) {
+                  				$log->error("Failed to read status data: $@.");
+                  				#$service_state = $result{'unknown'};
+                			}else{
+                				$log->debug("Successfully fetched status data.");
+                			}
  
-    			$log->debug("Reading config file $file.");
-                my $bpconfig = eval{ $conf->read_config( file => $file ) };
-                if ($@) {
-                  $log->error("Reading configuration files failed: $@");
-                  $bpconfig = '';
-                }else{
-                	$log->debug("Successfully read config file.");
-                }
+    						$log->debug("Reading config file $file.");
+                			my $bpconfig = eval{ $conf->read_config( file => $file ) };
+                			if ($@) {
+                  				$log->error("Reading configuration files failed: $@");
+                 				$bpconfig = '';
+                			}else{
+                				$log->debug("Successfully read config file.");
+                			}
  
-                # process BPs
-                my $bp = BPView::BP->new(
-                		bps			=> $status,
-                		bpconfig	=> $bpconfig,
-                		);
-                $log->debug("Processing business processes.");
-                my $result = eval { $bp->get_bpstatus() };
-                if ($@) {
-                  $log->error("Processing BPs failed: $@");
-                  $result = '';
-                }else{
-                	$log->debug("Successfully processed business processes.");
-                }
+                			# process BPs
+                			my $bp = BPView::BP->new(
+                				bps			=> $status,
+                				bpconfig	=> $bpconfig,
+                			);
+                			$log->debug("Processing business processes.");
+                			my $result = eval { $bp->get_bpstatus() };
+                			if ($@) {
+                				$log->error("Processing BPs failed: $@");
+                				$result = '';
+                			}else{
+                				$log->debug("Successfully processed business processes.");
+                			}
     
-                # If value already exists in cache -> update
-                # if not -> add
-                $log->debug("Updating cache.");
-                $log->debug("Updating BP $bp_name (set business process status code $result)");
-                $cache->set($bp_name, uc( $result ));
+                			# Updating memcached
+                			$log->debug("Updating cache.");
+                			$log->debug("Updating BP $bp_name (set business process status code $result)");
+                			$cache->set($bp_name, uc( $result ));
                 
-            }
+            			}
+            		}           	
+            	)->detach();
+        	} 1..$threads_bp;
+ 
+
+		# send files to queue
+		$queue->enqueue($_) for @files;
+		# no more work
+		$queue->enqueue(undef) for 1..$threads_bp;
+		# terminate
+		$_->join() for @workers;
+           
 		# TODO: add new option in config file
 		# to make bp processing independent from
 		# data fetching!
-            $log->debug("Sleeping for $config->{ 'bpviewd' }{ 'check_interval' } seconds.");
+            $log->info("Sleeping for $config->{ 'bpviewd' }{ 'check_interval' } seconds.");
             sleep($config->{ 'bpviewd' }{ 'check_interval' });
         }
     }) or croak "Can't create thread!";
@@ -297,7 +320,7 @@ sub create_client_thread {
         while(1)
         {
             # waiting for a new client connection
-            $log->debug("Waiting for client connections.");
+            $log->info("Waiting for client connections.");
             my $client_socket = $socket->accept();
 
             # get information about a newly connected client

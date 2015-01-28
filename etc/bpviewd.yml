@@ -77,10 +77,25 @@ bpviewd:
   cache_port: 11211
 
 #
-# interval in sec
+# interval: Check interval in seconds
+#    interval in sec
 #
 
   check_interval: 5000
+
+#
+# threads_bp: Number of threads
+#    Number of threads for business process calculation
+#
+
+  threads_bp: 10
+
+#
+# threads_client: Number of threads
+#    Number of threads for client connection handling
+#
+
+  threads_client: 1
   
 # ---
 
