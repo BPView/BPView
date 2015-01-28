@@ -70,7 +70,7 @@ my $pidfile = $pid_path . $daemonName . ".pid";
 
 # Logging infomration
 my $logconf = "
-    log4perl.category.BPViewd.Log							= DEBUG, BPViewdLog
+    log4perl.category.BPViewd.Log							= INFO, BPViewdLog
     log4perl.appender.BPViewdLog							= Log::Log4perl::Appender::File
 	log4perl.appender.BPViewdLog.filename					= $logFile
     log4perl.appender.BPViewdLog.layout						= Log::Log4perl::Layout::PatternLayout
