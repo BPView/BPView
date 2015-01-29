@@ -148,7 +148,7 @@ fi
 
 
 %changelog
-* Tue Sep 02 2014 Rene Koch <rkoch@rk-it.at> 0.10-1
+* Thu Jan 29 2015 Rene Koch <rkoch@rk-it.at> 0.10-1
 - bump to 0.10 release
 - cleanup of old unused scripts
 - install bpviewd.yml config file
