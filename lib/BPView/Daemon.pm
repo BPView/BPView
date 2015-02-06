@@ -175,11 +175,13 @@ sub create_status_thread {
 	sub {
         while(1)
         {
+        	my $start_time = time();
         	$log->info("Processing business processes.");
+        	$log->info("Start time: " . localtime($start_time));
             ## get all config files and iterate
             $log->debug("Getting config files.");
             my @files = <$bp_dir/*.yml>;
-            my $file;
+            #my $file;
 
 			# get all status data for workers
             my $data = BPView::Data->new(
@@ -194,6 +196,7 @@ sub create_status_thread {
             }else{
             	$log->debug("Successfully fetched status data.");
             }
+            $log->info("Fetching data finished: " . localtime(time()));
             
             # create new threads for parallel processing
             my $queue = Thread::Queue->new();
@@ -259,6 +262,8 @@ sub create_status_thread {
 		$queue->enqueue(undef) for 1..$threads_bp;
 		# terminate
 		$_->join() for @workers;
+		
+		$log->info("Calculations finished: " . localtime(time()));
            
 		# TODO: add new option in config file
 		# to make bp processing independent from
