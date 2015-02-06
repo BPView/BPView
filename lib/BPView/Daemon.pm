@@ -180,6 +180,20 @@ sub create_status_thread {
             $log->debug("Getting config files.");
             my @files = <$bp_dir/*.yml>;
             my $file;
+
+			# get all status data for workers
+            my $data = BPView::Data->new(
+            		provider	=> $config->{ 'provider' }{ 'source' },
+            		provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
+            );
+			$log->debug("Fetching status data.");
+            my $status = eval { $data->get_bpstatus() };
+            if ($@) {
+            	$log->error("Failed to read status data: $@.");
+            	#$service_state = $result{'unknown'};
+            }else{
+            	$log->debug("Successfully fetched status data.");
+            }
             
             # create new threads for parallel processing
             my $queue = Thread::Queue->new();
@@ -204,20 +218,6 @@ sub create_status_thread {
                 			$bp_name	=~ s/\///;
                 			$bp_name	=~ s/.yml//;
                 			my $service_state = '';
-    
-                			## TODO: extract to own sub functions
-                			my $data = BPView::Data->new(
-                				provider	=> $config->{ 'provider' }{ 'source' },
-                				provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
-                         	);
-							$log->debug("Fetching status data.");
-                			my $status = eval { $data->get_bpstatus() };
-                			if ($@) {
-                  				$log->error("Failed to read status data: $@.");
-                  				#$service_state = $result{'unknown'};
-                			}else{
-                				$log->debug("Successfully fetched status data.");
-                			}
  
     						$log->debug("Reading config file $file.");
                 			my $bpconfig = eval{ $conf->read_config( file => $file ) };
@@ -249,7 +249,7 @@ sub create_status_thread {
                 
             			}
             		}           	
-            	)->detach();
+            	)
         	} 1..$threads_bp;
  
 
