@@ -172,6 +172,7 @@ auth:
   provider: ldap
   
 
+businessprocess:
   cmdb_exporter: 
 
 #
