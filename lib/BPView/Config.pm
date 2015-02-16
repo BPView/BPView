@@ -319,10 +319,11 @@ sub validate_bpviewd {
   # go through config values
   my $config = $self->{ 'config' };
   # parameters given?
-  die "provider missing in bpview.yml!" unless $config->{'provider'}{'source'};
+  die "default provider missing in bpview.yml!" unless $config->{'default'}{'source'};
   
   # check data backend provider
-  $self->_check_provider( "provider", $config->{'provider'}{'source'}, $config->{ $config->{'provider'}{'source'} } );
+## temp disabled!
+##  $self->_check_provider( "provider", $config->{'provider'}{'source'}, $config->{ $config->{'provider'}{'source'} } );
   
 }
 

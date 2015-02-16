@@ -37,7 +37,7 @@ use threads;
 use Thread::Queue;
 
 # for debugging only
-#use Data::Dumper;
+use Data::Dumper;
 
 =head1 NAME
 
@@ -175,6 +175,15 @@ sub create_status_thread {
 	sub {
         while(1)
         {
+        	
+        	# Sleep first to give fetch thread time to get data from monitoring backend
+        	
+		# TODO: add new option in config file
+		# to make bp processing independent from
+		# data fetching!
+            $log->info("Sleeping for $config->{ 'bpviewd' }{ 'check_interval' } seconds.");
+            sleep($config->{ 'bpviewd' }{ 'check_interval' });
+            
         	my $start_time = time();
         	$log->info("Processing business processes.");
         	$log->info("Start time: " . localtime($start_time));
@@ -185,8 +194,10 @@ sub create_status_thread {
 
 			# get all status data for workers
             my $data = BPView::Data->new(
-            		provider	=> $config->{ 'provider' }{ 'source' },
-            		provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
+#            		provider	=> $config->{ 'provider' }{ 'source' },
+#            		provdata	=> $config->{ $config->{ 'provider' }{ 'source' } },
+					config		=> $config,
+					log			=> $log,
             );
 			$log->debug("Fetching status data.");
             my $status = eval { $data->get_bpstatus() };
@@ -222,6 +233,7 @@ sub create_status_thread {
                 			$bp_name	=~ s/.yml//;
                 			my $service_state = '';
  
+ 							### TODO: this shouldn't be necessary as config is already in memory
     						$log->debug("Reading config file $file.");
                 			my $bpconfig = eval{ $conf->read_config( file => $file ) };
                 			if ($@) {
@@ -233,8 +245,10 @@ sub create_status_thread {
  
                 			# process BPs
                 			my $bp = BPView::BP->new(
+                				log			=> $log,
                 				bps			=> $status,
                 				bpconfig	=> $bpconfig,
+                				config		=> $config,
                 			);
                 			$log->debug("Processing business processes.");
                 			my $result = eval { $bp->get_bpstatus() };
@@ -265,11 +279,6 @@ sub create_status_thread {
 		
 		$log->info("Calculations finished: " . localtime(time()));
            
-		# TODO: add new option in config file
-		# to make bp processing independent from
-		# data fetching!
-            $log->info("Sleeping for $config->{ 'bpviewd' }{ 'check_interval' } seconds.");
-            sleep($config->{ 'bpviewd' }{ 'check_interval' });
         }
     }) or croak "Can't create thread!";
     
@@ -367,8 +376,8 @@ sub create_client_thread {
                 my $dashboard_API = BPView::Data->new(
                      config     => $config,
                      views      => $views->{ $filter_hash->{'dashboard'} }{ 'views' },
-                     provider   => $config->{ 'bpview' }{ 'datasource' },
-                     provdata   => $config->{ 'bpview'}{ $config->{ 'bpview' }{ 'datasource' } },
+#                     provider   => $config->{ 'bpview' }{ 'datasource' },
+#                     provdata   => $config->{ 'bpview'}{ $config->{ 'bpview' }{ 'datasource' } },
                      bps        => $bps,
                      filter     => $filter,
                      cache		=> $cache,
@@ -399,14 +408,15 @@ sub create_client_thread {
                 if ( exists $filter_hash->{'name'} ) {
 					$filter->{ 'name' } = $filter_hash->{ 'name' };
                 }
-
+                
                 my $details_API = BPView::Data->new(
                     config      => $config,
                     bp          => $businessprocess,
-                    provider    => $config->{ 'provider' }{ 'source' },
-                    provdata    => $config->{ $config->{ 'provider' }{ 'source' } },
+#                    provider    => $config->{ 'provider' }{ 'source' },
+#                    provdata    => $config->{ $config->{ 'provider' }{ 'source' } },
                     bps         => $bps,
                     filter      => $filter,
+                    log			=> $log,
                    );
 
 				$log->debug("Getting business process service stati.");

@@ -34,7 +34,7 @@ use warnings;
 use Carp;
 
 # for debugging only
-#use Data::Dumper;
+use Data::Dumper;
 
 
 =head1 NAME
@@ -102,6 +102,8 @@ sub new {
   my $self 		= {
   	"bps"		=> undef,	# business process array
   	"bpconfig"	=> undef,	# business process config
+  	"log"		=> undef,	# log object
+  	"config"	=> undef,	# config hash
   };
   
   for my $key (keys %options){
@@ -160,15 +162,25 @@ sub get_bpstatus {
   # conjunction type of BP
   foreach my $bp_name (keys %{ $self->{ 'bpconfig' } }){
   	
+  	# is provider specified?
+  	my $provider = undef;
+  	if (defined $self->{ 'bpconfig' }{ $bp_name }{ 'BP' }{ 'PROVIDER' }){
+  	  # provider specified	
+  	  $provider = $self->{ 'bpconfig' }{ $bp_name }{ 'BP' }{ 'PROVIDER' };
+  	}else{
+  	  # use default provider
+  	  $provider = $self->{ 'config' }{ 'default' }{ 'source' };
+  	}
+  	
   	if ( lc( $self->{ 'bpconfig' }{ $bp_name }{ 'BP' }{ 'TYPE' } ) eq "and" ){
   	  # and conjunction
-  	  $result = $self->_and( $self->{ 'bpconfig' }{ $bp_name }{ 'HOSTS' } );	
+  	  $result = $self->_and( $self->{ 'bpconfig' }{ $bp_name }{ 'HOSTS' }, $provider );	
   	}elsif ( lc( $self->{ 'bpconfig' }{ $bp_name }{ 'BP' }{ 'TYPE' } ) eq "or" ){
   	  # or conjunction
-  	  $result = $self->_or( $self->{ 'bpconfig' }{ $bp_name }{ 'HOSTS' } );	
+  	  $result = $self->_or( $self->{ 'bpconfig' }{ $bp_name }{ 'HOSTS' }, $provider );	
   	}elsif ( lc( $self->{ 'bpconfig' }{ $bp_name }{ 'BP' }{ 'TYPE' } ) eq "min" ){
   	  # min conjunction
-  	  $result = $self->_min( $self->{ 'bpconfig' }{ $bp_name }{ 'HOSTS' }, $self->{ 'bpconfig' }{ $bp_name }{ 'BP' }{ 'MIND' } );	
+  	  $result = $self->_min( $self->{ 'bpconfig' }{ $bp_name }{ 'HOSTS' }, $self->{ 'bpconfig' }{ $bp_name }{ 'BP' }{ 'MIND' }, $provider );	
   	}else{
   	  # unknown conjunction
   	  die "Unknown conjunction: " . $self->{ 'bpconfig' }{ $bp_name }{ 'BP' }{ 'TYPE' };
@@ -191,6 +203,7 @@ sub _and {
 	
   my $self		= shift;
   my $hosts		= shift or croak ("Missing hosts!");
+  my $provider	= shift or croak ("Missing provider!");
   
   my $state = 0;
   
@@ -199,22 +212,22 @@ sub _and {
   	
   	foreach my $service (keys %{ $hosts->{ $host } }){
 
-      if (! defined $self->{ 'bps' }{ $host }){
+      if (! defined $self->{ 'bps' }{ $provider }{ $host }){
         $state = 3;
         next;
       }
 
-  	  my $size = scalar @{ $self->{ 'bps' }{ $host } };
+  	  my $size = scalar @{ $self->{ 'bps' }{ $provider }{ $host } };
   	  my $tmp_state = 3;
   	  
   	  # compare services
   	  for (my $i=0;$i<$size;$i++){
-  	  	if ($self->{ 'bps' }{ $host }->[ $i ]->{ 'name2' } eq $service ){
-          my $lh_state =  $self->{ 'bps' }{ $host }->[ $i ]->{ 'last_hard_state' };
+  	  	if ($self->{ 'bps' }{ $provider }{ $host }->[ $i ]->{ 'name2' } eq $service ){
+          my $lh_state =  $self->{ 'bps' }{ $provider }{ $host }->[ $i ]->{ 'last_hard_state' };
           $state = $lh_state if ( $lh_state == 3 && $state == 0 );
           $state = $lh_state if ( $lh_state >= $state || $state == 3 ) && ($lh_state != 3 && $lh_state > 0);
   	  	  # set state to 98 for hosts down
-  	  	  if ($self->{ 'bps' }{ $host }->[ $i ]->{ 'name2' } eq "__HOSTCHECK"){
+  	  	  if ($self->{ 'bps' }{ $provider }{ $host }->[ $i ]->{ 'name2' } eq "__HOSTCHECK"){
   	  		$state = 98 if $lh_state != 0;
   	  	  }
   	  	  $tmp_state = $state;
@@ -239,6 +252,7 @@ sub _or {
 
   my $self		= shift;
   my $hosts		= shift or croak ("Missing hosts!");
+  my $provider	= shift or croak ("Missing provider!");
   
   my $state = 3;
   
@@ -246,12 +260,12 @@ sub _or {
   foreach my $host (keys %{ $hosts }){
   	
   	foreach my $service (keys %{ $hosts->{ $host } }){
-  	  my $size = scalar @{ $self->{ 'bps' }{ $host } };
+  	  my $size = scalar @{ $self->{ 'bps' }{ $provider }{ $host } };
   	  
   	  # compare services
   	  for (my $i=0;$i<$size;$i++){
-  	  	if ($self->{ 'bps' }{ $host }->[ $i ]->{ 'name2' } eq $service ){
-  	  	  $state = $self->{ 'bps' }{ $host }->[ $i ]->{ 'last_hard_state' } if $self->{ 'bps' }{ $host }->[ $i ]->{ 'last_hard_state' } < $state;
+  	  	if ($self->{ 'bps' }{ $provider }{ $host }->[ $i ]->{ 'name2' } eq $service ){
+  	  	  $state = $self->{ 'bps' }{ $provider }{ $host }->[ $i ]->{ 'last_hard_state' } if $self->{ 'bps' }{ $provider }{ $host }->[ $i ]->{ 'last_hard_state' } < $state;
   	  	}
   	  }
   	  
@@ -271,6 +285,7 @@ sub _min {
   my $self		= shift;
   my $hosts		= shift or croak ("Missing hosts!");
   my $min		= shift or croak ("Missing min value!");
+  my $provider	= shift or croak ("Missing provider!");
   
   my $count;
   
@@ -278,12 +293,12 @@ sub _min {
   foreach my $host (keys %{ $hosts }){
   	
   	foreach my $service (keys %{ $hosts->{ $host } }){
-  	  my $size = scalar @{ $self->{ 'bps' }{ $host } };
+  	  my $size = scalar @{ $self->{ 'bps' }{ $provider }{ $host } };
   	  
   	  # compare services
   	  for (my $i=0;$i<$size;$i++){
-  	  	if ($self->{ 'bps' }{ $host }->[ $i ]->{ 'name2' } eq $service ){
-  	  	  $count->[ $self->{ 'bps' }{ $host }->[ $i ]->{ 'last_hard_state' } ]++;
+  	  	if ($self->{ 'bps' }{ $provider }{ $host }->[ $i ]->{ 'name2' } eq $service ){
+  	  	  $count->[ $self->{ 'bps' }{ $provider }{ $host }->[ $i ]->{ 'last_hard_state' } ]++;
   	  	}
   	  }
   	  

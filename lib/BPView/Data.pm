@@ -46,7 +46,7 @@ use constant TOPICS => '__topics';
 use constant VIEWS => 'views';
 
 # for debugging only
-#use Data::Dumper;
+use Data::Dumper;
 
 
 =head1 NAME
@@ -116,12 +116,13 @@ sub new {
   my $self 		= {
   	"views"		=> undef,	# views object (hash)
   	"bp"		=> undef,	# name of business process
-  	"provider"	=> "ido",	# provider (ido | mk-livestatus)
-  	"provdata"	=> undef,	# provider details like hostname, username,... 
+#  	"provider"	=> "ido",	# provider (ido | mk-livestatus)
+#  	"provdata"	=> undef,	# provider details like hostname, username,... 
   	"config"	=> undef,
   	"bps"		=> undef,
   	"filter"	=> undef,	# filter states (e.g. don't display bps with state ok)
   	"cache"		=> undef,	# memcached object
+  	"log"		=> undef,	# log file
   };
   
   for my $key (keys %options){
@@ -368,45 +369,30 @@ sub get_bpstatus {
   
   my $result = undef;
   
-  # verify if we cache data 
-  if (defined $self->{ 'provdata' }{ 'cache_file' }){
-  	# caching disabled if 0 or no cache time defined
-    next if (! defined $self->{ 'provdata' }{ 'cache_time' } || $self->{ 'provdata' }{ 'cache_time' } == 0);
-    $result = $self->_open_cache( $self->{ 'provdata' }{ 'cache_time' }, $self->{ 'provdata' }{ 'cache_file' } );
-    
-    # return cached data
-    return $result unless $result == 1;
-  }
+  my $log = $self->{ 'log' };
   
-  # fetch data from Icinga/Nagios
-  if ($self->{'provider'} eq "ido"){
+  # loop through providers
+  foreach my $provider (keys %{ $self->{ 'config' } }){
   	
-  	# construct SQL query
-  	my $sql = $self->_query_ido( '__all' );
-  	# get results
-  	$result = $self->_get_ido( $sql, "row" );
+  	# skip bpviewd config
+  	next if $provider eq 'bpviewd';
   	
-  }elsif ($self->{'provider'} eq "mk-livestatus"){
-  	
-  	# construct query
-  	
-  	# TODO: change to Plugin
-  	
-  	my $query = $self->_query_livestatus( '__all' );
-  	# get results
-  	$result = eval { $self->_get_livestatus( $query, "row" ) };
+    # verify if we cache data 
+  	if (defined $self->{ 'config' }{ $provider }{ 'cache_file' }){
+  	  # caching disabled if 0 or no cache time defined
+      if (! defined $self->{ 'config' }{ $provider }{ 'cache_time' } || $self->{ 'config' }{ $provider }{ 'cache_time' } == 0){
+      	#    $self->query_provider();
+      }
+      $log->debug("Using cache file $self->{ 'config' }{ $provider }{ 'cache_file' }");
+      $result->{ $provider } = $self->_open_cache( $self->{ 'config' }{ $provider }{ 'cache_time' }, $self->{ 'config' }{ $provider }{ 'cache_file' } );
 
-  }else{
-  	carp ("Unsupported provider: $self->{'provider'}!");
+      # query next provider
+###      next unless $result->{ $provider } == 1;
+#    }else{
+      #    $self->query_provider();
+    }
+
   }
-  
-  # write cache
-  if (defined $self->{ 'provdata' }{ 'cache_file' }){
-  	# caching disabled if 0 or no cache time defined
-    next if (! defined $self->{ 'provdata' }{ 'cache_time' } || $self->{ 'provdata' }{ 'cache_time' } == 0);
-    $self->_write_cache ( $self->{ 'provdata' }{ 'cache_time' }, $self->{ 'provdata' }{ 'cache_file' }, $result );
-  }
-  
   return $result;
   
 }
@@ -457,23 +443,40 @@ sub get_bpdetails {
   
   croak "No data received from backend!" unless $status;
   
+  my $log = $self->{ 'log' };
+ 
+  my $provider = undef;
+  # which backend provider do we use?
+  if (defined $self->{ 'bps' }{ $self->{ 'bp' } }{ 'BP' }{ 'PROVIDER' }){
+  	$provider = $self->{ 'bps' }{ $self->{ 'bp' } }{ 'BP' }{ 'PROVIDER' };
+  }else{
+  	# use default one
+  	$provider = $self->{ 'config' }{ 'default' }{ 'source' };
+  }
+  
+  $log->info("Provider: $provider");
+#  $log->info("Status:");
+#  $log->info(Dumper $status);
+#  $log->info("BPS:");
+#  $log->info(Dumper $self->{ 'bps' });
+  
   foreach my $host (keys %{ $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' } }){
     foreach my $service (keys %{ $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' }{ $host } }){
     	
       # Check if host array is empty - this happens if host was not found in monitoring system
-      if (defined $status->{ $host }){
+      if (defined $status->{ $provider }{ $host }){
       	
         # loop through host array
-        for (my $i=0; $i< scalar @{ $status->{ $host } }; $i++){
-      	  if ($status->{ $host }->[ $i ]->{ 'name2' } eq $service){
+        for (my $i=0; $i< scalar @{ $status->{ $provider }{ $host } }; $i++){
+      	  if ($status->{ $provider }{ $host }->[ $i ]->{ 'name2' } eq $service){
       	    # service found
       	    my $state = "UNKNOWN";
-      	    if    ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 0 ){ $state = "OK"; }
-      	    elsif ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 1 ){ $state = "WARNING"; }
-      	    elsif ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 2 ){ $state = "CRITICAL"; } 
-      	    elsif ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 3 ){ $state = "UNKNOWN"; }; 
+      	    if    ( $status->{ $provider }{ $host }->[ $i]->{ 'last_hard_state' } == 0 ){ $state = "OK"; }
+      	    elsif ( $status->{ $provider }{ $host }->[ $i]->{ 'last_hard_state' } == 1 ){ $state = "WARNING"; }
+      	    elsif ( $status->{ $provider }{ $host }->[ $i]->{ 'last_hard_state' } == 2 ){ $state = "CRITICAL"; } 
+      	    elsif ( $status->{ $provider }{ $host }->[ $i]->{ 'last_hard_state' } == 3 ){ $state = "UNKNOWN"; }; 
       	    $return->{ $host }{ $service }{ 'hardstate' } = $state;
-     	    $return->{ $host }{ $service }{ 'output' } = $status->{ $host }->[ $i ]->{ 'output' };
+     	    $return->{ $host }{ $service }{ 'output' } = $status->{ $provider }{ $host }->[ $i ]->{ 'output' };
       	  }
         }
         
@@ -536,12 +539,15 @@ sub get_details {
   	  croak "Unknown option: $key";
   	}
   }
-
-  if (defined $self->{ 'config' }{ 'provider' }{ 'source' }){
-  	# override provider data to be able to detect host down events
-  	$self->{ 'provider' } = $self->{ 'config' }{ 'provider' }{ 'source' };
-  	$self->{ 'provdata' } = $self->{ 'config' }{ $self->{ 'config' }{ 'provider' }{ 'source' } };
-  }
+  
+  my $log = $self->{ 'log' };
+  
+# why?
+#  if (defined $self->{ 'config' }{ 'provider' }{ 'source' }){
+#  	# override provider data to be able to detect host down events
+#  	$self->{ 'provider' } = $self->{ 'config' }{ 'provider' }{ 'source' };
+#  	$self->{ 'provdata' } = $self->{ 'config' }{ $self->{ 'config' }{ 'provider' }{ 'source' } };
+#  }
   
   # Die if no hosts are defined
   croak "No host defined for given business process " . $self->{ 'bp' } unless defined $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' };
@@ -639,50 +645,37 @@ sub query_provider {
           croak "Unknown option: $key";
         }
   }
-#  my $memd = new Cache::Memcached {
-#       'servers' => [ "127.0.0.1:11211" ],
-#       'debug' => 0,
-#       'compress_threshold' => 10_000,
-#     };
-  # fetch data from Icinga/Nagios
-  if ($self->{'provider'} eq "ido"){
+  
+#  my $log = $self->{ 'log' };
+  
+  # fetch data
+  foreach my $provider (keys %{ $self->{ 'config' } }){
+  	if (defined $self->{ 'config' }{ $provider }{ 'provider' }){
+  	  
+  	  if ($self->{ 'config' }{ $provider }{ 'provider'} eq "ido"){
 
         # construct SQL query
         my $sql = $self->_query_ido( '__all' );
         # get results
-        $result = $self->_get_ido( $sql, "row" );
+        $result = $self->_get_ido( $self->{ 'config' }{ $provider }, $sql, "row" );
 
-  }elsif ($self->{'provider'} eq "mk-livestatus"){
+  	  }elsif ($self->{ 'config' }{ $provider }{'provider'} eq "mk-livestatus"){
 
 		# TODO: change to Plugin
 
         # construct query
         my $query = $self->_query_livestatus( '__all' );
         # get results
-        $result = eval { $self->_get_livestatus( $query, "row" ) };
+        $result = eval { $self->_get_livestatus( $self->{ 'config' }{ $provider }, $query, "row" ) };
 
-  }else{
-        carp ("Unsupported provider: $self->{'provider'}!");
+  	  }else{
+        carp ("Unsupported provider: $self->{ 'config' }{ $provider }{ 'provider'}!");
+      }
+
+      $self->_write_cache( "10", $self->{ 'config' }{ $provider }{ 'cache_file' }, $result );
+      
+  	}
   }
-
-#       $memd->set("hosts3", $status);
-#       my $return = {};
-
-#       foreach my $host (keys %{ $status }){
-#               for (my $i=0; $i< scalar @{ $status->{$host} }; $i++){
-#                       my $state = "UNKNOWN";
-#                       my $service = $status->{$host}->[ $i ]->{ 'name2' };
-#                       if    ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 0 ){ $state = "OK"; }
-#                       elsif ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 1 ){ $state = "WARNING"; }
-#                       elsif ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 2 ){ $state = "CRITICAL"; }
-#                       elsif ( $status->{ $host }->[ $i]->{ 'last_hard_state' } == 3 ){ $state = "UNKNOWN"; };
-#
-#                       $return->{ $host }{ $service }{ 'hardstate' } = $state;
-#                       $return->{ $host }{ $service }{ 'output' } = $status->{ $host }->[ $i ]->{ 'output' };
-#
-#               }               
-#       }
-        $self->_write_cache( "10", $self->{ 'provdata' }{ 'cache_file' }, $result );
 }
 
 
@@ -777,9 +770,10 @@ Columns: display_name state\n";
 # get service status from IDOutils
 sub _get_ido {
 	
-  my $self	= shift;
-  my $sql	= shift or die ("Missing SQL query!");
-  my $fetch	= shift;	# how to handle results
+  my $self		= shift;
+  my $provdata 	= shift;
+  my $sql		= shift or die ("Missing SQL query!");
+  my $fetch		= shift;	# how to handle results
   
   my $result;
   
@@ -859,9 +853,10 @@ sub _get_ido {
 # get service status from mk-livestatus
 sub _get_livestatus {
 	
-  my $self	= shift;
-  my $query	= shift or croak ("Missing livestatus query!");
-  my $fetch	= shift;	# how to handle results
+  my $self		= shift;
+  my $provdata	= shift;
+  my $query		= shift or croak ("Missing livestatus query!");
+  my $fetch		= shift;	# how to handle results
   
   my $result;
   my $ml;
@@ -869,11 +864,11 @@ sub _get_livestatus {
   use Monitoring::Livestatus;
   
   # use socket or hostname:port?
-  if ($self->{'provdata'}{'socket'}){
-    $ml = Monitoring::Livestatus->new( 	'socket' 	=> $self->{'provdata'}{'socket'},
+  if ($provdata->{ 'socket' }){
+    $ml = Monitoring::Livestatus->new( 	'socket' 	=> $provdata->{'socket'},
     									'keepalive' => 1 );
   }else{
-    $ml = Monitoring::Livestatus->new( 	'server' 	=> $self->{'provdata'}{'server'} . ':' . $self->{'provdata'}{'port'},
+    $ml = Monitoring::Livestatus->new( 	'server' 	=> $provdata->{'server'} . ':' . $provdata->{'port'},
     									'keepalive'	=> 1 );
   }
   
