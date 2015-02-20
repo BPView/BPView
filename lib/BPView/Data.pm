@@ -703,9 +703,12 @@ sub _query_ido {
   if ($service_names eq "__all"){
 
     # example query:
-  	# select icinga_objects.name1 AS hostname, CASE WHEN icinga_objects.name2 IS NULL THEN '__HOSTCHECK' ELSE icinga_objects.name2 END AS name2, CASE WHEN 
-  	# icinga_hoststatus.last_hard_state IS NOT NULL THEN icinga_hoststatus.last_hard_state ELSE icinga_servicestatus.last_hard_state END AS last_hard_state, 
-  	# CASE WHEN icinga_hoststatus.output IS NOT NULL THEN icinga_hoststatus.output ELSE icinga_servicestatus.output END AS output from icinga_objects 
+  	# SELECT icinga_objects.name1 AS hostname, 
+  	# CASE WHEN icinga_objects.name2 IS NULL THEN '__HOSTCHECK' ELSE icinga_objects.name2 END AS name2, 
+  	# CASE WHEN icinga_hoststatus.last_hard_state IS NOT NULL THEN icinga_hoststatus.last_hard_state ELSE icinga_servicestatus.last_hard_state END AS last_hard_state, 
+  	# CASE WHEN icinga_hoststatus.output IS NOT NULL THEN icinga_hoststatus.output ELSE icinga_servicestatus.output END AS output,
+  	# CASE WHEN icinga_hoststatus.last_check IS NOT NULL THEN UNIX_TIMESTAMP(icinga_hoststatus.last_check) ELSE UNIX_TIMESTAMP(icinga_servicestatus.last_check) END AS last_check
+  	# from icinga_objects 
   	# LEFT JOIN icinga_hoststatus ON icinga_objects.object_id=icinga_hoststatus.host_object_id LEFT JOIN icinga_servicestatus ON 
   	# icinga_objects.object_id=icinga_servicestatus.service_object_id where icinga_objects.is_active=1 and (icinga_objects.objecttype_id=1 or icinga_objects.objecttype_id=2);
     
@@ -714,7 +717,10 @@ sub _query_ido {
   	$sql .= "CASE WHEN " . $provdata->{'prefix'} . "hoststatus.last_hard_state IS NOT NULL THEN " . $provdata->{'prefix'} . "hoststatus.last_hard_state ELSE ";
   	$sql .= $provdata->{'prefix'} . "servicestatus.last_hard_state END AS last_hard_state, ";
   	$sql .= "CASE WHEN " . $provdata->{'prefix'} . "hoststatus.output IS NOT NULL THEN " . $provdata->{'prefix'} . "hoststatus.output ELSE ";
-  	$sql .= $provdata->{'prefix'} . "servicestatus.output END AS output FROM " . $provdata->{'prefix'} . "objects ";
+  	$sql .= $provdata->{'prefix'} . "servicestatus.output END AS output, ";
+  	$sql .= "CASE WHEN " . $provdata->{'prefix'} . "hoststatus.last_check IS NOT NULL THEN UNIX_TIMESTAMP(" . $provdata->{'prefix'} . "hoststatus.last_check) ELSE ";
+  	$sql .= "UNIX_TIMESTAMP(" . $provdata->{'prefix'} . "servicestatus.last_check) END AS last_check ";
+  	$sql .= "FROM " . $provdata->{'prefix'} . "objects ";
   	$sql .= "LEFT JOIN " . $provdata->{'prefix'} . "hoststatus ON " . $provdata->{'prefix'} . "objects.object_id=" . $provdata->{'prefix'} . "hoststatus.host_object_id ";
   	$sql .= "LEFT JOIN " . $provdata->{'prefix'} . "servicestatus ON " . $provdata->{'prefix'} . "objects.object_id=" . $provdata->{'prefix'} . "servicestatus.service_object_id ";
   	$sql .= "WHERE " . $provdata->{'prefix'} . "objects.is_active=1 AND (" . $provdata->{'prefix'} . "objects.objecttype_id=1 OR ";
