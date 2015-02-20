@@ -39,6 +39,7 @@ use File::stat;
 use JSON::PP;
 use Tie::IxHash;
 use Storable 'dclone';
+use POSIX qw( strftime );
 use Module::Pluggable search_path => "Plugins", instantiate => 'new';;
 
 use constant DISPLAY => '__display';
@@ -477,6 +478,7 @@ sub get_bpdetails {
       	    elsif ( $status->{ $provider }{ $host }->[ $i]->{ 'last_hard_state' } == 3 ){ $state = "UNKNOWN"; }; 
       	    $return->{ $host }{ $service }{ 'hardstate' } = $state;
      	    $return->{ $host }{ $service }{ 'output' } = $status->{ $provider }{ $host }->[ $i ]->{ 'output' };
+     	    $return->{ $host }{ $service }{ 'last_check' } = strftime("%Y-%m-%d %H:%M:%S", localtime( $status->{ $provider }{ $host }->[ $i ]->{ 'last_check' } ) );
       	  }
         }
         
@@ -485,6 +487,7 @@ sub get_bpdetails {
       	  # service missing in data source
       	  $return->{ $host }{ $service }{ 'hardstate' } = "UNKNOWN";
       	  $return->{ $host }{ $service }{ 'output' } = "Service $service not found in Monitoring system!";
+      	  $return->{ $host }{ $service }{ 'last_check' } = "UNKNOWN";
 	    }
 	  
       }else{
@@ -492,6 +495,7 @@ sub get_bpdetails {
       	# Host missing in monitoring system
       	$return->{ $host }{ ' ' }{ 'hardstate' } = "UNKNOWN";
       	$return->{ $host }{ ' ' }{ 'output' } = "Host $host not found in Monitoring system!";
+      	$return->{ $host }{ ' ' }{ 'last_check' } = "UNKNOWN";
       	
       }
     }
@@ -748,7 +752,7 @@ sub _query_livestatus {
   # construct livestatus query
   if ($service_names eq "__all"){
   	$query = "GET services\n
-Columns: host_name description last_hard_state plugin_output\n";
+Columns: host_name description last_hard_state plugin_output last_check\n";
   }else{
   	# query data for specified service
     $query = "GET services\n
@@ -900,6 +904,7 @@ sub _get_livestatus {
       $tmphash->{ 'last_hard_state' } = $tmp->[$i][2];
       $tmphash->{ 'hostname' } = $tmp->[$i][0];
       $tmphash->{ 'output' } = $tmp->[$i][3];
+      $tmphash->{ 'last_check' } = $tmp->[$i][4];
       # set last hard state to 2 (critical) if host check is 1 (down)
       if ($tmphash->{ 'name2' } eq "__HOSTCHECK"){
         $tmphash->{ 'last_hard_state' } = 2 if $tmp->[$i][2] != 0; 
@@ -913,7 +918,8 @@ sub _get_livestatus {
   #             'name2' => 'PING',
   #             'last_hard_state' => '0',
   #             'hostname' => 'loadbalancer',
-  #             'output' => ''
+  #             'output' => '',
+  #             'last_check' => '1424453213'
   #           },
   #         ]
   #         },

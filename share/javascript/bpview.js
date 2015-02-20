@@ -253,15 +253,16 @@ function getDetails(businessProcess) {
 
 		// host names
 		jsonData += "<table class=\"details\" width=\"100%\">\n";
-		jsonData += "  <colgroup>\n    <col class=\"detail_service\">\n    <col class=\"detail_output\">\n    <col class=\"detail_status\">\n  </colgroup>\n";
-		jsonData += "<thead><tr><th width=\"100%\" class=\"detail_host\" colspan=\"3\">" + host + "</th></tr></thead>\n";
+		jsonData += "  <colgroup>\n    <col class=\"detail_service\">\n    <col class=\"detail_output\">\n    <col class=\"detail_status\">\n    <col class=\"detail_lastcheck\">\n  </colgroup>\n";
+		jsonData += "<thead><tr><th width=\"100%\" class=\"detail_host\" colspan=\"4\">" + host + "</th></tr></thead>\n";
 
 			$.each(hostval, function(service, serviceval){
 
 			  // service names
 			  jsonData += "    <tbody><tr><td class=\"detail_service detail_status_" + serviceval.hardstate + " \"title=\"" + service + "\">" + service + "</td>\n";
 			  jsonData += "    <td class=\"detail_output detail_status_" + serviceval.hardstate + "\" title=\"" + serviceval.output + "\">" + serviceval.output + "</td>\n";
-			  jsonData += "    <td class=\"detail_status detail_status_" + serviceval.hardstate + "\" title=\"" + serviceval.hardstate + "\">" + serviceval.hardstate + "</td></tr></tbody>\n";
+			  jsonData += "    <td class=\"detail_status detail_status_" + serviceval.hardstate + "\" title=\"" + serviceval.hardstate + "\">" + serviceval.hardstate + "</td>\n";
+			  jsonData += "    <td class=\"detail_lastcheck detail_status_" + serviceval.hardstate + "\" title=\"" + serviceval.last_check + "\">" + serviceval.last_check + "</td></tr></tbody>\n";
 			});
 
 			jsonData += "</table>\n";

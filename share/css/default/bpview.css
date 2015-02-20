@@ -459,6 +459,13 @@ padding: 0px 0px 0px 2px;
 width: 70%;
 }
 
+.detail_lastcheck {
+text-align: center;
+border: 1px dotted grey;
+overflow: hidden;
+width: 160px;
+}
+
 .detail_status {
 text-align: center;
 border: 1px dotted grey;
