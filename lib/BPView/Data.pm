@@ -659,7 +659,7 @@ sub query_provider {
   	  if ($self->{ 'config' }{ $provider }{ 'provider'} eq "ido"){
 
         # construct SQL query
-        my $sql = $self->_query_ido( '__all' );
+        my $sql = $self->_query_ido( $self->{ 'config' }{ $provider }, '__all' );
         # get results
         $result = $self->_get_ido( $self->{ 'config' }{ $provider }, $sql, "row" );
 
@@ -693,6 +693,7 @@ sub query_provider {
 sub _query_ido {
 	
   my $self			= shift;
+  my $provdata		= shift or die ("Missing provdata!");
   my $service_names	= shift or die ("Missing service_names!");
   
   my $sql = undef;
@@ -708,20 +709,20 @@ sub _query_ido {
   	# LEFT JOIN icinga_hoststatus ON icinga_objects.object_id=icinga_hoststatus.host_object_id LEFT JOIN icinga_servicestatus ON 
   	# icinga_objects.object_id=icinga_servicestatus.service_object_id where icinga_objects.is_active=1 and (icinga_objects.objecttype_id=1 or icinga_objects.objecttype_id=2);
     
-  	$sql = "SELECT " . $self->{'provdata'}{'prefix'} . "objects.name1 AS hostname, ";
-  	$sql .= "CASE WHEN " . $self->{'provdata'}{'prefix'} . "objects.name2 IS NULL THEN '__HOSTCHECK' ELSE " . $self->{'provdata'}{'prefix'} . "objects.name2 END AS name2, ";
-  	$sql .= "CASE WHEN " . $self->{'provdata'}{'prefix'} . "hoststatus.last_hard_state IS NOT NULL THEN " . $self->{'provdata'}{'prefix'} . "hoststatus.last_hard_state ELSE ";
-  	$sql .= $self->{'provdata'}{'prefix'} . "servicestatus.last_hard_state END AS last_hard_state, ";
-  	$sql .= "CASE WHEN " . $self->{'provdata'}{'prefix'} . "hoststatus.output IS NOT NULL THEN " . $self->{'provdata'}{'prefix'} . "hoststatus.output ELSE ";
-  	$sql .= $self->{'provdata'}{'prefix'} . "servicestatus.output END AS output FROM " . $self->{'provdata'}{'prefix'} . "objects ";
-  	$sql .= "LEFT JOIN " . $self->{'provdata'}{'prefix'} . "hoststatus ON " . $self->{'provdata'}{'prefix'} . "objects.object_id=" . $self->{'provdata'}{'prefix'} . "hoststatus.host_object_id ";
-  	$sql .= "LEFT JOIN " . $self->{'provdata'}{'prefix'} . "servicestatus ON " . $self->{'provdata'}{'prefix'} . "objects.object_id=" . $self->{'provdata'}{'prefix'} . "servicestatus.service_object_id ";
-  	$sql .= "WHERE " . $self->{'provdata'}{'prefix'} . "objects.is_active=1 AND (" . $self->{'provdata'}{'prefix'} . "objects.objecttype_id=1 OR ";
-  	$sql .= $self->{'provdata'}{'prefix'} . "objects.objecttype_id=2)";
+  	$sql = "SELECT " . $provdata->{'prefix'} . "objects.name1 AS hostname, ";
+  	$sql .= "CASE WHEN " . $provdata->{'prefix'} . "objects.name2 IS NULL THEN '__HOSTCHECK' ELSE " . $provdata->{'prefix'} . "objects.name2 END AS name2, ";
+  	$sql .= "CASE WHEN " . $provdata->{'prefix'} . "hoststatus.last_hard_state IS NOT NULL THEN " . $provdata->{'prefix'} . "hoststatus.last_hard_state ELSE ";
+  	$sql .= $provdata->{'prefix'} . "servicestatus.last_hard_state END AS last_hard_state, ";
+  	$sql .= "CASE WHEN " . $provdata->{'prefix'} . "hoststatus.output IS NOT NULL THEN " . $provdata->{'prefix'} . "hoststatus.output ELSE ";
+  	$sql .= $provdata->{'prefix'} . "servicestatus.output END AS output FROM " . $provdata->{'prefix'} . "objects ";
+  	$sql .= "LEFT JOIN " . $provdata->{'prefix'} . "hoststatus ON " . $provdata->{'prefix'} . "objects.object_id=" . $provdata->{'prefix'} . "hoststatus.host_object_id ";
+  	$sql .= "LEFT JOIN " . $provdata->{'prefix'} . "servicestatus ON " . $provdata->{'prefix'} . "objects.object_id=" . $provdata->{'prefix'} . "servicestatus.service_object_id ";
+  	$sql .= "WHERE " . $provdata->{'prefix'} . "objects.is_active=1 AND (" . $provdata->{'prefix'} . "objects.objecttype_id=1 OR ";
+  	$sql .= $provdata->{'prefix'} . "objects.objecttype_id=2)";
   	
   }else{
     # query data for specified service
-    $sql = "SELECT name2 AS service, current_state AS state FROM " . $self->{'provdata'}{'prefix'} . "objects, " . $self->{'provdata'}{'prefix'} . "servicestatus ";
+    $sql = "SELECT name2 AS service, current_state AS state FROM " . $provdata->{'prefix'} . "objects, " . $provdata->{'prefix'} . "servicestatus ";
     $sql .= "WHERE object_id = service_object_id AND is_active = 1 AND name2 IN (";
     # go trough service_names array
     for (my $i=0;$i<scalar @{ $service_names };$i++){
@@ -783,18 +784,18 @@ sub _get_ido {
   
   my $dsn = undef;
   # database driver
-  if ($self->{'provdata'}{'type'} eq "mysql"){
+  if ($provdata->{'type'} eq "mysql"){
     use DBI;	  # MySQL
-  	$dsn = "DBI:mysql:database=$self->{'provdata'}{'database'};host=$self->{'provdata'}{'host'};port=$self->{'provdata'}{'port'}";
-  }elsif ($self->{'provdata'}{'type'} eq "pgsql"){
+  	$dsn = "DBI:mysql:database=$provdata->{'database'};host=$provdata->{'host'};port=$provdata->{'port'}";
+  }elsif ($provdata->{'type'} eq "pgsql"){
 	use DBD::Pg;  # PostgreSQL
-  	$dsn = "DBI:Pg:dbname=$self->{'provdata'}{'database'};host=$self->{'provdata'}{'host'};port=$self->{'provdata'}{'port'}";
+  	$dsn = "DBI:Pg:dbname=$provdata->{'database'};host=$provdata->{'host'};port=$provdata->{'port'}";
   }else{
-  	die "Unsupported database type: $self->{'provdata'}{'type'}";
+  	die "Unsupported database type: $provdata->{'type'}";
   }
   
   # connect to database
-  my $dbh   = eval { DBI->connect_cached($dsn, $self->{'provdata'}{'username'}, $self->{'provdata'}{'password'}) };
+  my $dbh   = eval { DBI->connect_cached($dsn, $provdata->{'username'}, $provdata->{'password'}) };
   if ($DBI::errstr){
   	die "$DBI::errstr: $@";
   }
