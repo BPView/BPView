@@ -12,25 +12,20 @@
 # Make sure to use correct YAML syntax and especially don't use
 # tabs instead of spaces!
 #
-# The structure and shifting hast to be:
-# provider:
-# source: <source>
+# The structure and shifting has to be:
+# default:
+#   source: <source>
 #
 
-provider:
+default:
 
 #
 # source: name of the provider.
 # This requires a configuration block with the same name later
 # in this configuration file.
 #
-# Supported values are:
-# * ido
-# * mk-livestatus
-# * bpaddon
-#
 
-  source: ido
+  source: icinga-ido
 
     
 # ---
@@ -43,21 +38,32 @@ provider:
 # tabs instead of spaces!
 #
 # The structure and shifting hast to be:
-# ido:
-# host: <host>
-# port: <port>
-# type: <type>
-# database: <database>
-# username: <username>
-# password: <password>
-# prefix: <prefix>
-# timeout: <timeout>
+# <name>:
+#   provider: <provider>
+#   host: <host>
+#   port: <port>
+#   type: <type>
+#   database: <database>
+#   username: <username>
+#   password: <password>
+#   prefix: <prefix>
+#   timeout: <timeout>
 #
 # For further details on how to integrate IDOutils in your
 # monitoring system visit: http://docs.icinga.org/latest/en/
 #
   
-ido:
+icinga-ido:
+
+#
+# provider: Type of provider
+#
+# Supported values are:
+# * ido
+# * mk-livestatus
+#
+
+  provider: ido
 
 #
 # host: Hostname of the IDOutils database server.
@@ -139,18 +145,27 @@ ido:
 # tabs instead of spaces!
 #
 # The structure and shifting hast to be:
-# mk-livestatus:
-# socket: <socket>
-# server: <server>
-# port: <port>
+# <name>:
+#   provider: <provider>
+#   socket: <socket>
+#   server: <server>
+#   port: <port>
 #
 # For further details on how to integrate mk-livestatus in your
 # monitoring system visit: http://mathias-kettner.de/checkmk_livestatus.html
 #
-  
-### NOTE: mk-livestatus isn't supported in this release, yet!
-  
+ 
 mk-livestatus:
+
+#
+# provider: Type of provider
+#
+# Supported values are:
+# * ido
+# * mk-livestatus
+#
+
+  provider: mk-livestatus
 
 #
 # socket: Path to mk-livetstatus socket if connection shall be
@@ -184,6 +199,20 @@ mk-livestatus:
 #
   
 # port:
+
+#
+# cache_time: Cache results in file for $cache_time seconds
+#
+  
+  cache_time: 30
+
+#
+# cache_file: Write results of this provider in this file to
+# cache it for $cache_time seconds.
+#
+
+  cache_file: "/dev/shm/bpview_mklivestatus_cache"
+
   
   
 # ---

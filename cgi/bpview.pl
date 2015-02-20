@@ -350,7 +350,14 @@ sub _connect_api {
   
   # receive a response of up to 5024 characters from server
   my $response = "";
-  $socket->recv($response, $config->{ 'bpviewd' }{ 'response_chars' });
+  
+  # fetch all data
+  my $tmp_resp = "";
+  while (defined $tmp_resp){
+    $socket->recv($tmp_resp, $config->{ 'bpviewd' }{ 'response_chars' });
+    $response .= $tmp_resp;
+    undef $tmp_resp if $tmp_resp eq "";
+  }
   
   # close socket
   $socket->close();

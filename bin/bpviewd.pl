@@ -200,10 +200,9 @@ if ($@){
 my $data = BPView::Data->new(
      config       => $config,
      views        => $views,
-     provider     => $config->{ 'provider' }{ 'source' },
-     provdata     => $config->{ $config->{ 'provider' }{ 'source' } },
      bps          => $bps,
      filter       => "",
+     log		=> $log,
    );
 
 my $bp_dir      = $cfg_path . "/bp-config";
@@ -246,9 +245,32 @@ my $client_thread = $daemon->create_client_thread(
 );
 
 
-# Verify status of threads and restart it in case one dies
+my $counter = 0;
+my $repeater = 300/$config->{ 'bpviewd' }{ 'sleep' };
+
+# "infinite" loop where some useful process happens
 until ($dieNow) {
 
+	# Fetching data from monitoring backends
+	# TODO: Rename sleep option in config file
+
+		$log->info("Fetching data from providers");
+        eval { $data->query_provider() };
+
+        if ($@) {
+                my $msg = $@;
+                $msg =~ s/\n//g;
+                $log->error($msg);
+        } else {
+                if ($counter == $repeater) {
+                        $log->info("Fetched. (Repeated " . $repeater . " times, output every 5 minutes)");
+                        $counter = 0;
+                }
+        }
+        
+        $counter++;
+  
+  # Verify status of threads and restart it in case one dies     
   if ($status_thread->is_running() != 1){
   	$log->error("Status thread isn't running - restarting it.");
   	$status_thread = $daemon->create_status_thread(
@@ -269,36 +291,8 @@ until ($dieNow) {
 		'cache'			=> $cache,
 	);
   }
-  
-  sleep (10);
-
-}
-
-
-my $counter = 0;
-my $repeater = 300/$config->{ 'bpviewd' }{ 'sleep' };
-
-# "infinite" loop where some useful process happens
-until ($dieNow) {
-
-	# Fetching data from monitoring backends
-	# TODO: Rename sleep option in config file
-
-        eval { $data->query_provider() };
-
-        if ($@) {
-                my $msg = $@;
-                $msg =~ s/\n//g;
-                $log->error($msg);
-        } else {
-                if ($counter == $repeater) {
-                        $log->info("Fetched. (Repeated " . $repeater . " times, output every 5 minutes)");
-                        $counter = 0;
-                }
-        }
         
-        $counter++;
-        
+        $log->info("Waiting for next fetch for $config->{ 'bpviewd' }{ 'sleep' } seconds");
         sleep($config->{ 'bpviewd' }{ 'sleep' });
 
 }
