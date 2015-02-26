@@ -1,0 +1,8 @@
+/etc/bpview(/.*)?				gen_context(system_u:object_r:bpview_config_t,s0)
+/usr/bin/bpviewd			--	gen_context(system_u:object_r:bpview_bin_t,s0)
+/usr/bin/bpviewd_reload		--	gen_context(system_u:object_r:bpview_bin_t,s0)
+/usr/lib64/bpview/bpview.pl	--	gen_context(system_u:object_r:bpview_script_exec_t,s0)
+/usr/share/bpview(/.*)?			gen_context(system_u:object_r:bpview_content_t,s0)
+/var/log/bpview/bpviewd.log	--	gen_context(system_u:object_r:bpview_log_t,s0)
+/var/log/bpview/reload.log	--	gen_context(system_u:object_r:bpview_log_t,s0)
+/var/log/bpview/bpview.log	--	gen_context(system_u:object_r:bpview_log_t,s0)

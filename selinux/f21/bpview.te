@@ -1,0 +1,56 @@
+policy_module(bpview,0.2.0)
+
+########################################
+#
+# Declarations
+#
+
+
+require {
+	type postgresql_port_t;
+	type mysqld_port_t;
+	type cert_t;
+	type initrc_t;
+};
+
+
+apache_content_template(bpview)
+
+# Type for bpviewd
+type bpview_bin_t;
+
+allow initrc_t bpview_bin_t:file { getattr read execute open execute_no_trans ioctl };
+
+
+# Type for the configuration files
+type bpview_config_t;
+files_config_file(bpview_config_t)
+
+allow bpview_script_t bpview_config_t:file { getattr read create_file_perms };
+allow bpview_script_t bpview_config_t:dir { create_dir_perms };
+allow bpview_bin_t bpview_config_t:file { getattr read create_file_perms };
+allow bpview_bin_t bpview_config_t:file { create_dir_perms };
+
+
+# Type for log files
+type bpview_log_t;
+logging_log_file(bpview_log_t)
+
+allow bpview_script_t bpview_log_t:file {create read_file_perms append_file_perms };
+allow bpview_script_t bpview_log_t:dir {setattr rw_dir_perms};
+logging_log_filetrans(bpview_script_t,bpview_log_t,{file dir})
+
+allow bpview_bin_t bpview_log_t:file {create read_file_perms append_file_perms };
+allow bpview_bin_t bpview_log_t:dir {setattr rw_dir_perms};
+logging_log_filetrans(bpview_bin_t,bpview_log_t,{file dir})
+
+# Provider connections
+# MySQL/PostgreSQL
+allow bpview_bin_t mysqld_port_t:tcp_socket name_connect;
+allow bpview_bin_t postgresql_port_t:tcp_socket name_connect;
+
+
+# FastCGI
+allow bpview_script_t httpd_t:unix_stream_socket { ioctl accept getattr shutdown };
+# also requires:
+# setsebool -P allow_ypbind=on

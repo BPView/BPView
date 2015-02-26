@@ -72,11 +72,15 @@ in a Business Process.
            --with-web-group=%{apachegroup} \
            --with-web-conf=/etc/httpd/conf.d/bpview.conf
 
-cd selinux
+%if 0%{?fedora} && 0%{?fedora_version} >= 21
+cd selinux/f21
+%else
+cd selinux/rh6
+%endif
 for selinuxvariant in %{selinux_variants}
 do
   make NAME=${selinuxvariant} -f /usr/share/selinux/devel/Makefile
-  mv %{name}.pp %{name}.pp.${selinuxvariant}
+  mv %{name}.pp ../%{name}.pp.${selinuxvariant}
   make NAME=${selinuxvariant} -f /usr/share/selinux/devel/Makefile clean
 done
 cd -
@@ -156,7 +160,7 @@ fi
 
 %changelog
 * Thu Feb 26 2015 Rene Koch <rkoch@rk-it.at> 0.11-2
-- compile on RHEL 7
+- compile on RHEL 7 and Fedora 21
 
 * Fri Feb 20 2015 Rene Koch <rkoch@rk-it.at> 0.11-1
 - bump to 0.11 release
