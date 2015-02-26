@@ -1,6 +1,6 @@
 Name: bpview
 Version: 0.11
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Business Process view for Nagios/Icinga 
 
 Group: Applications/System
@@ -11,11 +11,18 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildRequires: perl
 BuildRequires: perl-CGI
+%if "%{_vendor}" == "redhat"
+%if 0%{?rhel} == 6
 BuildRequires: perl-JSON
+%else
+# RHEL 7 and Fedora
+BuildRequires: perl-JSON-PP
+%endif
+%endif
 BuildRequires: perl-YAML-Syck
 BuildRequires: perl-DBI
 BuildRequires: perl-DBD-Pg
-BuildRequires: selinux-policy
+BuildRequires: selinux-policy-devel
 
 Requires: httpd
 Requires: memcached
@@ -148,6 +155,9 @@ fi
 
 
 %changelog
+* Thu Feb 26 2015 Rene Koch <rkoch@rk-it.at> 0.11-2
+- compile on RHEL 7
+
 * Fri Feb 20 2015 Rene Koch <rkoch@rk-it.at> 0.11-1
 - bump to 0.11 release
 
