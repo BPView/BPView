@@ -21,7 +21,7 @@ AM_INIT_AUTOMAKE
 AC_PREFIX_DEFAULT(/usr/local/bpview)
 PKG_NAME="bpview"
 PKG_VERSION="0.11"
-PKG_REL_DATE="2015-02-20"
+PKG_REL_DATE="2015-03-07"
 
 # Figure out how to invoke "install" and what install options to use
 AC_PROG_INSTALL
