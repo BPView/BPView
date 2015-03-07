@@ -154,7 +154,11 @@ function getDbOverview(){
 
 				$.each(topicval, function(products, productval){
 					// set class for status code
-					var statusClass = "state" + productval.state;
+					if (productval.state == ""){
+						var statusClass = "state99";
+					}else{
+						var statusClass = "state" + productval.state;
+					}
 					var bpName      = productval.bpname;
 					var name		= productval.name;
 					var name_short = (name.length > 20) ? name.substr(0,20) + " ..." : name;
