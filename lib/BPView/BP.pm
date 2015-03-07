@@ -211,6 +211,11 @@ sub _and {
   foreach my $host (keys %{ $hosts }){
   	
   	foreach my $service (keys %{ $hosts->{ $host } }){
+  		
+      if (! ref($self->{ 'bps' }{ $provider }) eq "HASH"){
+      	$state = 3;
+      	next;
+      }
 
       if (! defined $self->{ 'bps' }{ $provider }{ $host }){
         $state = 3;

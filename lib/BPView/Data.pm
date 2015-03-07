@@ -650,18 +650,26 @@ sub query_provider {
         }
   }
   
-#  my $log = $self->{ 'log' };
+  my $log = $self->{ 'log' };
   
   # fetch data
   foreach my $provider (keys %{ $self->{ 'config' } }){
   	if (defined $self->{ 'config' }{ $provider }{ 'provider' }){
+
+      $log->debug("Fetching data for provider " . $provider);
   	  
   	  if ($self->{ 'config' }{ $provider }{ 'provider'} eq "ido"){
 
         # construct SQL query
         my $sql = $self->_query_ido( $self->{ 'config' }{ $provider }, '__all' );
         # get results
-        $result = $self->_get_ido( $self->{ 'config' }{ $provider }, $sql, "row" );
+        $result = eval { $self->_get_ido( $self->{ 'config' }{ $provider }, $sql, "row" ) };
+        if ($@){
+          $log->error("Failed to fetch data from IDO: " . $@);
+          next;
+        }else{
+          $log->debug("Successfully fetched data from IDO");
+        }
 
   	  }elsif ($self->{ 'config' }{ $provider }{'provider'} eq "mk-livestatus"){
 
@@ -671,6 +679,12 @@ sub query_provider {
         my $query = $self->_query_livestatus( '__all' );
         # get results
         $result = eval { $self->_get_livestatus( $self->{ 'config' }{ $provider }, $query, "row" ) };
+        if ($@){
+          $log->error("Failed to fetch data from livestatus: " . $@);
+          next;
+        }else{
+          $log->debug("Successfully fetched data from livestatus");
+        }
 
   	  }else{
         carp ("Unsupported provider: $self->{ 'config' }{ $provider }{ 'provider'}!");
@@ -797,18 +811,18 @@ sub _get_ido {
 	use DBD::Pg;  # PostgreSQL
   	$dsn = "DBI:Pg:dbname=$provdata->{'database'};host=$provdata->{'host'};port=$provdata->{'port'}";
   }else{
-  	die "Unsupported database type: $provdata->{'type'}";
+  	croak "Unsupported database type: $provdata->{'type'}";
   }
   
   # connect to database
   my $dbh   = eval { DBI->connect_cached($dsn, $provdata->{'username'}, $provdata->{'password'}) };
   if ($DBI::errstr){
-  	die "$DBI::errstr: $@";
+  	croak "$DBI::errstr: $@";
   }
   my $query = eval { $dbh->prepare( $sql ) };
   eval { $query->execute };
   if ($DBI::errstr){
-  	die "$DBI::errstr: $@";
+  	croak "$DBI::errstr: $@";
   }
   
   # prepare return
@@ -847,7 +861,7 @@ sub _get_ido {
   	}
   	
   }else{
-  	die "Unsupported fetch method: " . $fetch;
+  	croak "Unsupported fetch method: " . $fetch;
   }
   
   
@@ -905,6 +919,15 @@ sub _get_livestatus {
   }elsif ($fetch eq "row"){
   	# fetch all data and return array
   	my $tmp = $ml->selectall_arrayref($query);
+  	if (! defined $tmp){
+  	  my $provdetails = undef;
+  	  if ( $provdata->{'socket'} ){
+  	  	$provdetails = $provdata->{ 'socket' };
+      }else{
+    	$provdetails = $provdata->{'server'} . ':' . $provdata->{'port'};
+      }
+  	  croak "Got empty result from livestatus ($provdetails)";
+  	}
     for (my $i=0; $i<scalar @{ $tmp }; $i++ ){
       my $tmphash = {};
       $tmphash->{ 'name2' } = $tmp->[$i][1];
@@ -937,7 +960,7 @@ sub _get_livestatus {
   }
   
   if($Monitoring::Livestatus::ErrorCode) {
-    die "Getting Monitoring checkresults failed: $Monitoring::Livestatus::ErrorMessage";
+    croak "Getting Monitoring checkresults failed: $Monitoring::Livestatus::ErrorMessage";
   }
   
   return $result;
