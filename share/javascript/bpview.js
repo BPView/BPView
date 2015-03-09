@@ -297,30 +297,26 @@ function getDetails(businessProcess) {
 }
 
 function showErrorMessage(){
-
-	$.magnificPopup.open({
-		enableEscapeKey: false,
-		closeOnBgClick: false,
-		showCloseBtn: false,
-        items: {
-		src: '<div class="error-popup"><div id="details_subject" class="topBar">An error occured!</div><div id="details_data" class="details_data_error"><div class="details_data_error_content">Please check error_log of your webserver or try to reload this webapp!<br/><span style="font-size:13px;">&nbsp;<br/>(press &lt;F5\&gt; or &lt;CTRL-R&gt;)</span></div><div class="details_data_error_content_image"><img src="../share/images/global/exclamation_mark_red.png"></div></div></div>',
-                type: 'inline'
-        }
+	// user configuration of all toastmessages to come:
+	$().toastmessage({
+	    sticky   : false,
+	    position : 'top-right',
+            stayTime : 5000,
+	    close    : function () {console.log("toast is closed ...");}
 	});
+	$().toastmessage('showErrorToast', 'Please check error_log of your webserver or try to reload this webapp!');
 	deleteCookie();
 }
 
 function showDetailedErrorMessage(message){
-
-	$.magnificPopup.open({
-		enableEscapeKey: true,
-		closeOnBgClick: true,
-		showCloseBtn: true,
-        items: {
-		src: '<div class="error-popup"><div id="details_subject" class="topBar">An error occured!</div><div id="details_data" class="details_data_error"><div class="details_data_error_content">' + message + '</div><div class="details_data_error_content_image"><img src="../share/images/global/exclamation_mark_red.png"></div></div></div>',
-                type: 'inline'
-        }
+	// user configuration of all toastmessages to come:
+	$().toastmessage({
+	    sticky   : false,
+	    position : 'top-right',
+            stayTime : 5000,
+	    close    : function () {console.log("toast is closed ...");}
 	});
+	$().toastmessage('showErrorToast', message);
 }
 
 function showCopyright(){

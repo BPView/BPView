@@ -35,3 +35,8 @@ A list of foreign components and frameworks used by BPView
   share/javascript/jQuery.LICENSE
   COPYING
 
+* jquery-toastmessage-plugin (Apache)
+  jquery-toastmessage-plugin is a JQuery plugin which provides android-like notification messages. 
+  It's a quite nice way to report info or error to the user.
+
+  share/javascript/jquery-toastmessage-plugin.LICENSE

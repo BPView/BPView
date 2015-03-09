@@ -27,6 +27,7 @@
     <title>BPView | [% sitename %]</title>
     <link rel="icon" type="image/x-icon" href="[% site_url %]/share/images/[% templ %]/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/bpview.css" />
+    <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/global/jquery.toastmessage.css" />
 [% IF css != "bpview" %]
     <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/[% css %].css" />
 [% END %]
@@ -51,6 +52,7 @@
     <script type="text/javascript" src="[% site_url %]/share/javascript/bpview.js"></script>
     <script type="text/javascript" src="[% site_url %]/share/javascript/magnific-popup.js"></script>
     <script type="text/javascript" src="[% site_url %]/share/javascript/superfish.js"></script>
+    <script type="text/javascript" src="[% site_url %]/share/javascript/jquery.toastmessage.js"></script>
   </head>
   <body>
 	<div class="topContainer topBar">
