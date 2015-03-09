@@ -66,6 +66,11 @@ $(document).ready(function() {
 
 	inputHostEnter();
 
+  $('.open-popup-link').magnificPopup({
+	type:'inline',
+	midClick: true // Allow opening popup on middle mouse click. Always set it to true if you don't provide alternative source in href.
+  });
+
 });
 
 
@@ -317,19 +322,6 @@ function showDetailedErrorMessage(message){
 	    close    : function () {console.log("toast is closed ...");}
 	});
 	$().toastmessage('showErrorToast', message);
-}
-
-function showCopyright(){
-
-        $.magnificPopup.open({
-                enableEscapeKey: true,
-                closeOnBgClick: true,
-                showCloseBtn: false,
-        items: {
-		src: '<div class="error-popup"><div id="details_subject" class="topBar">Copyright</div><div id="details_data" class="details_data_error"><div class="details_data_copyright_content">BPView is Open Source under the terms of the GNU General Public License.<br/>&nbsp;<br/><span style="font-size:14px;">Copyright:<br/>&nbsp;&nbsp;&nbsp;ovido<br/>&nbsp;&nbsp;&nbsp;Peter Stöckl, p.stoeckl@ovido.at</br>&nbsp;&nbsp;&nbsp;Rene Koch, r.koch@ovido.at</span></div><div class="details_data_copyright_content_image"><img src="../share/images/global/bpview_watermark.png" height="76" width="450"></div></div><button title="Close (Esc)" type="button" class="mfp-close" style="color: white;">×</button></div>',
-                type: 'inline'
-        }
-        });
 }
 
 function showReload(){

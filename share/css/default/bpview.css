@@ -412,6 +412,7 @@ font-size: 18px;
 #details_data {
 border: 1px solid black;
 margin: 0px 0px 0px 0px;
+background-color: #fff;
 }
 
 .details_data_error {

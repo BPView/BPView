@@ -16,7 +16,7 @@
 
     <div id="watermark" class="contentBottom"></div>
 	<div class="footer bottomBar">
-		<div id="copyr">&copy; 2013 ovido gmbh, &copy; 2014 BPView Development Team</div>
+		<div id="copyr"><b>BPView 0.12</b> - &copy; 2013 ovido gmbh, &copy; 2014-2015 BPView Development Team</div>
 		<div id="refresh">Last refresh</div>
 	</div>
 	<script type="text/javascript">

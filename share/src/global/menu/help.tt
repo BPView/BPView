@@ -6,7 +6,7 @@
 	</a>
 	<ul style="display: none;">
 		<li>
-			<a href="javascript:showCopyright();">About BPView&nbsp;&nbsp;&nbsp;
+			<a href="#about" class="open-popup-link">About BPView&nbsp;&nbsp;&nbsp;
 				<sub>
 					<img src="[% site_url %]/share/images/global/copyright.png" height="22" width="22" alt="" title="" />
 				</sub>

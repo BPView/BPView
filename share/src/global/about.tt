@@ -1,0 +1,23 @@
+<div id="about" class="error-popup mfp-hide">
+	<div id="details_subject" class="topBar">
+		About BPView
+	</div>
+	<div id="details_data" class="details_data_error">
+		<div class="details_data_copyright_content">
+			BPView is a web based business process monitoring application.<br />
+			<br />
+			<span style="font-size:14px;">
+				Copyright:<br/>
+				&nbsp;&nbsp;&nbsp;&copy; 2013 ovido gmbh<br/>
+				&nbsp;&nbsp;&nbsp;&copy; 2014-2015 BPView Development Team</br>
+				BPView is released under the terms of GNU General Public License 3 or later.
+			</span>
+		</div>
+		<div class="details_data_copyright_content_image">
+			<img src="../share/images/global/bpview_watermark.png" height="76" width="450">
+		</div>
+	</div>
+	<button title="Close (Esc)" type="button" class="mfp-close" style="color: white;">
+		×
+	</button>
+</div>

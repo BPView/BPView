@@ -22,4 +22,6 @@
           <div class="bpsContainer" id="bps"></div>
       </div>
 
+[% INCLUDE about.tt %]
+
 [% INCLUDE main_footer.tt %]
