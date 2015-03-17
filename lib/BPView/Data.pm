@@ -381,12 +381,13 @@ sub get_bpstatus {
   	
     # verify if we cache data 
   	if (defined $self->{ 'config' }{ $provider }{ 'cache_file' }){
-  	  # caching disabled if 0 or no cache time defined
-      if (! defined $self->{ 'config' }{ $provider }{ 'cache_time' } || $self->{ 'config' }{ $provider }{ 'cache_time' } == 0){
-      	#    $self->query_provider();
-      }
+#  	  # caching disabled if 0 or no cache time defined
+#      if (! defined $self->{ 'config' }{ $provider }{ 'cache_time' } || $self->{ 'config' }{ $provider }{ 'cache_time' } == 0){
+#      	#    $self->query_provider();
+#      }
       $log->debug("Using cache file $self->{ 'config' }{ $provider }{ 'cache_file' }");
-      $result->{ $provider } = $self->_open_cache( $self->{ 'config' }{ $provider }{ 'cache_time' }, $self->{ 'config' }{ $provider }{ 'cache_file' } );
+#      $result->{ $provider } = $self->_open_cache( $self->{ 'config' }{ $provider }{ 'cache_time' }, $self->{ 'config' }{ $provider }{ 'cache_file' } );
+      $result->{ $provider } = $self->_open_cache( $self->{ 'config' }{ $provider }{ 'cache_file' } );
 
       # query next provider
 ###      next unless $result->{ $provider } == 1;
@@ -658,7 +659,29 @@ sub query_provider {
   	if (defined $self->{ 'config' }{ $provider }{ 'provider' }){
 
       $log->debug("Fetching data for provider " . $provider);
-  	  
+      
+      # check if a restart timeout is defined and if monitoring backend
+      # provides these data. If yes, skip fetching if backend was restarted
+      # restart_timeout seconds ago.
+      if (defined $self->{ 'config' }{ 'bpviewd' }{ 'restart_timeout' }){
+      	
+      	my $restart_timeout = $self->{ 'config' }{ 'bpviewd' }{ 'restart_timeout' };
+        my $tmp = $self->_get_restart_time( $self->{ 'config' }{ $provider }, $restart_timeout );
+        my $restart = 0;
+        foreach my $keys (keys %{ $tmp }){
+          $restart = $keys;
+          $log->debug("Last restart of monitoring backend: $restart");
+        } 
+        my $now = time;
+        my $online = $now - $restart;
+        
+        if ($online <= $restart_timeout){
+          $log->info("Monitoring backend $provider was restarted " . $online . " seconds ago - skipping provider");
+          next;
+        }
+        
+      }
+
   	  if ($self->{ 'config' }{ $provider }{ 'provider'} eq "ido"){
 
         # construct SQL query
@@ -691,7 +714,7 @@ sub query_provider {
         carp ("Unsupported provider: $self->{ 'config' }{ $provider }{ 'provider'}!");
       }
 
-      $self->_write_cache( "10", $self->{ 'config' }{ $provider }{ 'cache_file' }, $result );
+      $self->_write_cache( $self->{ 'config' }{ $provider }{ 'cache_file' }, $result );
       
   	}
   }
@@ -861,6 +884,16 @@ sub _get_ido {
   #         },
   	}
   	
+  }elsif ($fetch eq "program_start"){
+  	$result = $query->fetchall_hashref("program_start");
+  	
+  	# example output:
+  	# $VAR1 = {
+    #      '1422429147' => {
+    #                        'program_start' => 1422429147
+    #                      }
+    #    };
+  	
   }else{
   	croak "Unsupported fetch method: " . $fetch;
   }
@@ -956,6 +989,16 @@ sub _get_livestatus {
   #         },
   	}
 
+  }elsif ($fetch eq "program_start"){
+  	$result = $ml->selectall_hashref($query, "program_start");
+  	
+  	# example output:
+  	# $VAR1 = {
+    #      '1422429147' => {
+    #                        'program_start' => 1422429147
+    #                      }
+    #    };
+    
   }else{
   	die "Unsupported fetch method: " . $fetch;
   }
@@ -971,17 +1014,52 @@ sub _get_livestatus {
 
 #----------------------------------------------------------------
 
+# get last restart time of monitoring backend
+sub _get_restart_time {
+	
+  my $self			= shift;
+  my $provdata		= shift or die ("Missing provdata!");
+  
+  my $result = undef;
+  my $query  = undef;
+  
+  # prepare queries
+  if ($provdata->{ 'provider' } eq "ido"){
+    $query  = "SELECT UNIX_TIMESTAMP(program_start_time) AS program_start FROM " . $provdata->{ 'prefix' } . "programstatus ";
+    $query .= "ORDER BY instance_id DESC LIMIT 1";
+    $result = eval { $self->_get_ido( $provdata, $query, "program_start" ) };
+    if ($@){
+      carp "Failed to fetch program start time: " . $@;
+    }
+  }elsif ($provdata->{ 'provider' } eq "mk-livestatus"){
+  	$query = "GET status\n
+Columns: program_start\n";
+    $result = eval { $self->_get_livestatus( $provdata, $query, "program_start" ) };
+    if ($@){
+      carp "Failed to fetch program start time: " . $@;
+    }
+  }else{
+  	croak "Unsupported provider: $provdata->{ 'provider' }";
+  }
+  
+  return $result;
+
+}
+
+
+#----------------------------------------------------------------
+
 # read cached data
 sub _open_cache {
 
   my $self = shift;
-  my $cache_time = shift or die ("Missing cache time!");
+#  my $cache_time = shift or die ("Missing cache time!");
   my $cache_file = shift or die ("Missing cache file!");
   
   return 1 unless -f $cache_file;
   
-  # check file age
-  if ( ( time() - $cache_time ) < ( stat( $cache_file )->mtime ) ){
+#  # check file age
+#  if ( ( time() - $cache_time ) < ( stat( $cache_file )->mtime ) ){
   	
   	# open cache file
     my $yaml = eval { LoadFile( $cache_file ) };
@@ -992,7 +1070,7 @@ sub _open_cache {
       return $yaml;
     }
     
-  }
+#  }
   
   return 1;
   
@@ -1005,7 +1083,7 @@ sub _open_cache {
 sub _write_cache {
 
   my $self = shift;
-  my $cache_time = shift or die ("Missing cache time!");
+#  my $cache_time = shift or die ("Missing cache time!");
   my $cache_file = shift or die ("Missing cache file!");
   my $data = shift or die ("Missing data to write to cache file!");
   

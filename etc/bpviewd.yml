@@ -96,6 +96,15 @@ bpviewd:
 #
 
   threads_client: 1
+
+#
+# restart_timeout: Timeout in seconds
+#    Number of seconds to wait after monitoring backend restart
+#    before fetching data from it. This prevents unknown business
+#    processes.
+#
+
+  restart_timeout: 300
   
 # ---
 

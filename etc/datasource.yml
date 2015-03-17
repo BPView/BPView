@@ -121,14 +121,7 @@ icinga-ido:
   timeout: 10
   
 #
-# cache_time: Cache results in file for $cache_time seconds
-#
-  
-  cache_time: 30
-
-#
-# cache_file: Write results of this provider in this file to
-# cache it for $cache_time seconds.
+# cache_file: Write results of this provider in this file
 #
 
   cache_file: "/dev/shm/bpview_icinga_cache"
@@ -201,14 +194,7 @@ mk-livestatus:
 # port:
 
 #
-# cache_time: Cache results in file for $cache_time seconds
-#
-  
-  cache_time: 30
-
-#
-# cache_file: Write results of this provider in this file to
-# cache it for $cache_time seconds.
+# cache_file: Write results of this provider in this file
 #
 
   cache_file: "/dev/shm/bpview_mklivestatus_cache"
