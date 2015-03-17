@@ -15,13 +15,13 @@
 
 
 AC_PREREQ([2.63])
-AC_INIT([BPView], [0.11], [sales@ovido.at])
+AC_INIT([BPView], [0.12], [sales@ovido.at])
 AM_INIT_AUTOMAKE
 
 AC_PREFIX_DEFAULT(/usr/local/bpview)
 PKG_NAME="bpview"
-PKG_VERSION="0.11"
-PKG_REL_DATE="2015-03-07"
+PKG_VERSION="0.12"
+PKG_REL_DATE="2015-03-17"
 
 # Figure out how to invoke "install" and what install options to use
 AC_PROG_INSTALL
