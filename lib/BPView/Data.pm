@@ -3,7 +3,8 @@
 # COPYRIGHT:
 #
 # This software is Copyright (c) 2013 by ovido
-#                             <sales@ovido.at>
+#                            (c) 2014-2015 BPView Development Team
+#                                     http://github.com/BPView/BPView
 #
 # This file is part of Business Process View (BPView).
 #
@@ -26,7 +27,7 @@
 package BPView::Data;
 
 BEGIN {
-    $VERSION = '1.710'; # Don't forget to set version and release
+    $VERSION = '1.800'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -1064,16 +1065,17 @@ See BPView::Config for reading and parsing config files.
 
 =head1 AUTHOR
 
-Rene Koch, E<lt>r.koch@ovido.atE<gt>
+Rene Koch, E<lt>rkoch@rk-it.atE<gt>
 Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.710  (September 16 2014))
+Version 1.800  (March 17 2015))
 
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2013 by ovido gmbh
+          (C) 2014-2015 by BPView development team
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as BPView itself.
