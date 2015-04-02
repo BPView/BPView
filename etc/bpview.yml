@@ -153,10 +153,62 @@ refresh:
 #
 
   interval: 10
-
-    
-# ---
   
+# ---
+
+#
+# This is the BPView CMDB export config block.
+# The configuration format is YAML.
+#
+# Make sure to use correct YAML syntax and especially don't use
+# tabs instead of spaces!
+#
+# The structure and shifting has to be:
+# businessprocess:
+#   cmdb_exporter: <script>
+#
+
+businessprocess:
+
+#
+# cmdb_exporter: path to script for exporting business process config
+#    out of existing CMDB (optional)
+#
+
+  cmdb_exporter: 
+
+# ---
+
+#
+# This is the BPView reload config block.
+# The configuration format is YAML.
+#
+# Make sure to use correct YAML syntax and especially don't use
+# tabs instead of spaces!
+#
+# The structure and shifting has to be:
+# reload:
+#   bpviewd_restart: <command>
+#   apache_restart: <command>
+#
+
+reload:
+
+#
+# bpviewd_restart: full path to bpviewd restart command (service/systemctl/...)
+#
+
+  bpviewd_restart: "/usr/bin/sudo /sbin/service bpviewd restart"
+
+#
+# apache_restart: full path to apache restart command (service/systemctl/...)
+#
+
+  apache_restart: "/usr/bin/sudo /sbin/service httpd reload"
+
+# ---
+
+
 #
 # Configuration options for future release features.
 # These options aren't used yet!
@@ -171,9 +223,6 @@ logging:
 auth:
   provider: ldap
   
-
-businessprocess:
-  cmdb_exporter: 
 
 #
 # Also make sure to end this file with a newline!

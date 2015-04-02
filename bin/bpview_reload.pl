@@ -83,8 +83,9 @@ my $log = Log::Log4perl::get_logger("BPViewReload::Log");
 #$log->error_die($@) if $@;
 
 my $operations = BPView::Operations->new(
-   	   config	=> $config,
-  	   cfg_path	=> $cfg_path,
+   	   config		=> $config,
+  	   cfg_path		=> $cfg_path,
+  	   reload_log	=> $reload_log,
    );
    
 # loop until config generation has finished

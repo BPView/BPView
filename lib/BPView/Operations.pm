@@ -68,6 +68,7 @@ sub new {
                 "config"        => undef,        # config object (hash)
                 "cfg_path"      => undef,
   				"lock_file"		=> "/tmp/bpview-reload",
+  				"reload_log"	=> "/var/log/bpview/reload.log",
         };
         for my $key (keys %options) {
                 if (exists $self->{ $key }) {
@@ -197,15 +198,13 @@ sub generate_config {
       
     }
     
-    # we have to change the service names to configuration options!
     $self->{ 'log' }->info("Restarting services");
     
-    # TODO! remove hard coded paths!
-    
-    if (! `/usr/bin/sudo /sbin/service bpviewd restart`){
+    # Restarting bpviewd and apache
+    if (! `$self->{ 'config' }{ 'reload' }{ 'bpviewd_restart' }`){
       $self->_error_die("Failed to restart bpviewd: $!");
     }
-	if (! `/usr/bin/sudo /sbin/service httpd reload`){
+    if (! `$self->{ 'config' }{ 'reload' }{ 'apache_restart' }`){
 	  $self->_error_die("Failed to restart Apache: $!");
 	}
 	
@@ -287,8 +286,9 @@ sub _status_script {
 
 
 sub _check_last_run {
-	# TODO: Remove hardcoded log file path!
-  my $status = `tail -1 /var/log/bpview/reload.log`;
+  my $self		= shift;
+  
+  my $status = `tail -1 $self->{ 'reload_log' }`;
   my $return;
   if ($status =~ /\[SUCCESS\]/){
   	$return->{ 'status' }  = 0;

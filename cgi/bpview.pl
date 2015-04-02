@@ -130,8 +130,9 @@ while ( my $q = new CGI::Fast ){
     print "Content-type: application/json; charset=utf-8\n\n";
     use BPView::Operations;
 	my $operations = BPView::Operations->new(
-    	   config	=> $config,
-    	   cfg_path	=> $cfg_path,
+    	   config		=> $config,
+    	   cfg_path		=> $cfg_path,
+    	   reload_log	=> $reload_log,
          );
 
     my $return = undef;
