@@ -3,7 +3,7 @@
 # COPYRIGHT:
 #
 # This software is Copyright (c) 2013 by ovido, 
-#                            (c) 2014 BPView Development Team
+#                            (c) 2014-2015 BPView Development Team
 #                                     http://github.com/ovido/BPView
 #
 # This file is part of Business Process View (BPView).
@@ -27,6 +27,9 @@ use strict;
 use warnings;
 
 use Log::Log4perl;
+
+# for debugging only
+use Data::Dumper;
 
 # define default paths required to read config files
 my ($lib_path, $cfg_path, $log_path, $reload_log);
@@ -76,22 +79,22 @@ my $log = Log::Log4perl::get_logger("BPViewReload::Log");
 
 
 # validate config
-eval { $conf->validate( 'config' => $config ) };
-$log->error_die($@) if $@;
+#eval { $conf->validate( 'config' => $config ) };
+#$log->error_die($@) if $@;
 
 my $operations = BPView::Operations->new(
-   	   config	=> $config,
-  	   cfg_path	=> $cfg_path,
+   	   config		=> $config,
+  	   cfg_path		=> $cfg_path,
+  	   reload_log	=> $reload_log,
    );
    
 # loop until config generation has finished
 my $param = "reload";
 my $status = 1;
+my $return = undef;
 
 while ($status == 1){
 	
-  my $return = undef;
-  
   if ($param eq "reload"){
     $return = eval { $operations->generate_config() };
     $log->info($@) if $@;
@@ -100,14 +103,18 @@ while ($status == 1){
   }
     
   if (ref($return) ne "HASH"){
-    # config generation failed
-    $return = undef;
-    $status = 0;
-    $log->error_die("Another instance is already running!");
+    # check the status 
+    $status = 1;
+  }else{
+    $status = $return->{ 'status' };
   }
-
-  $status = $return->{ 'status' };
+  
+  # loop until finshed
+  sleep(3);
+  $param = "status";
 
 }
 
-exit 0;
+print $return->{ 'message' } . "\n";
+
+exit $status;

@@ -130,8 +130,9 @@ while ( my $q = new CGI::Fast ){
     print "Content-type: application/json; charset=utf-8\n\n";
     use BPView::Operations;
 	my $operations = BPView::Operations->new(
-    	   config	=> $config,
-    	   cfg_path	=> $cfg_path,
+    	   config		=> $config,
+    	   cfg_path		=> $cfg_path,
+    	   reload_log	=> $reload_log,
          );
 
     my $return = undef;
@@ -145,12 +146,6 @@ while ( my $q = new CGI::Fast ){
     
   	my $json = JSON::PP->new->pretty->allow_nonref;
     $json->utf8('true');
-    if (ref($return) ne "HASH"){
-      # config generation failed
-      $return = undef;
-      $return->{ 'status' } = 0;
-      $return->{ 'message' } = "Another instance is already running!";
-    }
 
     print $json->encode($return);
 
