@@ -145,12 +145,6 @@ while ( my $q = new CGI::Fast ){
     
   	my $json = JSON::PP->new->pretty->allow_nonref;
     $json->utf8('true');
-    if (ref($return) ne "HASH"){
-      # config generation failed
-      $return = undef;
-      $return->{ 'status' } = 0;
-      $return->{ 'message' } = "Another instance is already running!";
-    }
 
     print $json->encode($return);
 
