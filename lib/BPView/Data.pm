@@ -210,7 +210,11 @@ sub get_status {
 
   for (my $i=0;$i<=@{ $service_names };$i++){
     $result->{ $service_names->[$i] }{ 'service' }	= $service_names->[$i];
-    $result->{ $service_names->[$i] }{ 'state' }	= $cache->get( $service_names->[$i] ); # or die "Couldn't fetch data from memcached: $!"; 
+    my $memcache_result = $cache->get( $service_names->[$i] ); # or die "Couldn't fetch data from memcached: $!"; 
+    if ($memcache_result){
+      $result->{ $service_names->[$i] }{ 'state' }	= $memcache_result->{ "status" };
+      $result->{ $service_names->[$i] }{ 'age' }	= $memcache_result->{ "age" };
+    }
   }
   
 	# sorting the hash 
@@ -281,6 +285,7 @@ sub get_status {
 	    }else{
 	      $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'name' } = "Missing BP-Config!";
 	    }
+	    $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'age' } = $result->{ $service }{ 'age' };
 
 	    # filter objects
 	    if (defined $self->{ 'filter' }{ 'state' }){

@@ -106,6 +106,22 @@ bpviewd:
 
   restart_timeout: 300
   
+#
+# outdated_threshold: Percentage of outdated service checks
+#    Percentage of checks not activly checks in last outdated_time
+#    seconds. If this threshold is reached the corresponding business
+#    process is marked as outdated.
+#
+
+  outdated_threshold: 50
+
+#
+# outdated_time: Time in seconds
+#    Number of seconds which marks a service check as outdated.
+#
+
+  outdated_time: 300
+
 # ---
 
 #

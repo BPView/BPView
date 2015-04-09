@@ -253,18 +253,29 @@ sub create_status_thread {
                 				mappings	=> $self->{ 'mappings' },
                 			);
                 			$log->debug("Processing business processes.");
-                			my $result = eval { $bp->get_bpstatus() };
+                			my $status = eval { $bp->get_bpstatus() };
                 			if ($@) {
                 				$log->error("Processing BPs failed: $@");
                 				$result = '';
                 			}else{
                 				$log->debug("Successfully processed business processes.");
                 			}
-    
+                			
+                			# process BP age
+                			$log->debug("Processing business processes age.");
+                			my $age = eval { $bp->get_bpage( "bp_name" => $bp_name) };
+                			if ($@) {
+                				$log->error("Processing BPs age failed: $@");
+                				$result = '';
+                			}else{
+                				$log->debug("Successfully processed business processes age.");
+                			}
+                			
                 			# Updating memcached
                 			$log->debug("Updating cache.");
-                			$log->debug("Updating BP $bp_name (set business process status code $result)");
-                			$cache->set($bp_name, uc( $result ));
+                			$log->debug("Updating BP $bp_name (set business process status code $status)");
+                			$log->debug("Updating BP $bp_name (set business process age $age)");
+                			$cache->set($bp_name, { "status" => uc( $status ), "age" => $age });
                 
             			}
             		}           	
