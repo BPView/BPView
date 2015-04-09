@@ -27,6 +27,7 @@
     <title>BPView | [% sitename %]</title>
     <link rel="icon" type="image/x-icon" href="[% site_url %]/share/images/[% templ %]/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/bpview.css" />
+    <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/status.css" />
     <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/global/jquery.toastmessage.css" />
 [% IF css != "bpview" %]
     <link rel="stylesheet" type="text/css" href="[% site_url %]/share/css/[% templ %]/[% css %].css" />

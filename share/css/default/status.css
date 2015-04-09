@@ -1,0 +1,79 @@
+/*
+ * COPYRIGHT:
+ *
+ * This software is Copyright (c) 2013 by ovido
+ *                            (c) 2014-2015 BPView Development Team
+ *                            http://github.com/BPView/BPView
+ *
+ * This file is part of Business Process View (BPView).
+ *
+ * (Except where explicitly superseded by other copyright notices)
+ * BPView is free software: you can redistribute it and/or modify it 
+ * under the terms of the GNU General Public License as published by 
+ * the Free Software Foundation, either version 3 of the License, or 
+ * any later version.
+ *
+ * BPView is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BPView.  
+ * If not, see <http://www.gnu.org/licenses/>.
+ */
+
+.OK {
+  background-color: #14FF14;
+}
+
+.DOWNTIME-WARNING {
+  background-color: #FFF8C0;
+}
+
+.DOWNTIME-UNKNOWN {
+  background-color: #FFB05C;
+}
+
+.DOWNTIME-CRITICAL {
+  background-color: #CD675F;
+}
+
+.ACK-WARNING {
+  background-color: #FFEB41;
+}
+
+.ACK-UNKNOWN {
+  background-color: #FF9625;
+}
+
+.WARNING {
+  background-color: yellow;
+}
+
+.UNKNOWN {
+  background-color: orange;
+}
+
+.ACK-CRITICAL {
+  background-color: #D93C31;
+}
+
+.ACK-DOWN {
+  background-color: #4E4D4D;
+}
+
+.CRITICAL {
+  background-color: #FF1414;
+  font-weight: bold;
+}
+
+.DOWN {
+  background-color: black;
+  font-weight: bold;
+}
+
+.NOT-MONITORED {
+  background-color: lightgrey;
+}
+

@@ -2,7 +2,8 @@
  * COPYRIGHT:
  *
  * This software is Copyright (c) 2013 by ovido
- *                              <sales@ovido.at>
+ *                            (c) 2014-2015 BPView Development Team
+ *                                     http://github.com/BPView/BPView
  *
  * This file is part of Business Process View (BPView).
  *
@@ -21,6 +22,20 @@
  * along with BPView.
  * If not, see <http://www.gnu.org/licenses/>.
  */
+
+/* 
+ * Configuration
+ */
+
+var config = {
+		// Error message dialog
+		errorDialog: {
+			sticky: false,
+			position: 'top-right',
+			stayTime: 5000
+		}
+}
+
 
 var FilterJsonState = getCookie("BPView_FilterJsonState");
 var FilterJsonHost2 = getCookie("BPView_FilterJsonHost");
@@ -160,9 +175,9 @@ function getDbOverview(){
 				$.each(topicval, function(products, productval){
 					// set class for status code
 					if (productval.state == ""){
-						var statusClass = "state99";
+						var statusClass = "not-found";
 					}else{
-						var statusClass = "state" + productval.state;
+						var statusClass = productval.state;
 					}
 					var bpName      = productval.bpname;
 					var name		= productval.name;
@@ -268,10 +283,10 @@ function getDetails(businessProcess) {
 			$.each(hostval, function(service, serviceval){
 
 			  // service names
-			  jsonData += "    <tbody><tr><td class=\"detail_service detail_status_" + serviceval.hardstate + " \"title=\"" + service + "\">" + service + "</td>\n";
-			  jsonData += "    <td class=\"detail_output detail_status_" + serviceval.hardstate + "\" title=\"" + serviceval.output + "\">" + serviceval.output + "</td>\n";
-			  jsonData += "    <td class=\"detail_status detail_status_" + serviceval.hardstate + "\" title=\"" + serviceval.hardstate + "\">" + serviceval.hardstate + "</td>\n";
-			  jsonData += "    <td class=\"detail_lastcheck detail_status_" + serviceval.hardstate + "\" title=\"" + serviceval.last_check + "\">" + serviceval.last_check + "</td></tr></tbody>\n";
+			  jsonData += "    <tbody><tr><td class=\"detail_service " + serviceval.hardstate + " \"title=\"" + service + "\">" + service + "</td>\n";
+			  jsonData += "    <td class=\"detail_output " + serviceval.hardstate + "\" title=\"" + serviceval.output + "\">" + serviceval.output + "</td>\n";
+			  jsonData += "    <td class=\"detail_status " + serviceval.hardstate + "\" title=\"" + serviceval.hardstate + "\">" + serviceval.hardstate + "</td>\n";
+			  jsonData += "    <td class=\"detail_lastcheck " + serviceval.hardstate + "\" title=\"" + serviceval.last_check + "\">" + serviceval.last_check + "</td></tr></tbody>\n";
 			});
 
 			jsonData += "</table>\n";
@@ -304,10 +319,9 @@ function getDetails(businessProcess) {
 function showErrorMessage(){
 	// user configuration of all toastmessages to come:
 	$().toastmessage({
-	    sticky   : false,
-	    position : 'top-right',
-            stayTime : 5000,
-	    close    : function () {console.log("toast is closed ...");}
+	    sticky   : config.errorDialog.sticky,
+	    position : config.errorDialog.position,
+        stayTime : config.errorDialog.stayTime
 	});
 	$().toastmessage('showErrorToast', 'Please check error_log of your webserver or try to reload this webapp!');
 	deleteCookie();
@@ -316,10 +330,9 @@ function showErrorMessage(){
 function showDetailedErrorMessage(message){
 	// user configuration of all toastmessages to come:
 	$().toastmessage({
-	    sticky   : false,
-	    position : 'top-right',
-            stayTime : 5000,
-	    close    : function () {console.log("toast is closed ...");}
+	    sticky   : config.errorDialog.sticky,
+	    position : config.errorDialog.position,
+        stayTime : config.errorDialog.stayTime
 	});
 	$().toastmessage('showErrorToast', message);
 }

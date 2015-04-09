@@ -27,7 +27,7 @@
 package BPView::Daemon;
 
 BEGIN {
-    $VERSION = '1.000'; # Don't forget to set version and release
+    $VERSION = '1.100'; # Don't forget to set version and release
 }
 
 use strict;
@@ -114,6 +114,7 @@ sub new {
   	"socket"		=> undef,	# client listening socket
   	"views"			=> undef,	# views (dashboard) hash
   	"bps"			=> undef,	# business process data
+  	"mappings"		=> undef,	# service map
   };
   
   for my $key (keys %options){
@@ -249,6 +250,7 @@ sub create_status_thread {
                 				bps			=> $status,
                 				bpconfig	=> $bpconfig,
                 				config		=> $config,
+                				mappings	=> $self->{ 'mappings' },
                 			);
                 			$log->debug("Processing business processes.");
                 			my $result = eval { $bp->get_bpstatus() };
@@ -381,6 +383,7 @@ sub create_client_thread {
                      bps        => $bps,
                      filter     => $filter,
                      cache		=> $cache,
+       				  mappings	=> $self->{ 'mappings' },
                    );
 
 				$log->debug("Getting business process status.");
@@ -417,6 +420,7 @@ sub create_client_thread {
                     bps         => $bps,
                     filter      => $filter,
                     log			=> $log,
+       				  mappings	=> $self->{ 'mappings' },
                    );
 
 				$log->debug("Getting business process service stati.");
@@ -478,7 +482,7 @@ Rene Koch, E<lt>rkoch@rk-it.atE<gt>
 
 =head1 VERSION
 
-Version 1.000  (January 26 2014))
+Version 1.100  (April 02 2015))
 
 =head1 COPYRIGHT AND LICENSE
 

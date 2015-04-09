@@ -3,7 +3,8 @@
 # COPYRIGHT:
 #
 # This software is Copyright (c) 2013 by ovido
-#                             <sales@ovido.at>
+#                            (c) 2014-2015 BPView Development Team
+#                                     http://github.com/BPView/BPView
 #
 # This file is part of Business Process View (BPView).
 #
@@ -26,7 +27,7 @@
 package BPView::BP;
 
 BEGIN {
-    $VERSION = '1.010'; # Don't forget to set version and release
+    $VERSION = '1.100'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -104,6 +105,7 @@ sub new {
   	"bpconfig"	=> undef,	# business process config
   	"log"		=> undef,	# log object
   	"config"	=> undef,	# config hash
+  	"mappings"	=> undef,	# service map
   };
   
   for my $key (keys %options){
@@ -212,35 +214,38 @@ sub _and {
   	
   	foreach my $service (keys %{ $hosts->{ $host } }){
   		
-      if (! ref($self->{ 'bps' }{ $provider }) eq "HASH"){
-      	$state = 3;
-      	next;
-      }
-
-      if (! defined $self->{ 'bps' }{ $provider }{ $host }){
-        $state = 3;
-        next;
-      }
+#      if (! ref($self->{ 'bps' }{ $provider }) eq "HASH"){
+#      	# TODO: remove hard coded value!
+#      	$state = 35;
+#      	next;
+#      }
+#
+#      if (! defined $self->{ 'bps' }{ $provider }{ $host }){
+#      	# TODO: remove hard coded value!
+#        $state = 35;
+#        next;
+#      }
 
   	  my $size = scalar @{ $self->{ 'bps' }{ $provider }{ $host } };
-  	  my $tmp_state = 3;
+#  	  my $tmp_state = 35;
   	  
   	  # compare services
   	  for (my $i=0;$i<$size;$i++){
   	  	if ($self->{ 'bps' }{ $provider }{ $host }->[ $i ]->{ 'name2' } eq $service ){
           my $lh_state =  $self->{ 'bps' }{ $provider }{ $host }->[ $i ]->{ 'last_hard_state' };
-          $state = $lh_state if ( $lh_state == 3 && $state == 0 );
-          $state = $lh_state if ( $lh_state >= $state || $state == 3 ) && ($lh_state != 3 && $lh_state > 0);
-  	  	  # set state to 98 for hosts down
-  	  	  if ($self->{ 'bps' }{ $provider }{ $host }->[ $i ]->{ 'name2' } eq "__HOSTCHECK"){
-  	  		$state = 98 if $lh_state != 0;
-  	  	  }
-  	  	  $tmp_state = $state;
+#          $state = $lh_state if ( $lh_state >= $state );
+          $state = $lh_state if ( $lh_state >= $state );
+#  	  	  # set state to 55 for hosts down
+#  	  	  if ($self->{ 'bps' }{ $provider }{ $host }->[ $i ]->{ 'name2' } eq "__HOSTCHECK"){
+#  	  	  	# TODO: remove hard coded value!
+#  	  		$state = 55 if $lh_state != 0;
+#  	  	  }
+#  	  	  $tmp_state = $state;
   	  	}
   	  }
   	  
   	  # set state to unknown if state was not found, but don't override warning and critical
-  	  $state = 3 if ( ( $tmp_state == 3 ) && ( $state == 0 ) );
+#  	  $state = 35 if ( ( $tmp_state == 35 ) && ( $state == 0 ) );
   	  
   	}
   }
@@ -350,11 +355,11 @@ See BPView::Config for reading BP configuration files.
 
 =head1 AUTHOR
 
-Rene Koch, E<lt>r.koch@ovido.atE<gt>
+Rene Koch, E<lt>rkoch@rk-it.atE<gt>
 
 =head1 VERSION
 
-Version 1.010  (September 02 2014))
+Version 1.100  (April 04 2015))
 
 =head1 COPYRIGHT AND LICENSE
 

@@ -125,6 +125,7 @@ sub new {
   	"filter"	=> undef,	# filter states (e.g. don't display bps with state ok)
   	"cache"		=> undef,	# memcached object
   	"log"		=> undef,	# log file
+  	"mappings"	=> undef,	# status map
   };
   
   for my $key (keys %options){
@@ -248,7 +249,7 @@ sub get_status {
 	
   # verify if status is given for all products
   # note: if product is missing in Icinga/Nagios there's no state for it
-  # we use status code 99 for this (0-3 are reserved as Nagios plugin exit codes)
+  # we use status code 98 for this (0-3 are reserved as Nagios plugin exit codes)
   
   foreach my $environment (keys %{ $viewOut }){
     foreach my $topic (keys %{ $viewOut->{ $environment }{ TOPICS() } }){
@@ -262,11 +263,15 @@ sub get_status {
 
     	if (defined ($result->{ $service }{ 'state' })){
   	      # found status in IDO database
-	      $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'state' } = $result->{ $service }{ 'state' };
-	      
+  	      # get status name from mappings config file
+  	      foreach my $status (keys %{ $self->{ 'mappings' }}){
+  	      	if ($result->{ $service }{ 'state' } eq $self->{ 'mappings' }{ $status }{ 'mapped' }){
+	          $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'state' } = $status;
+  	      	}
+  	      }
 	    }else{
 	      # didn't found status in IDO database
-  	      $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'state' } = 99;
+  	      $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'state' } = "not-found";
 	    }
 	    
 	    # return also business process name
@@ -458,10 +463,6 @@ sub get_bpdetails {
   }
   
   $log->info("Provider: $provider");
-#  $log->info("Status:");
-#  $log->info(Dumper $status);
-#  $log->info("BPS:");
-#  $log->info(Dumper $self->{ 'bps' });
   
   foreach my $host (keys %{ $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' } }){
     foreach my $service (keys %{ $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' }{ $host } }){
@@ -473,11 +474,13 @@ sub get_bpdetails {
         for (my $i=0; $i< scalar @{ $status->{ $provider }{ $host } }; $i++){
       	  if ($status->{ $provider }{ $host }->[ $i ]->{ 'name2' } eq $service){
       	    # service found
-      	    my $state = "UNKNOWN";
-      	    if    ( $status->{ $provider }{ $host }->[ $i]->{ 'last_hard_state' } == 0 ){ $state = "OK"; }
-      	    elsif ( $status->{ $provider }{ $host }->[ $i]->{ 'last_hard_state' } == 1 ){ $state = "WARNING"; }
-      	    elsif ( $status->{ $provider }{ $host }->[ $i]->{ 'last_hard_state' } == 2 ){ $state = "CRITICAL"; } 
-      	    elsif ( $status->{ $provider }{ $host }->[ $i]->{ 'last_hard_state' } == 3 ){ $state = "UNKNOWN"; }; 
+      	    my $state = "not-found";
+      	    # get status name from mappings config file
+  	        foreach my $map_status (keys %{ $self->{ 'mappings' }}){
+  	      	  if ($status->{ $provider }{ $host }->[ $i]->{ 'last_hard_state' } eq $self->{ 'mappings' }{ $map_status }{ 'mapped' }){
+	            $state = $map_status;
+  	      	  }
+  	        }
       	    $return->{ $host }{ $service }{ 'hardstate' } = $state;
      	    $return->{ $host }{ $service }{ 'output' } = $status->{ $provider }{ $host }->[ $i ]->{ 'output' };
      	    $return->{ $host }{ $service }{ 'last_check' } = strftime("%Y-%m-%d %H:%M:%S", localtime( $status->{ $provider }{ $host }->[ $i ]->{ 'last_check' } ) );
@@ -563,29 +566,6 @@ sub get_details {
   croak "Failed to fetch BP details.\nReason: $@" if $@;
   
   foreach my $host (keys %{ $return }){
-  	
-  	# set status to DOWN if host is down
-  	if (defined $return->{ $host }{ '__HOSTCHECK' }){
-  		
-  	  # check if host check is mapped to a service check
-  	  if (defined $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' }{ $host }{ '__HOSTCHECK' }){
-  	  	my $host_service = $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' }{ $host }{ '__HOSTCHECK' };
-  	  	
-  	  	# verify if defined services does exist
-  	  	if (! defined $return->{ $host }{ $host_service }{ 'hardstate' }){
-  	  	  $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } = 'UNKNOWN';
-  	  	  $return->{ $host }{ '__HOSTCHECK' }{ 'output' } = 'Unknown service check mapped to __HOSTCHECK';
-  	  	}else{
-  	  	  $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } = 'DOWN' if $return->{ $host }{ $host_service }{ 'hardstate' } eq "CRITICAL";
-  	  	  $return->{ $host }{ '__HOSTCHECK' }{ 'output' } = $return->{ $host }{ $host_service }{ 'output' };
-  	  	}
-  	  	
-  	  }else{
-  	  	# no mapping - use real host check
-  	    $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } = 'DOWN' if $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } ne "OK" && $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } ne "UNKNOWN";
-  	  }
-  	  
-  	}
 		
     # filter objects
     if (defined $self->{ 'filter' }{ 'state' }){
@@ -713,7 +693,42 @@ sub query_provider {
   	  }else{
         carp ("Unsupported provider: $self->{ 'config' }{ $provider }{ 'provider'}!");
       }
-
+      
+      
+      # handle status mapping
+      foreach my $host (keys %{ $result }){
+      	for (my $i=0;$i< scalar @{ $result->{ $host } };$i++){
+      	  my $downtime = 0;
+      	     $downtime = $result->{ $host }->[ $i ]->{ 'downtime' } if defined $result->{ $host }->[ $i ]->{ 'downtime' };
+      	  my $acknowledged = 0;
+      	     $acknowledged = $result->{ $host }->[ $i ]->{ 'acknowledged' } if defined $result->{ $host }->[ $i ]->{ 'acknowledged' };
+      	  my $status = 3;
+      	     $status = $result->{ $host }->[ $i ]->{ 'last_hard_state' } if defined $result->{ $host }->[ $i ]->{ 'last_hard_state' };
+      	  
+      	  # go through mappings config
+      	  foreach my $state (keys %{ $self->{ 'mappings' } }){
+      	  	# TODO: check provider
+      	  	if ( ( $self->{ 'mappings' }{ $state }{ 'status' } eq $status ) && 
+      	  				( $self->{ 'mappings' }{ $state }{ 'acknowledged' } eq $acknowledged ) &&
+      	  				( $self->{ 'mappings' }{ $state }{ 'downtime' } eq $downtime ) ){
+      	  	  
+      	  	  # special check for host down events in Icinga/Nagios
+      	  	  # mappings.yml to match this check:
+      	  	  # "DOWN":
+			  #  "service": "__HOSTCHECK"
+      	  	  if (defined $self->{ 'mappings' }{ $state }{ 'service' }){
+      	  	  	next unless $self->{ 'mappings' }{ $state }{ 'service' } eq $result->{ $host }->[ $i ]->{ 'name2' };
+      	  	  }
+      	  	  
+      	      # we did find the mapped state
+      	      $log->debug("Mapping service state of \"" . $result->{ $host }->[ $i ]->{ 'name2' } . "\" [$host] from " . $result->{ $host }->[ $i ]->{ 'last_hard_state' } . " to " . $self->{ 'mappings' }{ $state }{ 'mapped' });
+      	      $result->{ $host }->[ $i ]->{ 'last_hard_state' } = $self->{ 'mappings' }{ $state }{ 'mapped' };
+      	  	}
+      	  }
+      	  
+      	}
+      }
+ 
       $self->_write_cache( $self->{ 'config' }{ $provider }{ 'cache_file' }, $result );
       
   	}
@@ -744,6 +759,7 @@ sub _query_ido {
   	# SELECT icinga_objects.name1 AS hostname, 
   	# CASE WHEN icinga_objects.name2 IS NULL THEN '__HOSTCHECK' ELSE icinga_objects.name2 END AS name2, 
   	# CASE WHEN icinga_hoststatus.last_hard_state IS NOT NULL THEN icinga_hoststatus.last_hard_state ELSE icinga_servicestatus.last_hard_state END AS last_hard_state, 
+  	# CASE WHEN icinga_hoststatus.problem_has_been_acknowledged IS NOT NULL THEN icinga_hoststatus.problem_has_been_acknowledged ELSE icinga_servicestatus.problem_has_been_acknowledged END AS acknowledged, 
   	# CASE WHEN icinga_hoststatus.output IS NOT NULL THEN icinga_hoststatus.output ELSE icinga_servicestatus.output END AS output,
   	# CASE WHEN icinga_hoststatus.last_check IS NOT NULL THEN UNIX_TIMESTAMP(icinga_hoststatus.last_check) ELSE UNIX_TIMESTAMP(icinga_servicestatus.last_check) END AS last_check
   	# from icinga_objects 
@@ -754,6 +770,8 @@ sub _query_ido {
   	$sql .= "CASE WHEN " . $provdata->{'prefix'} . "objects.name2 IS NULL THEN '__HOSTCHECK' ELSE " . $provdata->{'prefix'} . "objects.name2 END AS name2, ";
   	$sql .= "CASE WHEN " . $provdata->{'prefix'} . "hoststatus.last_hard_state IS NOT NULL THEN " . $provdata->{'prefix'} . "hoststatus.last_hard_state ELSE ";
   	$sql .= $provdata->{'prefix'} . "servicestatus.last_hard_state END AS last_hard_state, ";
+  	$sql .= "CASE WHEN " . $provdata->{'prefix'} . "hoststatus.problem_has_been_acknowledged IS NOT NULL THEN " . $provdata->{'prefix'} . "hoststatus.problem_has_been_acknowledged ELSE ";
+  	$sql .= $provdata->{'prefix'} . "servicestatus.problem_has_been_acknowledged END AS acknowledged, ";
   	$sql .= "CASE WHEN " . $provdata->{'prefix'} . "hoststatus.output IS NOT NULL THEN " . $provdata->{'prefix'} . "hoststatus.output ELSE ";
   	$sql .= $provdata->{'prefix'} . "servicestatus.output END AS output, ";
   	$sql .= "CASE WHEN " . $provdata->{'prefix'} . "hoststatus.last_check IS NOT NULL THEN UNIX_TIMESTAMP(" . $provdata->{'prefix'} . "hoststatus.last_check) ELSE ";
