@@ -196,13 +196,22 @@ if ($@){
 	$log->debug("Succcessfully replaced arrays with hashes.");
 }
 
+# read mappings
+$log->info("Opening mappings config file.");
+my $mappings = eval { $conf->read_config( file => $cfg_path . "/mappings.yml" ) };
+if ($@){
+	$log->error_die("Failed to read mappings: $@");
+}else{
+	$log->info("Successfully read mappings.");
+}
 
 my $data = BPView::Data->new(
      config       => $config,
      views        => $views,
      bps          => $bps,
      filter       => "",
-     log		=> $log,
+     log		  => $log,
+     mappings	  => $mappings,
    );
 
 my $bp_dir      = $cfg_path . "/bp-config";
@@ -218,6 +227,7 @@ my $status_thread = $daemon->create_status_thread(
 	config		=> $config,
 	conf		=> $conf,
 	cache		=> $cache,
+	mappings	=> $mappings,
 );
 
 
@@ -242,6 +252,7 @@ my $client_thread = $daemon->create_client_thread(
 	'views'			=> $views,
 	'bps'			=> $bps,
 	'cache'			=> $cache,
+	'mappings'		=> $mappings,
 );
 
 
