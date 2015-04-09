@@ -815,10 +815,10 @@ sub _query_livestatus {
   # construct livestatus query
   if ($service_names eq "__all"){
   	$query->[0] = "GET services\n
-Columns: host_name description last_hard_state plugin_output last_check\n";
+Columns: host_name description last_hard_state plugin_output last_check acknowledged\n";
     # get host status
     $query->[1] = "GET hosts\n
-Columns: name last_hard_state plugin_output last_check";
+Columns: name last_hard_state plugin_output last_check acknowledged";
   }else{
   	# query data for specified service
     $query->[0] = "GET services\n
@@ -993,7 +993,7 @@ sub _get_livestatus {
         my $tmphash = {};
         # do we deal with host or service checks?
         # host checks don't have description, so array doesn't have last entry
-        if (! defined $tmp->[$i][$j][4]){
+        if (! defined $tmp->[$i][$j][5]){
       	  # host check
       	  $tmphash->{ 'name2' } = "__HOSTCHECK";
       	  $tmphash->{ 'last_hard_state' } = $tmp->[$i][$j][1];
@@ -1002,12 +1002,14 @@ sub _get_livestatus {
           $tmphash->{ 'hostname' } = $tmp->[$i][$j][0];
           $tmphash->{ 'output' } = $tmp->[$i][$j][2];
           $tmphash->{ 'last_check' } = $tmp->[$i][$j][3];
+          $tmphash->{ 'acknowledged' } = $tmp->[$i][$j][4];
         }else{
           $tmphash->{ 'name2' } = $tmp->[$i][$j][1];
           $tmphash->{ 'last_hard_state' } = $tmp->[$i][$j][2];
           $tmphash->{ 'hostname' } = $tmp->[$i][$j][0];
           $tmphash->{ 'output' } = $tmp->[$i][$j][3];
           $tmphash->{ 'last_check' } = $tmp->[$i][$j][4];
+          $tmphash->{ 'acknowledged' } = $tmp->[$i][$j][5];
         }
   	    push @{ $result->{ $tmp->[$i][$j][0] } }, $tmphash;
       }
