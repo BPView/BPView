@@ -1,6 +1,6 @@
 Name: bpview
 Version: 0.12
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Business Process view for Nagios/Icinga 
 
 Group: Applications/System
@@ -114,7 +114,6 @@ do
     %{_datadir}/selinux/${selinuxvariant}/%{name}.pp &> /dev/null || :
 done
 /sbin/fixfiles -R %{name} restore || :
-/sbin/restorecon -R %{_localstatedir}/cache/%{name} || :
 /usr/sbin/setsebool -P allow_ypbind=on
 
 %postun
@@ -124,8 +123,6 @@ if [ $1 -eq 0 ] ; then
     /usr/sbin/semodule -s ${selinuxvariant} -r %{name} &> /dev/null || :
   done
   /sbin/fixfiles -R %{name} restore || :
-  [ -d %{_localstatedir}/cache/%{name} ]  && \
-    /sbin/restorecon -R %{_localstatedir}/cache/%{name} &> /dev/null || :
 fi
 
 
@@ -159,6 +156,9 @@ fi
 
 
 %changelog
+* Thu Apr 09 2015 Rene Koch <rkoch@rk-it.at> 0.12-2
+- removed SELinux restorecon for legacy /var/cache/bpview
+
 * Tue Mar 17 2015 Rene Koch <rkoch@rk-it.at> 0.12-1
 - bump to 0.12 release
 
