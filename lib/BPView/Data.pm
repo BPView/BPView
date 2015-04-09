@@ -566,29 +566,6 @@ sub get_details {
   croak "Failed to fetch BP details.\nReason: $@" if $@;
   
   foreach my $host (keys %{ $return }){
-  	
-  	# set status to DOWN if host is down
-  	if (defined $return->{ $host }{ '__HOSTCHECK' }){
-  		
-  	  # check if host check is mapped to a service check
-  	  if (defined $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' }{ $host }{ '__HOSTCHECK' }){
-  	  	my $host_service = $self->{ 'bps' }{ $self->{ 'bp' } }{ 'HOSTS' }{ $host }{ '__HOSTCHECK' };
-  	  	
-  	  	# verify if defined services does exist
-  	  	if (! defined $return->{ $host }{ $host_service }{ 'hardstate' }){
-  	  	  $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } = 'UNKNOWN';
-  	  	  $return->{ $host }{ '__HOSTCHECK' }{ 'output' } = 'Unknown service check mapped to __HOSTCHECK';
-  	  	}else{
-  	  	  $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } = 'DOWN' if $return->{ $host }{ $host_service }{ 'hardstate' } eq "CRITICAL";
-  	  	  $return->{ $host }{ '__HOSTCHECK' }{ 'output' } = $return->{ $host }{ $host_service }{ 'output' };
-  	  	}
-  	  	
-  	  }else{
-  	  	# no mapping - use real host check
-  	    $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } = 'DOWN' if $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } ne "OK" && $return->{ $host }{ '__HOSTCHECK' }{ 'hardstate' } ne "UNKNOWN";
-  	  }
-  	  
-  	}
 		
     # filter objects
     if (defined $self->{ 'filter' }{ 'state' }){
