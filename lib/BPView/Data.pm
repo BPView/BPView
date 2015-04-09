@@ -27,7 +27,7 @@
 package BPView::Data;
 
 BEGIN {
-    $VERSION = '1.800'; # Don't forget to set version and release
+    $VERSION = '1.900'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -814,17 +814,20 @@ sub _query_livestatus {
   # get service status for given host and services
   # construct livestatus query
   if ($service_names eq "__all"){
-  	$query = "GET services\n
+  	$query->[0] = "GET services\n
 Columns: host_name description last_hard_state plugin_output last_check\n";
+    # get host status
+    $query->[1] = "GET hosts\n
+Columns: name last_hard_state plugin_output last_check";
   }else{
   	# query data for specified service
-    $query = "GET services\n
+    $query->[0] = "GET services\n
 Columns: display_name state\n";
     # go through service array
     for (my $i=0;$i< scalar @{ $service_names };$i++){
-   	  $query .= "Filter: display_name = " . lc($service_names->[$i]) . "\n";
+   	  $query->[0] .= "Filter: display_name = " . lc($service_names->[$i]) . "\n";
     }
-    $query .= "Or: " . scalar @{ $service_names } . "\n" if scalar @{ $service_names } > 1;
+    $query->[0] .= "Or: " . scalar @{ $service_names } . "\n" if scalar @{ $service_names } > 1;
   }
   	  
   return $query;
@@ -953,7 +956,8 @@ sub _get_livestatus {
   
   # prepare return
   if (! defined $fetch || $fetch eq "all"){
-    $result = $ml->selectall_hashref($query, "display_name");
+  	
+    $result = $ml->selectall_hashref($query->[0], "display_name");
     
   # example output:
   # $VAR1 = {
@@ -970,7 +974,11 @@ sub _get_livestatus {
   
   }elsif ($fetch eq "row"){
   	# fetch all data and return array
-  	my $tmp = $ml->selectall_arrayref($query);
+  	my $tmp = undef;
+  	for (my $i=0;$i<=@{ $query };$i++){
+      push @{ $tmp }, $ml->selectall_arrayref($query->[$i]);
+  	}
+  	
   	if (! defined $tmp){
   	  my $provdetails = undef;
   	  if ( $provdata->{'socket'} ){
@@ -981,18 +989,29 @@ sub _get_livestatus {
   	  croak "Got empty result from livestatus ($provdetails)";
   	}
     for (my $i=0; $i<scalar @{ $tmp }; $i++ ){
-      my $tmphash = {};
-      $tmphash->{ 'name2' } = $tmp->[$i][1];
-      $tmphash->{ 'last_hard_state' } = $tmp->[$i][2];
-      $tmphash->{ 'hostname' } = $tmp->[$i][0];
-      $tmphash->{ 'output' } = $tmp->[$i][3];
-      $tmphash->{ 'last_check' } = $tmp->[$i][4];
-      # set last hard state to 2 (critical) if host check is 1 (down)
-      if ($tmphash->{ 'name2' } eq "__HOSTCHECK"){
-        $tmphash->{ 'last_hard_state' } = 2 if $tmp->[$i][2] != 0; 
+      for (my $j=0; $j<scalar @{ $tmp->[ $i ] }; $j++ ){
+        my $tmphash = {};
+        # do we deal with host or service checks?
+        # host checks don't have description, so array doesn't have last entry
+        if (! defined $tmp->[$i][$j][4]){
+      	  # host check
+      	  $tmphash->{ 'name2' } = "__HOSTCHECK";
+      	  $tmphash->{ 'last_hard_state' } = $tmp->[$i][$j][1];
+          # set last hard state to 2 (critical) if host check is 1 (down)
+      	  $tmphash->{ 'last_hard_state' } = 2 if $tmp->[$i][$j][1] != 0;
+          $tmphash->{ 'hostname' } = $tmp->[$i][$j][0];
+          $tmphash->{ 'output' } = $tmp->[$i][$j][2];
+          $tmphash->{ 'last_check' } = $tmp->[$i][$j][3];
+        }else{
+          $tmphash->{ 'name2' } = $tmp->[$i][$j][1];
+          $tmphash->{ 'last_hard_state' } = $tmp->[$i][$j][2];
+          $tmphash->{ 'hostname' } = $tmp->[$i][$j][0];
+          $tmphash->{ 'output' } = $tmp->[$i][$j][3];
+          $tmphash->{ 'last_check' } = $tmp->[$i][$j][4];
+        }
+  	    push @{ $result->{ $tmp->[$i][$j][0] } }, $tmphash;
       }
-  	  push @{ $result->{ $tmp->[$i][0] } }, $tmphash;
-  
+ 
   # example output:
   # $VAR1 = {
   #         'loadbalancer' => [
@@ -1008,7 +1027,7 @@ sub _get_livestatus {
   	}
 
   }elsif ($fetch eq "program_start"){
-  	$result = $ml->selectall_hashref($query, "program_start");
+  	$result = $ml->selectall_hashref($query->[0], "program_start");
   	
   	# example output:
   	# $VAR1 = {
@@ -1050,9 +1069,9 @@ sub _get_restart_time {
       carp "Failed to fetch program start time: " . $@;
     }
   }elsif ($provdata->{ 'provider' } eq "mk-livestatus"){
-  	$query = "GET status\n
+  	$query->[0] = "GET status\n
 Columns: program_start\n";
-    $result = eval { $self->_get_livestatus( $provdata, $query, "program_start" ) };
+    $result = eval { $self->_get_livestatus( $provdata, $query->[0], "program_start" ) };
     if ($@){
       carp "Failed to fetch program start time: " . $@;
     }
@@ -1166,7 +1185,7 @@ Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.800  (March 17 2015))
+Version 1.900  (April 09 2015))
 
 =head1 COPYRIGHT AND LICENSE
 
