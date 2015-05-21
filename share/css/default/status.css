@@ -39,6 +39,10 @@
   background-color: #CD675F;
 }
 
+.DOWNTIME-DOWN {
+  background-color: grey;
+}
+
 .ACK-WARNING {
   background-color: #FFEB41;
 }

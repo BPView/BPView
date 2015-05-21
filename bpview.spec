@@ -131,6 +131,7 @@ fi
 %config(noreplace) %{_sysconfdir}/%{name}/bpview.yml
 %config(noreplace) %{_sysconfdir}/%{name}/bpviewd.yml
 %config(noreplace) %{_sysconfdir}/%{name}/datasource.yml
+%config(noreplace) %{_sysconfdir}/%{name}/mappings.yml
 %config(noreplace) %{_sysconfdir}/%{name}/views
 %config(noreplace) %{_sysconfdir}/%{name}/backup
 %config(noreplace) %{_sysconfdir}/%{name}/bp-config
@@ -156,6 +157,9 @@ fi
 
 
 %changelog
+* Fri Apr 10 2015 Rene Koch <rkoch@rk-it.at> 0.12-3
+- added mappings.yml
+
 * Thu Apr 09 2015 Rene Koch <rkoch@rk-it.at> 0.12-2
 - removed SELinux restorecon for legacy /var/cache/bpview
 

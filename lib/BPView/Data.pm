@@ -703,12 +703,23 @@ sub query_provider {
       # handle status mapping
       foreach my $host (keys %{ $result }){
       	for (my $i=0;$i< scalar @{ $result->{ $host } };$i++){
+ 
       	  my $downtime = 0;
       	     $downtime = $result->{ $host }->[ $i ]->{ 'downtime' } if defined $result->{ $host }->[ $i ]->{ 'downtime' };
       	  my $acknowledged = 0;
       	     $acknowledged = $result->{ $host }->[ $i ]->{ 'acknowledged' } if defined $result->{ $host }->[ $i ]->{ 'acknowledged' };
       	  my $status = 3;
       	     $status = $result->{ $host }->[ $i ]->{ 'last_hard_state' } if defined $result->{ $host }->[ $i ]->{ 'last_hard_state' };
+      	     
+      	  # remove duplicates, but keep schedules downtimes
+      	  if ($result->{ $host }->[ $i ]->{ 'name2' } eq $result->{ $host }->[ $i-1 ]->{ 'name2' }){
+      	    if ($downtime == 1){
+      	      delete $result->{ $host }->[ $i-1 ];
+      	    }else{
+      	      delete $result->{ $host }->[ $i ];
+      	      next;
+      	    }
+      	  }
       	  
       	  # go through mappings config
       	  foreach my $state (keys %{ $self->{ 'mappings' } }){
@@ -717,6 +728,8 @@ sub query_provider {
       	  				( $self->{ 'mappings' }{ $state }{ 'acknowledged' } eq $acknowledged ) &&
       	  				( $self->{ 'mappings' }{ $state }{ 'downtime' } eq $downtime ) ){
       	  	  
+      	  	  # 
+      	  	  
       	  	  # special check for host down events in Icinga/Nagios
       	  	  # mappings.yml to match this check:
       	  	  # "DOWN":
@@ -724,6 +737,9 @@ sub query_provider {
       	  	  if (defined $self->{ 'mappings' }{ $state }{ 'service' }){
       	  	  	next unless $self->{ 'mappings' }{ $state }{ 'service' } eq $result->{ $host }->[ $i ]->{ 'name2' };
       	  	  }
+      	  	  
+      	  	  # don't change the state twice
+      	  	  next if ($result->{ $host }->[ $i ]->{ 'last_hard_state' } != $self->{ 'mappings' }{ $state }{ 'status' } );
       	  	  
       	      # we did find the mapped state
       	      $log->debug("Mapping service state of \"" . $result->{ $host }->[ $i ]->{ 'name2' } . "\" [$host] from " . $result->{ $host }->[ $i ]->{ 'last_hard_state' } . " to " . $self->{ 'mappings' }{ $state }{ 'mapped' });
@@ -760,32 +776,58 @@ sub _query_ido {
   # query all host and service data
   if ($service_names eq "__all"){
 
-    # example query:
-  	# SELECT icinga_objects.name1 AS hostname, 
-  	# CASE WHEN icinga_objects.name2 IS NULL THEN '__HOSTCHECK' ELSE icinga_objects.name2 END AS name2, 
-  	# CASE WHEN icinga_hoststatus.last_hard_state IS NOT NULL THEN icinga_hoststatus.last_hard_state ELSE icinga_servicestatus.last_hard_state END AS last_hard_state, 
-  	# CASE WHEN icinga_hoststatus.problem_has_been_acknowledged IS NOT NULL THEN icinga_hoststatus.problem_has_been_acknowledged ELSE icinga_servicestatus.problem_has_been_acknowledged END AS acknowledged, 
-  	# CASE WHEN icinga_hoststatus.output IS NOT NULL THEN icinga_hoststatus.output ELSE icinga_servicestatus.output END AS output,
-  	# CASE WHEN icinga_hoststatus.last_check IS NOT NULL THEN UNIX_TIMESTAMP(icinga_hoststatus.last_check) ELSE UNIX_TIMESTAMP(icinga_servicestatus.last_check) END AS last_check
-  	# from icinga_objects 
-  	# LEFT JOIN icinga_hoststatus ON icinga_objects.object_id=icinga_hoststatus.host_object_id LEFT JOIN icinga_servicestatus ON 
-  	# icinga_objects.object_id=icinga_servicestatus.service_object_id where icinga_objects.is_active=1 and (icinga_objects.objecttype_id=1 or icinga_objects.objecttype_id=2);
+=cut
+Example query: Fetch host and service checks, acknowledges and scheduled downtimes
+--------------
+
+SELECT DISTINCT
+	icinga_objects.name1 AS hostname,
+	coalesce(icinga_objects.name2,'__HOSTCHECK') AS name2,
+  coalesce(icinga_hoststatus.last_hard_state, icinga_servicestatus.last_hard_state) AS last_hard_state,
+  coalesce(icinga_hoststatus.problem_has_been_acknowledged, icinga_servicestatus.problem_has_been_acknowledged) AS acknowledged, 
+	coalesce(icinga_hoststatus.output, icinga_servicestatus.output) AS output,
+	coalesce(unix_timestamp(icinga_hoststatus.last_check), unix_timestamp(icinga_servicestatus.last_check)) AS last_check,
+	unix_timestamp() between unix_timestamp(icinga_scheduleddowntime.scheduled_start_time) AND
+	unix_timestamp(icinga_scheduleddowntime.scheduled_end_time) AS downtime
+FROM 
+	icinga_objects
+LEFT JOIN
+	icinga_scheduleddowntime 
+  ON icinga_scheduleddowntime.object_id = icinga_objects.object_id
+LEFT JOIN 
+	icinga_hoststatus 
+  ON icinga_objects.object_id=icinga_hoststatus.host_object_id
+LEFT JOIN 
+	icinga_servicestatus
+  ON icinga_objects.object_id=icinga_servicestatus.service_object_id 
+WHERE
+	icinga_objects.is_active = 1
+  AND (icinga_objects.objecttype_id=1 
+  OR icinga_objects.objecttype_id=2)
+  ORDER BY icinga_objects.name1;
+
+=cut
     
-  	$sql = "SELECT " . $provdata->{'prefix'} . "objects.name1 AS hostname, ";
-  	$sql .= "CASE WHEN " . $provdata->{'prefix'} . "objects.name2 IS NULL THEN '__HOSTCHECK' ELSE " . $provdata->{'prefix'} . "objects.name2 END AS name2, ";
-  	$sql .= "CASE WHEN " . $provdata->{'prefix'} . "hoststatus.last_hard_state IS NOT NULL THEN " . $provdata->{'prefix'} . "hoststatus.last_hard_state ELSE ";
-  	$sql .= $provdata->{'prefix'} . "servicestatus.last_hard_state END AS last_hard_state, ";
-  	$sql .= "CASE WHEN " . $provdata->{'prefix'} . "hoststatus.problem_has_been_acknowledged IS NOT NULL THEN " . $provdata->{'prefix'} . "hoststatus.problem_has_been_acknowledged ELSE ";
-  	$sql .= $provdata->{'prefix'} . "servicestatus.problem_has_been_acknowledged END AS acknowledged, ";
-  	$sql .= "CASE WHEN " . $provdata->{'prefix'} . "hoststatus.output IS NOT NULL THEN " . $provdata->{'prefix'} . "hoststatus.output ELSE ";
-  	$sql .= $provdata->{'prefix'} . "servicestatus.output END AS output, ";
-  	$sql .= "CASE WHEN " . $provdata->{'prefix'} . "hoststatus.last_check IS NOT NULL THEN UNIX_TIMESTAMP(" . $provdata->{'prefix'} . "hoststatus.last_check) ELSE ";
-  	$sql .= "UNIX_TIMESTAMP(" . $provdata->{'prefix'} . "servicestatus.last_check) END AS last_check ";
+  	$sql = "SELECT DISTINCT ";
+  	$sql .= $provdata->{'prefix'} . "objects.name1 AS hostname, ";
+  	$sql .= "coalesce(" . $provdata->{'prefix'} . "objects.name2, '__HOSTCHECK') AS name2, ";
+  	$sql .= "coalesce(" . $provdata->{'prefix'} . "hoststatus.last_hard_state, " . $provdata->{'prefix'} . "servicestatus.last_hard_state) AS last_hard_state, ";
+  	$sql .= "coalesce(" . $provdata->{'prefix'} . "hoststatus.problem_has_been_acknowledged, " . $provdata->{'prefix'} . "servicestatus.problem_has_been_acknowledged) AS acknowledged, ";
+  	$sql .= "coalesce(" . $provdata->{'prefix'} . "hoststatus.output, " . $provdata->{'prefix'} . "servicestatus.output) AS output, ";
+  	$sql .= "coalesce(unix_timestamp(" . $provdata->{'prefix'} . "hoststatus.last_check), unix_timestamp(" . $provdata->{'prefix'} . "servicestatus.last_check)) AS last_check, ";
+  	$sql .= "unix_timestamp() between unix_timestamp(" . $provdata->{'prefix'} . "scheduleddowntime.scheduled_start_time) AND ";
+  	$sql .= "unix_timestamp(" . $provdata->{'prefix'} . "scheduleddowntime.scheduled_end_time) AS downtime ";
   	$sql .= "FROM " . $provdata->{'prefix'} . "objects ";
-  	$sql .= "LEFT JOIN " . $provdata->{'prefix'} . "hoststatus ON " . $provdata->{'prefix'} . "objects.object_id=" . $provdata->{'prefix'} . "hoststatus.host_object_id ";
-  	$sql .= "LEFT JOIN " . $provdata->{'prefix'} . "servicestatus ON " . $provdata->{'prefix'} . "objects.object_id=" . $provdata->{'prefix'} . "servicestatus.service_object_id ";
-  	$sql .= "WHERE " . $provdata->{'prefix'} . "objects.is_active=1 AND (" . $provdata->{'prefix'} . "objects.objecttype_id=1 OR ";
-  	$sql .= $provdata->{'prefix'} . "objects.objecttype_id=2)";
+  	$sql .= "LEFT JOIN " . $provdata->{'prefix'} . "scheduleddowntime ON ";
+  	$sql .= $provdata->{'prefix'} . "scheduleddowntime.object_id=" . $provdata->{'prefix'} . "objects.object_id ";
+  	$sql .= "LEFT JOIN " . $provdata->{'prefix'} . "hoststatus ON ";
+  	$sql .= $provdata->{'prefix'} . "objects.object_id=" . $provdata->{'prefix'} . "hoststatus.host_object_id ";
+  	$sql .= "LEFT JOIN " . $provdata->{'prefix'} . "servicestatus ON ";
+  	$sql .= $provdata->{'prefix'} . "objects.object_id=" . $provdata->{'prefix'} . "servicestatus.service_object_id ";
+  	$sql .= "WHERE " . $provdata->{'prefix'} . "objects.is_active=1 ";
+  	$sql .= "AND (" . $provdata->{'prefix'} . "objects.objecttype_id=1 OR ";
+  	$sql .= $provdata->{'prefix'} . "objects.objecttype_id=2) ";
+  	$sql .= "ORDER BY " . $provdata->{'prefix'} . "objects.name1";
   	
   }else{
     # query data for specified service
