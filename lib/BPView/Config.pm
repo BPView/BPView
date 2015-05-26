@@ -507,9 +507,10 @@ sub get_css {
   # get list of css files
   opendir (CSSDIR, $dir) or croak ("Can't open directory $dir }: $!");
   while (my $file = readdir (CSSDIR)){
-	next unless $file =~ /\.css$/;
-	$file =~ s/.css$//;
-	push @{ $css_files }, $file;
+	  next unless $file =~ /\.css$/;
+	  next if $file =~ /^status.css$/;
+	  $file =~ s/.css$//;
+	  push @{ $css_files }, $file;
   }
   closedir (CSSDIR);
   
