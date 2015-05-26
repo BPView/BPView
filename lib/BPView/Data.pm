@@ -27,7 +27,7 @@
 package BPView::Data;
 
 BEGIN {
-    $VERSION = '1.900'; # Don't forget to set version and release
+    $VERSION = '2.000'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -428,7 +428,10 @@ $VAR1 = {
    "mailserver": {
       "Amavisd-new Virus Check" : {
          "hardstate" : "OK",
-         "output" : "Amavisd-New Virusscanning OK - server returned 2.7.0 Ok, discarded, id=00848-16 - INFECTED: Eicar-Test-Signature"
+         "output" : "Amavisd-New Virusscanning OK - server returned 2.7.0 Ok, discarded, id=00848-16 - INFECTED: Eicar-Test-Signature",
+         "acknowledged" : 0,
+         "downtime" : 0,
+         "outdated" : 0
       },
    },
 }
@@ -486,9 +489,18 @@ sub get_bpdetails {
 	            $state = $map_status;
   	      	  }
   	        }
+  	        my $last_check = $status->{ $provider }{ $host }->[ $i ]->{ 'last_check' };
+  	        my $date = time();
       	    $return->{ $host }{ $service }{ 'hardstate' } = $state;
-     	    $return->{ $host }{ $service }{ 'output' } = $status->{ $provider }{ $host }->[ $i ]->{ 'output' };
-     	    $return->{ $host }{ $service }{ 'last_check' } = strftime("%Y-%m-%d %H:%M:%S", localtime( $status->{ $provider }{ $host }->[ $i ]->{ 'last_check' } ) );
+     	      $return->{ $host }{ $service }{ 'output' } = $status->{ $provider }{ $host }->[ $i ]->{ 'output' };
+     	      $return->{ $host }{ $service }{ 'last_check' } = strftime("%Y-%m-%d %H:%M:%S", localtime( $last_check ) );
+     	      $return->{ $host }{ $service }{ 'downtime' } = $status->{ $provider }{ $host }->[ $i ]->{ 'downtime' };
+     	      $return->{ $host }{ $service }{ 'acknowledged' } = $status->{ $provider }{ $host }->[ $i ]->{ 'acknowledged' };
+     	      if ($date - $last_check > $self->{ 'config' }{ 'bpviewd' }{ 'outdated_time' }){
+     	        $return->{ $host }{ $service }{ 'outdated' } = 1;
+     	      }else{
+     	        $return->{ $host }{ $service }{ 'outdated' } = 0;
+     	      }
       	  }
         }
         
@@ -1265,7 +1277,7 @@ Peter Stoeckl, E<lt>p.stoeckl@ovido.atE<gt>
 
 =head1 VERSION
 
-Version 1.900  (April 09 2015))
+Version 2.000  (May 26 2015))
 
 =head1 COPYRIGHT AND LICENSE
 
