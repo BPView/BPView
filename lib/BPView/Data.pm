@@ -702,12 +702,34 @@ sub query_provider {
       
       # handle status mapping
       foreach my $host (keys %{ $result }){
+       
+        # handle host checks
+        # we need to override services if host check is acknowledged or in a scheduled
+        # downtime
+        my $downtime = 0;
+        my $acknowledged = 0;
+      	for (my $i=0;$i< scalar @{ $result->{ $host } };$i++){
+      	  next unless $result->{ $host }->[ $i ]->{ 'name2' } eq "__HOSTCHECK";
+      	  $downtime = $result->{ $host }->[ $i ]->{ 'downtime' } if defined $result->{ $host }->[ $i ]->{ 'downtime' };
+      	  $acknowledged = $result->{ $host }->[ $i ]->{ 'acknowledged' } if defined $result->{ $host }->[ $i ]->{ 'acknowledged' };
+      	}
+      	
+      	# handle all services
       	for (my $i=0;$i< scalar @{ $result->{ $host } };$i++){
  
-      	  my $downtime = 0;
-      	     $downtime = $result->{ $host }->[ $i ]->{ 'downtime' } if defined $result->{ $host }->[ $i ]->{ 'downtime' };
-      	  my $acknowledged = 0;
-      	     $acknowledged = $result->{ $host }->[ $i ]->{ 'acknowledged' } if defined $result->{ $host }->[ $i ]->{ 'acknowledged' };
+          # override downtimes and acknowledgements for services if host is acknowledged
+          # or in scheduled downtime
+          if ($downtime == 0){
+            $downtime = $result->{ $host }->[ $i ]->{ 'downtime' } if defined $result->{ $host }->[ $i ]->{ 'downtime' };
+          }else{
+            $result->{ $host }->[ $i ]->{ 'downtime' } = $downtime;
+          }
+          if ($acknowledged == 0){
+      	    $acknowledged = $result->{ $host }->[ $i ]->{ 'acknowledged' } if defined $result->{ $host }->[ $i ]->{ 'acknowledged' };
+          }else{
+            $result->{ $host }->[ $i ]->{ 'acknowledged' } = $acknowledged;
+          }
+      	  $acknowledged = $result->{ $host }->[ $i ]->{ 'acknowledged' } if defined $result->{ $host }->[ $i ]->{ 'acknowledged' } && $acknowledged != 0;
       	  my $status = 3;
       	     $status = $result->{ $host }->[ $i ]->{ 'last_hard_state' } if defined $result->{ $host }->[ $i ]->{ 'last_hard_state' };
       	     
@@ -724,27 +746,36 @@ sub query_provider {
       	  # go through mappings config
       	  foreach my $state (keys %{ $self->{ 'mappings' } }){
       	  	# TODO: check provider
-      	  	if ( ( $self->{ 'mappings' }{ $state }{ 'status' } eq $status ) && 
-      	  				( $self->{ 'mappings' }{ $state }{ 'acknowledged' } eq $acknowledged ) &&
-      	  				( $self->{ 'mappings' }{ $state }{ 'downtime' } eq $downtime ) ){
-      	  	  
-      	  	  # 
-      	  	  
-      	  	  # special check for host down events in Icinga/Nagios
-      	  	  # mappings.yml to match this check:
-      	  	  # "DOWN":
-			  #  "service": "__HOSTCHECK"
-      	  	  if (defined $self->{ 'mappings' }{ $state }{ 'service' }){
-      	  	  	next unless $self->{ 'mappings' }{ $state }{ 'service' } eq $result->{ $host }->[ $i ]->{ 'name2' };
-      	  	  }
-      	  	  
-      	  	  # don't change the state twice
-      	  	  next if ($result->{ $host }->[ $i ]->{ 'last_hard_state' } != $self->{ 'mappings' }{ $state }{ 'status' } );
-      	  	  
-      	      # we did find the mapped state
+      	  	if ( $self->{ 'mappings' }{ $state }{ 'status' } ne $status ){
+      	  	  # original states don't match - skip it
+      	  	  next;
+      	  	}
+      	  	# TODO: try to avoid hard coded __HOSTCHECK here!
+      	  	if ( $result->{ $host }->[ $i ]->{ 'name2' } eq "__HOSTCHECK" ){
+      	  	  # skip this services if a special service name (e.g. __HOSTCHECK) is configured,
+      	  	  # but the actual service doesn't match
+      	  	  next unless $self->{ 'mappings' }{ $state }{ 'service' } eq $result->{ $host }->[ $i ]->{ 'name2' };
+      	  	}else{
+      	  	  # skip service stati with defined services
+      	  	  next if defined $self->{ 'mappings' }{ $state }{ 'service' };
+      	  	}
+      	  	if (( $self->{ 'mappings' }{ $state }{ 'downtime' } eq $downtime ) && ( $downtime ne 0 )){
+      	  	  # we found a scheduled downtime - change original state of service
       	      $log->debug("Mapping service state of \"" . $result->{ $host }->[ $i ]->{ 'name2' } . "\" [$host] from " . $result->{ $host }->[ $i ]->{ 'last_hard_state' } . " to " . $self->{ 'mappings' }{ $state }{ 'mapped' });
       	      $result->{ $host }->[ $i ]->{ 'last_hard_state' } = $self->{ 'mappings' }{ $state }{ 'mapped' };
+      	  	}elsif (( $self->{ 'mappings' }{ $state }{ 'acknowledged' } eq $acknowledged ) && ( $acknowledged ne 0 ) && ( $downtime eq 0 )){
+      	  	  # acknowledgements are less important as scheduled downtimes
+      	  	  next if $self->{ 'mappings' }{ $state }{ 'downtime' } ne 0;
+      	  	  $log->debug("Mapping service state of \"" . $result->{ $host }->[ $i ]->{ 'name2' } . "\" [$host] from " . $result->{ $host }->[ $i ]->{ 'last_hard_state' } . " to " . $self->{ 'mappings' }{ $state }{ 'mapped' });
+      	      $result->{ $host }->[ $i ]->{ 'last_hard_state' } = $self->{ 'mappings' }{ $state }{ 'mapped' };
+      	  	}elsif ($downtime eq 0 && $acknowledged eq 0){
+      	  	  # we have neither scheduled downtime nor an acknowledgement
+      	  	  next if $self->{ 'mappings' }{ $state }{ 'acknowledged' } ne 0;
+      	  	  next if $self->{ 'mappings' }{ $state }{ 'downtime' } ne 0;
+      	  	  $log->debug("Mapping service state of \"" . $result->{ $host }->[ $i ]->{ 'name2' } . "\" [$host] from " . $result->{ $host }->[ $i ]->{ 'last_hard_state' } . " to " . $self->{ 'mappings' }{ $state }{ 'mapped' });
+      	      $result->{ $host }->[ $i ]->{ 'last_hard_state' } = $self->{ 'mappings' }{ $state }{ 'mapped' };
       	  	}
+      	  	  
       	  }
       	  
       	}
