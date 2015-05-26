@@ -182,8 +182,16 @@ function getDbOverview(){
 					var bpName      = productval.bpname;
 					var name		= productval.name;
 					var name_short = (name.length > 20) ? name.substr(0,20) + " ..." : name;
+					
+					// display icon for outdated business processes
+					if (productval.age == 1){
+						var outdated = "&nbsp;<img src=\"../share/images/global/outdated.png\">";
+					}else{
+						var outdated = "";
+					}
+					
 					//products
-					jsonData += "          <div id=\"" + bpName +"\" class=\"tile " + statusClass + "\" title=\"" + name + "\">" + name_short + "</div>\n";
+					jsonData += "          <div id=\"" + bpName +"\" class=\"tile " + statusClass + "\" title=\"" + name + "\">" + name_short + outdated + "</div>\n";
 				});
 
 				jsonData += "    </div>\n";

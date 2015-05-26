@@ -25,55 +25,74 @@
 
 .OK {
   background-color: #14FF14;
+  cursor: pointer;
 }
 
 .DOWNTIME-WARNING {
   background-color: #FFF8C0;
+  cursor: pointer;
 }
 
 .DOWNTIME-UNKNOWN {
   background-color: #FFB05C;
+  cursor: pointer;
 }
 
 .DOWNTIME-CRITICAL {
   background-color: #CD675F;
+  cursor: pointer;
+}
+
+.DOWNTIME-DOWN {
+  background-color: grey;
+  cursor: pointer;
 }
 
 .ACK-WARNING {
   background-color: #FFEB41;
+  cursor: pointer;
 }
 
 .ACK-UNKNOWN {
   background-color: #FF9625;
+  cursor: pointer;
 }
 
 .WARNING {
   background-color: yellow;
+  cursor: pointer;
 }
 
 .UNKNOWN {
   background-color: orange;
+  cursor: pointer;
 }
 
 .ACK-CRITICAL {
   background-color: #D93C31;
+  cursor: pointer;
 }
 
 .ACK-DOWN {
   background-color: #4E4D4D;
+  cursor: pointer;
 }
 
 .CRITICAL {
   background-color: #FF1414;
+  cursor: pointer;
   font-weight: bold;
 }
 
 .DOWN {
   background-color: black;
+  cursor: pointer;
   font-weight: bold;
+  color: white;
 }
 
 .NOT-MONITORED {
   background-color: lightgrey;
+  cursor: url("../share/images/global/cursor-not-allowed.gif"), auto;
 }
 

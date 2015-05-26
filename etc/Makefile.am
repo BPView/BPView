@@ -30,6 +30,7 @@ all:
 	cp $(CONF).tmp $(CONF).yml
 	cp datasource.yml.in datasource.yml
 	cp bpviewd.yml.in bpviewd.yml
+	cp mappings.yml.in mappings.yml
 	rm -f $(CONF).tmp
 	
 # install

@@ -34,12 +34,22 @@
   "acknowledged": 0
   "downtime": 1
 
+"DOWNTIME-DOWN":
+  "provider": 
+    - "ido"
+    - "mk-livestatus"
+  "status": 2
+  "mapped": 20
+  "acknowledged": 0
+  "downtime": 1
+  "service": "__HOSTCHECK"
+
 "ACK-WARNING":
   "provider": 
     - "ido"
     - "mk-livestatus"
   "status": 1
-  "mapped": 20
+  "mapped": 25
   "acknowledged": 1
   "downtime": 0
 
@@ -48,7 +58,7 @@
     - "ido"
     - "mk-livestatus"
   "status": 3
-  "mapped": 25
+  "mapped": 30
   "acknowledged": 1
   "downtime": 0
 
@@ -57,7 +67,7 @@
     - "ido"
     - "mk-livestatus"
   "status": 1
-  "mapped": 30
+  "mapped": 35
   "acknowledged": 0
   "downtime": 0
 
@@ -66,7 +76,7 @@
     - "ido"
     - "mk-livestatus"
   "status": 3
-  "mapped": 35
+  "mapped": 40
   "acknowledged": 0
   "downtime": 0
 
@@ -75,7 +85,7 @@
     - "ido"
     - "mk-livestatus"
   "status": 2
-  "mapped": 40
+  "mapped": 45
   "acknowledged": 1
   "downtime": 0
 
@@ -84,7 +94,7 @@
     - "ido"
     - "mk-livestatus"
   "status": 2
-  "mapped": 45
+  "mapped": 50
   "acknowledged": 1
   "downtime": 0
   "service": "__HOSTCHECK"
@@ -94,7 +104,7 @@
     - "ido"
     - "mk-livestatus"
   "status": 2
-  "mapped": 50
+  "mapped": 55
   "acknowledged": 0
   "downtime": 0
 
@@ -103,7 +113,7 @@
     - "ido"
     - "mk-livestatus"
   "status": 2
-  "mapped": 55
+  "mapped": 60
   "acknowledged": 0
   "downtime": 0
   "service": "__HOSTCHECK"

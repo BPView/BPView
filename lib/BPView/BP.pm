@@ -27,7 +27,7 @@
 package BPView::BP;
 
 BEGIN {
-    $VERSION = '1.100'; # Don't forget to set version and release
+    $VERSION = '1.200'; # Don't forget to set version and release
 }  						# date in POD below!
 
 use strict;
@@ -106,6 +106,7 @@ sub new {
   	"log"		=> undef,	# log object
   	"config"	=> undef,	# config hash
   	"mappings"	=> undef,	# service map
+  	"bp_name"	=> undef,	# business process name for bpage()
   };
   
   for my $key (keys %options){
@@ -197,6 +198,85 @@ sub get_bpstatus {
 
 #----------------------------------------------------------------
 
+=head1 METHODS	
+
+=head2 get_bpage
+
+ get_bpage ()
+
+Get age of business process by comparing last check date of service
+and host checks with threshold in bpviewd.yml config file.
+Returns 0 or 1 (uptodate / outdated).
+
+  my $bpage = $get_bpage();
+  
+$VAR1 = 0
+
+=cut
+
+sub get_bpage {
+	
+  my $self		= shift;
+  my %options 	= @_;
+  
+  for my $key (keys %options){
+  	if (exists $self->{ $key }){
+  	  $self->{ $key } = $options{ $key };
+  	}else{
+  	  die "Unknown option: $key";
+  	}
+  }
+  
+  my $bp_name = $self->{ 'bp_name' } or die "Missing business process!";
+
+  my $result = 0;
+  
+  # is provider specified?
+  my $provider = undef;
+  if (defined $self->{ 'bpconfig' }{ $bp_name }{ 'BP' }{ 'PROVIDER' }){
+    # provider specified	
+    $provider = $self->{ 'bpconfig' }{ $bp_name }{ 'BP' }{ 'PROVIDER' };
+  }else{
+    # use default provider
+    $provider = $self->{ 'config' }{ 'default' }{ 'source' };
+  }
+      	
+  my $outdated = 0;
+  my $count = 0;
+  foreach my $host (keys %{ $self->{ 'bpconfig' }{ $bp_name }{ 'HOSTS' } }){
+    my $size = scalar @{ $self->{ 'bps' }{ $provider }{ $host } };
+  	    
+    # are thresholds defined?
+    if ((defined $self->{ 'config' }{ 'bpviewd' }{ 'outdated_time' }) && defined ($self->{ 'config' }{ 'bpviewd' }{ 'outdated_threshold' })){
+  	    
+      # compare service age with config value
+      for (my $i=0;$i<$size;$i++){
+        $count++;
+    	my $last_check = $self->{ 'bps' }{ $provider }{ $host }->[ $i ]->{ 'last_check' };
+  	    my $date = time();
+  	    $outdated++ if ($date - $last_check > $self->{ 'config' }{ 'bpviewd' }{ 'outdated_time' });
+  	  }
+  	      
+  	}else{
+  	  # return 0 (services are up-to-date)
+  	  return 0;
+  	}
+  }
+  
+  # return 1 (outdated) if more then outdated_threshold % found
+  if ($outdated == 0){
+    $result = 0;
+  }else{
+    $result = 1 if ( ($count * $self->{ 'config' }{ 'bpviewd' }{ 'outdated_threshold' } / 100) <= $outdated);
+  }
+  
+  return $result;
+
+}
+
+
+#----------------------------------------------------------------
+
 # internal methods
 ##################
 
@@ -214,38 +294,15 @@ sub _and {
   	
   	foreach my $service (keys %{ $hosts->{ $host } }){
   		
-#      if (! ref($self->{ 'bps' }{ $provider }) eq "HASH"){
-#      	# TODO: remove hard coded value!
-#      	$state = 35;
-#      	next;
-#      }
-#
-#      if (! defined $self->{ 'bps' }{ $provider }{ $host }){
-#      	# TODO: remove hard coded value!
-#        $state = 35;
-#        next;
-#      }
-
   	  my $size = scalar @{ $self->{ 'bps' }{ $provider }{ $host } };
-#  	  my $tmp_state = 35;
   	  
   	  # compare services
   	  for (my $i=0;$i<$size;$i++){
   	  	if ($self->{ 'bps' }{ $provider }{ $host }->[ $i ]->{ 'name2' } eq $service ){
           my $lh_state =  $self->{ 'bps' }{ $provider }{ $host }->[ $i ]->{ 'last_hard_state' };
-#          $state = $lh_state if ( $lh_state >= $state );
           $state = $lh_state if ( $lh_state >= $state );
-#  	  	  # set state to 55 for hosts down
-#  	  	  if ($self->{ 'bps' }{ $provider }{ $host }->[ $i ]->{ 'name2' } eq "__HOSTCHECK"){
-#  	  	  	# TODO: remove hard coded value!
-#  	  		$state = 55 if $lh_state != 0;
-#  	  	  }
-#  	  	  $tmp_state = $state;
   	  	}
   	  }
-  	  
-  	  # set state to unknown if state was not found, but don't override warning and critical
-#  	  $state = 35 if ( ( $tmp_state == 35 ) && ( $state == 0 ) );
   	  
   	}
   }
@@ -359,7 +416,7 @@ Rene Koch, E<lt>rkoch@rk-it.atE<gt>
 
 =head1 VERSION
 
-Version 1.100  (April 04 2015))
+Version 1.200  (April 09 2015))
 
 =head1 COPYRIGHT AND LICENSE
 
