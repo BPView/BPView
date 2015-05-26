@@ -24,75 +24,75 @@
  */
 
 .OK {
-  background-color: #14FF14;
+  background-color: #00CC33;
   cursor: pointer;
 }
 
 .DOWNTIME-WARNING {
-  background-color: #FFF8C0;
+  background-color: #FFFFCC;
   cursor: pointer;
 }
 
 .DOWNTIME-UNKNOWN {
-  background-color: #FFB05C;
+  background-color: #FFCC99;
   cursor: pointer;
 }
 
 .DOWNTIME-CRITICAL {
-  background-color: #CD675F;
+  background-color: #FFCCCC;
   cursor: pointer;
 }
 
 .DOWNTIME-DOWN {
-  background-color: grey;
+  background-color: #CCCCCC;
   cursor: pointer;
 }
 
 .ACK-WARNING {
-  background-color: #FFEB41;
+  background-color: #FFFF99;
   cursor: pointer;
 }
 
 .ACK-UNKNOWN {
-  background-color: #FF9625;
+  background-color: #FF9966;
   cursor: pointer;
 }
 
 .WARNING {
-  background-color: yellow;
+  background-color: #FFFF33;
   cursor: pointer;
 }
 
 .UNKNOWN {
-  background-color: orange;
+  background-color: #FF6600;
   cursor: pointer;
 }
 
 .ACK-CRITICAL {
-  background-color: #D93C31;
+  background-color: #CC6666;
   cursor: pointer;
 }
 
 .ACK-DOWN {
-  background-color: #4E4D4D;
+  background-color: #666666;
   cursor: pointer;
 }
 
 .CRITICAL {
-  background-color: #FF1414;
+  background-color: #CC0000;
   cursor: pointer;
   font-weight: bold;
 }
 
 .DOWN {
-  background-color: black;
+  background-color: #000000;
   cursor: pointer;
   font-weight: bold;
   color: white;
 }
 
 .NOT-MONITORED {
-  background-color: lightgrey;
+  background-color: #CCFFFF;
   cursor: url("../share/images/global/cursor-not-allowed.gif"), auto;
 }
 
