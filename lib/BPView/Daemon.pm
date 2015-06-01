@@ -394,6 +394,7 @@ sub create_client_thread {
                      bps        => $bps,
                      filter     => $filter,
                      cache		=> $cache,
+                     log        => $log,
        				  mappings	=> $self->{ 'mappings' },
                    );
 

@@ -292,7 +292,18 @@ function getDetails(businessProcess) {
 
 			  // service names
 			  jsonData += "    <tbody><tr><td class=\"detail_service " + serviceval.hardstate + " \"title=\"" + service + "\">" + service + "</td>\n";
-			  jsonData += "    <td class=\"detail_output " + serviceval.hardstate + "\" title=\"" + serviceval.output + "\">" + serviceval.output + "</td>\n";
+			  jsonData += "    <td class=\"detail_output " + serviceval.hardstate + "\" title=\"" + serviceval.output + "\">";
+			  jsonData += "      <table border=\"0\" width=\"100%\" style=\"border:0;\"><tr><td align=\"left\">" + serviceval.output + "</td><td align=\"right\">";
+			  if (serviceval.outdated == 1){
+				  jsonData += "      <img src=\"../share/images/global/outdated.png\">\n"
+			  }
+			  if (serviceval.acknowledged == 1){
+				  jsonData += "      <img src=\"../share/images/global/wrench-screwdriver.png\">\n"
+			  }
+			  if (serviceval.downtime == 1){
+				  jsonData += "      <img src=\"../share/images/global/contrast.png\">\n"
+			  }
+			  jsonData += "    &nbsp;</td></tr></table></td>\n";
 			  jsonData += "    <td class=\"detail_status " + serviceval.hardstate + "\" title=\"" + serviceval.hardstate + "\">" + serviceval.hardstate + "</td>\n";
 			  jsonData += "    <td class=\"detail_lastcheck " + serviceval.hardstate + "\" title=\"" + serviceval.last_check + "\">" + serviceval.last_check + "</td></tr></tbody>\n";
 			});
@@ -446,11 +457,7 @@ function updateDashSub() {
 	var filters = "<span style=\"color: rgb(160,160,160);\">No Filters activated</span>";
         if (FilterJsonState != "" || FilterJsonHost != "") {
 		filters = "<span style=\"color: rgb(78,238,148);\">Filters: ";
-		if (FilterJsonState.search(/warning/) != -1) filters += "W ";
-		if (FilterJsonState.search(/unknown/) != -1) filters += "U ";
-		if (FilterJsonState.search(/critical/) != -1) filters += "C ";
-		if (FilterJsonState.search(/down/) != -1) filters += "D ";
-		if (FilterJsonState.search(/ok/) != -1) filters += "OK ";
+		filters += FilterJsonState.toUpperCase().replace(/\+/g, ' ').replace('STATE','');
 		filters += "</span>";
 	        if (FilterJsonHost != "") filters += "<span style=\"color: rgb(255,127,36);\" title=\"" + FilterJsonHost  + "\">+ HOST</<span>";
         }
