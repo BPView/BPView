@@ -718,30 +718,33 @@ sub query_provider {
         # handle host checks
         # we need to override services if host check is acknowledged or in a scheduled
         # downtime
-        my $downtime = 0;
-        my $acknowledged = 0;
+        my $host_downtime = 0;
+        my $host_acknowledged = 0;
       	for (my $i=0;$i< scalar @{ $result->{ $host } };$i++){
       	  next unless $result->{ $host }->[ $i ]->{ 'name2' } eq "__HOSTCHECK";
-      	  $downtime = $result->{ $host }->[ $i ]->{ 'downtime' } if defined $result->{ $host }->[ $i ]->{ 'downtime' };
-      	  $acknowledged = $result->{ $host }->[ $i ]->{ 'acknowledged' } if defined $result->{ $host }->[ $i ]->{ 'acknowledged' };
+      	  $host_downtime = $result->{ $host }->[ $i ]->{ 'downtime' } if defined $result->{ $host }->[ $i ]->{ 'downtime' };
+      	  $host_acknowledged = $result->{ $host }->[ $i ]->{ 'acknowledged' } if defined $result->{ $host }->[ $i ]->{ 'acknowledged' };
       	}
       	
       	# handle all services
       	for (my $i=0;$i< scalar @{ $result->{ $host } };$i++){
+      	 
+      	 my $downtime = 0;
+      	 my $acknowledged = 0;
  
           # override downtimes and acknowledgements for services if host is acknowledged
           # or in scheduled downtime
-          if ($downtime == 0){
+          if ($host_downtime == 0){
             $downtime = $result->{ $host }->[ $i ]->{ 'downtime' } if defined $result->{ $host }->[ $i ]->{ 'downtime' };
           }else{
-            $result->{ $host }->[ $i ]->{ 'downtime' } = $downtime;
+            $result->{ $host }->[ $i ]->{ 'downtime' } = $host_downtime;
           }
-          if ($acknowledged == 0){
+          if ($host_acknowledged == 0){
       	    $acknowledged = $result->{ $host }->[ $i ]->{ 'acknowledged' } if defined $result->{ $host }->[ $i ]->{ 'acknowledged' };
           }else{
-            $result->{ $host }->[ $i ]->{ 'acknowledged' } = $acknowledged;
+            $result->{ $host }->[ $i ]->{ 'acknowledged' } = $host_acknowledged;
           }
-      	  $acknowledged = $result->{ $host }->[ $i ]->{ 'acknowledged' } if defined $result->{ $host }->[ $i ]->{ 'acknowledged' } && $acknowledged != 0;
+      	  $acknowledged = $result->{ $host }->[ $i ]->{ 'acknowledged' } if (defined $result->{ $host }->[ $i ]->{ 'acknowledged' } && $host_acknowledged != 0);
       	  my $status = 3;
       	     $status = $result->{ $host }->[ $i ]->{ 'last_hard_state' } if defined $result->{ $host }->[ $i ]->{ 'last_hard_state' };
       	     
