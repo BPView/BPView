@@ -457,11 +457,7 @@ function updateDashSub() {
 	var filters = "<span style=\"color: rgb(160,160,160);\">No Filters activated</span>";
         if (FilterJsonState != "" || FilterJsonHost != "") {
 		filters = "<span style=\"color: rgb(78,238,148);\">Filters: ";
-		if (FilterJsonState.search(/warning/) != -1) filters += "W ";
-		if (FilterJsonState.search(/unknown/) != -1) filters += "U ";
-		if (FilterJsonState.search(/critical/) != -1) filters += "C ";
-		if (FilterJsonState.search(/down/) != -1) filters += "D ";
-		if (FilterJsonState.search(/ok/) != -1) filters += "OK ";
+		filters += FilterJsonState.toUpperCase().replace(/\+/g, ' ').replace('STATE','');
 		filters += "</span>";
 	        if (FilterJsonHost != "") filters += "<span style=\"color: rgb(255,127,36);\" title=\"" + FilterJsonHost  + "\">+ HOST</<span>";
         }

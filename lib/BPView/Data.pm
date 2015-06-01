@@ -190,6 +190,8 @@ sub get_status {
   	}
   }
   
+  my $log = $self->{ 'log' };
+  
   my $service_names;
   # go through views hash
   # name required for BP is -> environment-group-product
@@ -260,64 +262,64 @@ sub get_status {
       
       foreach my $product (keys %{ $viewOut->{ $environment }{ TOPICS() }{ $topic } }){
       	
-    	# see _get_ido for example output!
+    	  # see _get_ido for example output!
   	    my $service = lc($environment . "-" . $topic . "-" . $product);
   	    # replace non-chars with _ except -, due to Nagios limitations
         $service =~ s/[^a-zA-Z0-9-]/_/g;
 
-    	if (defined ($result->{ $service }{ 'state' })){
+    	  if (defined ($result->{ $service }{ 'state' })){
   	      # found status in IDO database
   	      # get status name from mappings config file
   	      foreach my $status (keys %{ $self->{ 'mappings' }}){
   	      	if ($result->{ $service }{ 'state' } eq $self->{ 'mappings' }{ $status }{ 'mapped' }){
-	          $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'state' } = $status;
+	            $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'state' } = $status;
   	      	}
   	      }
-	    }else{
-	      # didn't found status in IDO database
+	      }else{
+	        # didn't found status in IDO database
   	      $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'state' } = "not-found";
-	    }
+	      }
 	    
-	    # return also business process name
-	    $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'bpname' } = $service;
-	    if (defined $self->{ 'bps' }{ $service }{ 'BP' }{ 'NAME' }){
-	      $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'name' } = $self->{ 'bps' }{ $service }{ 'BP' }{ 'NAME' };
-	    }else{
-	      $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'name' } = "Missing BP-Config!";
-	    }
-	    $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'age' } = $result->{ $service }{ 'age' };
-
-	    # filter objects
-	    if (defined $self->{ 'filter' }{ 'state' }){
-		my $del = 1;
-          	# filter results
-          	for (my $i=0;$i< scalar @{ $self->{ 'filter' }{ 'state' } }; $i++){
-          		if (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "ok"){
-		        	$del = 0 if $result->{ $service }{ 'state' } == 0;
-		        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "warning"){
-					$del = 0 if $result->{ $service }{ 'state' } == 1;
-		        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "critical"){
-					$del = 0 if $result->{ $service }{ 'state' } == 2;
-				}elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "unknown"){
-					$del = 0 if $result->{ $service }{ 'state' } == 3;
-		        }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $i ] ) eq "down"){
-		        	$del = 0 if $result->{ $service }{ 'state' } == 98;
+	      # return also business process name
+	      $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'bpname' } = $service;
+	      if (defined $self->{ 'bps' }{ $service }{ 'BP' }{ 'NAME' }){
+	        $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'name' } = $self->{ 'bps' }{ $service }{ 'BP' }{ 'NAME' };
+	      }else{
+	        $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'name' } = "Missing BP-Config!";
+	      }
+	      $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'age' } = $result->{ $service }{ 'age' };
+	      
+	      # filter objects
+	      if (defined $self->{ 'filter' }{ 'state' }){
+          # filter results
+          my $del = 1;
+          for (my $i=0;$i< scalar @{ $self->{ 'filter' }{ 'state' } }; $i++){
+            if ($self->{ 'filter' }{ 'state' }->[ $i ] =~ /not/){
+              $del = 0;
+              my $filter = $self->{ 'filter' }{ 'state' }->[ $i ];
+              $filter =~ s/not-//g;
+		          delete $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product } 
+		                 if lc($viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'state' }) eq lc($filter);
+		          next;
+		        }else{
+			        $del = 0 if lc($viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'state' }) eq lc($self->{ 'filter' }{ 'state' }->[$i]);
 		        }
-		}
-	        delete $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product } if $del == 1;
-	    }
+		      }
+		      delete $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product } if $del == 1;
+		      delete $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product } if ! defined $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product }{ 'state' };
+	      }
 	    
-	    # filter hostnames
-	    if (defined $self->{ 'filter' }{ 'name' }){
-		my $del = 1;
-		# loop through hostname hash
-		foreach my $hostname (keys %{ $self->{ 'bps' }{ $service }{ 'HOSTS' } }){
-	            for (my $i=0;$i< scalar @{ $self->{ 'filter' }{ 'name' } }; $i++){
-	              $del = 0 if lc( $hostname ) =~ lc ( $self->{ 'filter' }{ 'name' }->[ $i ]);
-        	    }
-          	}
-          	delete $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product } if $del == 1;
-	    }
+	      # filter hostnames
+	      if (defined $self->{ 'filter' }{ 'name' }){
+		      my $del = 1;
+		      # loop through hostname hash
+		      foreach my $hostname (keys %{ $self->{ 'bps' }{ $service }{ 'HOSTS' } }){
+	          for (my $i=0;$i< scalar @{ $self->{ 'filter' }{ 'name' } }; $i++){
+	            $del = 0 if lc( $hostname ) =~ lc ( $self->{ 'filter' }{ 'name' }->[ $i ]);
+        	  }
+          }
+          delete $viewOut->{ $environment }{ TOPICS() }{ $topic }{ $product } if $del == 1;
+	      }
 	      
       }
       
@@ -586,29 +588,27 @@ sub get_details {
 		
     # filter objects
     if (defined $self->{ 'filter' }{ 'state' }){
-	  foreach my $service (keys %{ $return->{ $host } }){
-		my $del = 1;
-	    # filter results
-	    for (my $x=0;$x< scalar @{ $self->{ 'filter' }{ 'state' } }; $x++){
-	      if (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "ok"){
-	      	$del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "ok";
-	      }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "warning"){
-	        $del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "warning";
-	      }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "critical"){
-	        $del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "critical";
-	        $del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "down";
-	      }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "unknown"){
-	        $del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "unknown";
-	      }elsif (lc( $self->{ 'filter' }{ 'state' }->[ $x ] ) eq "down"){
-	        $del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "critical";
-	        $del = 0 if lc( $return->{ $host }{ $service }{ 'hardstate' } ) eq "down";
+	    foreach my $service (keys %{ $return->{ $host } }){
+		    my $del = 1;
+	      # filter results
+        for (my $i=0;$i< scalar @{ $self->{ 'filter' }{ 'state' } }; $i++){
+          if ($self->{ 'filter' }{ 'state' }->[ $i ] =~ /not/){
+            $del = 0;
+            my $filter = $self->{ 'filter' }{ 'state' }->[ $i ];
+            $filter =~ s/not-//g;
+            delete $return->{ $host }{ $service }
+                 if lc($return->{ $host }{ $service }{ 'hardstate' }) eq lc($filter);
+		        next;
+		      }else{
+			      $del = 0 if lc($return->{ $host }{ $service }{ 'hardstate' }) eq lc($self->{ 'filter' }{ 'state' }->[$i]);
+		      }
 	      }
-	    }
-	    delete $return->{ $host }{ $service } if $del == 1;
+		    delete $return->{ $host }{ $service } if $del == 1;
+		    delete $return->{ $host }{ $service } if ! defined $return->{ $host }{ $service }{ 'hardstate' };
       }
-	  if (scalar keys %{ $return->{ $host } } == 0) {
-		delete $return->{ $host };
-	  }
+	    if (scalar keys %{ $return->{ $host } } == 0) {
+		    delete $return->{ $host };
+	    }
     }
 	    
     # filter hostnames
