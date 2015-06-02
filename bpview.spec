@@ -72,7 +72,7 @@ in a Business Process.
            --with-web-group=%{apachegroup} \
            --with-web-conf=/etc/httpd/conf.d/bpview.conf
 
-%if 0%{?fedora} && 0%{?fedora_version} >= 21
+%if 0%{?fedora} && 0%{?fedora_version} >= 21 || 0%{?rhel} >= 7
 cd selinux/f21
 %else
 cd selinux/rh6
