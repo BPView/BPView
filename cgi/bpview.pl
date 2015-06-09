@@ -186,8 +186,6 @@ while ( my $q = new CGI::Fast ){
       
       $json = _connect_api( $data );
       
-      print STDERR Dumper $json;
-
 
     #----------------------------------------------------------------
     # Get details for given business process in JSON format
