@@ -81,7 +81,7 @@ bpviewd:
 #    interval in sec
 #
 
-  check_interval: 5000
+  check_interval: 30
 
 #
 # threads_bp: Number of threads
