@@ -1,6 +1,6 @@
 Name: bpview
-Version: 0.12
-Release: 2%{?dist}
+Version: 0.13
+Release: 1%{?dist}
 Summary: Business Process view for Nagios/Icinga 
 
 Group: Applications/System
@@ -157,14 +157,13 @@ fi
 
 
 %changelog
-* Fri Apr 10 2015 Rene Koch <rkoch@rk-it.at> 0.12-3
-- added mappings.yml
+* Fri Jun 15 2015 Rene Koch <rkoch@rk-it.at> 0.13-1
+- bump to 0.13 release
 
-* Thu Apr 09 2015 Rene Koch <rkoch@rk-it.at> 0.12-2
-- removed SELinux restorecon for legacy /var/cache/bpview
-
-* Tue Mar 17 2015 Rene Koch <rkoch@rk-it.at> 0.12-1
+* Fri Jun 15 2015 Rene Koch <rkoch@rk-it.at> 0.12-1
 - bump to 0.12 release
+- added mappings.yml
+- removed SELinux restorecon for legacy /var/cache/bpview
 
 * Thu Feb 26 2015 Rene Koch <rkoch@rk-it.at> 0.11-2
 - compile on RHEL 7 and Fedora 21
