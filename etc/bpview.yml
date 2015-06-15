@@ -220,6 +220,35 @@ reload:
 
   apache_restart: "/usr/bin/sudo /sbin/service httpd reload"
 
+# ---
+
+#
+# This is the BPView logging config block.
+# The configuration format is YAML.
+#
+# Make sure to use correct YAML syntax and especially don't use
+# tabs instead of spaces!
+#
+# The structure and shifting has to be:
+# logging:
+#   logfile: <file>
+#   level: <level>
+#
+ 
+logging:
+
+# 
+# logfile: path to bpview log file
+#
+
+  logfile: /var/log/bpview/bpview.log
+
+#
+# level: bpview log level
+#
+
+  level: notice
+
 #
 # Also make sure to end this file with a newline!
 #
