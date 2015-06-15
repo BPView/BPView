@@ -48,6 +48,7 @@ default:
 #   password: <password>
 #   prefix: <prefix>
 #   timeout: <timeout>
+#   cache_file: <file>
 #
 # For further details on how to integrate IDOutils in your
 # monitoring system visit: http://docs.icinga.org/latest/en/
@@ -143,6 +144,7 @@ icinga-ido:
 #   socket: <socket>
 #   server: <server>
 #   port: <port>
+#   cache_file: <file>
 #
 # For further details on how to integrate mk-livestatus in your
 # monitoring system visit: http://mathias-kettner.de/checkmk_livestatus.html

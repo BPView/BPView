@@ -13,11 +13,25 @@
 #
 # The structure and shifting hast to be:
 # bpview:
+#   site_url: <url>
 #   src_dir: <src_dir>
 #   data_dir: <data_dir>
 #   site_url: <site_url>
 #   template: <template>
 #
+# bpviewd:
+#   peer_host: <host>
+#   peer_port: <port>
+#   proto: <protocol>
+#   response_chars: <characters>
+# refresh:
+#   interval: <seconds>
+# businessprocess:
+#   cmdb_exporter: <export script>
+# reload:
+#   bpviewd_restart: <command>
+#   apache_restart: <command>
+
 
 bpview:
 
@@ -65,7 +79,7 @@ bpview:
 #    for site_url /bpview.
 #
 #
-  
+ 
   site_url: /bpview
 
 #
@@ -205,24 +219,6 @@ reload:
 #
 
   apache_restart: "/usr/bin/sudo /sbin/service httpd reload"
-
-# ---
-
-
-#
-# Configuration options for future release features.
-# These options aren't used yet!
-
-logging:
-  logfile: /var/log/bpview/bpview.log
-  level: notice
-
-  
-# ---
-  
-auth:
-  provider: ldap
-  
 
 #
 # Also make sure to end this file with a newline!
