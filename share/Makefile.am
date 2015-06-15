@@ -21,7 +21,7 @@ all:
 
 # install
 install:
-	for file in css/default/*.css images/global/* images/default/* javascript/*.js src/global/*.tt src/global/menu/*.tt src/global/config; do \
+	for file in css/default/*.css css/global/*.css images/global/* images/default/* javascript/*.js src/global/*.tt src/global/menu/*.tt src/global/config; do \
 	  $(INSTALL) -D -m 644 $(INSTALL_OPTS) $$file $(DESTDIR)$(DATAROOTDIR)/$$file; \
 	done
 	
