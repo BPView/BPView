@@ -22,6 +22,11 @@
 #   cache_host: <cache host>
 #   cache_port: <cache port>
 #   check_interval: <interval in sec>
+#   threads_bp: <number of threads>
+#   threads_client: <number of threads>
+#   restart_timeout: <seconds>
+#   outdated_threshold: <seconds>
+#   outdated_time: <seconds> 
 #
 
 bpviewd:
