@@ -738,6 +738,7 @@ sub query_provider {
             $downtime = $result->{ $host }->[ $i ]->{ 'downtime' } if defined $result->{ $host }->[ $i ]->{ 'downtime' };
           }else{
             $result->{ $host }->[ $i ]->{ 'downtime' } = $host_downtime;
+            $downtime = $host_downtime;
           }
           if ($host_acknowledged == 0){
       	    $acknowledged = $result->{ $host }->[ $i ]->{ 'acknowledged' } if defined $result->{ $host }->[ $i ]->{ 'acknowledged' };
