@@ -1,6 +1,6 @@
 Name: bpview
-Version: 0.12
-Release: 2%{?dist}
+Version: 0.12.1
+Release: 1%{?dist}
 Summary: Business Process view for Nagios/Icinga 
 
 Group: Applications/System
@@ -157,6 +157,9 @@ fi
 
 
 %changelog
+* Fri Jun 19 2015 Rene Koch <rkoch@rk-it.at> 0.12.1-1
+- bump to 0.12.1 maintenance release
+
 * Fri Apr 10 2015 Rene Koch <rkoch@rk-it.at> 0.12-3
 - added mappings.yml
 
