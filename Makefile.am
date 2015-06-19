@@ -33,19 +33,21 @@ DOCDIR=@docdir@
 WEBCONF=@web_conf@
 HTTPCONF=httpd
 INITRH6=bpview.rh6.init
+SERVICESCRIPT=bpviewd.service
 BPVIEWTMPL=bpview_templates
 CGIDIR=@sbindir@
 BINDIR=@bindir@
 ETCDIR=@sysconfdir@
 DATAROOTDIR=@datarootdir@
 LOCALSTATEDIR=@localstatedir@
+SYSTEMD_UNIT_DIR=@systemd_unit_dir@
 
 PACKAGE=@PACKAGE@
 VERSION=@VERSION@
 
 distdir=$(PACKAGE)-$(VERSION)
 DIST_COMMON=config.sub configure.ac configure NEWS INSTALL missing aclocal.m4 install-sh Makefile.am ChangeLog COPYING README.md AUTHORS Makefile.in config.guess autogen.sh bpview.spec
-DISTFILES=$(DIST_COMMON) $(BIN_DIR) $(CGI_DIR) $(ETC_DIR) $(LIB_DIR) $(LOG_DIR) $(SHARE_DIR) $(SELINUX_DIR) sample-config docs tools bpview.rh6.init.in
+DISTFILES=$(DIST_COMMON) $(BIN_DIR) $(CGI_DIR) $(ETC_DIR) $(LIB_DIR) $(LOG_DIR) $(SHARE_DIR) $(SELINUX_DIR) sample-config docs tools bpview.rh6.init.in bpviewd.service.in
 
 # compiler settings
 prefix=@prefix@
@@ -72,7 +74,12 @@ all:
 	sed -i -e 's!PID_FILE=.*!PID_FILE="$(LOCALSTATEDIR)/run/bpviewd.pid"!' $(INITRH6).tmp
 	cp $(INITRH6).tmp $(INITRH6)
 	rm -f $(INITRH6).tmp
-	
+
+	cp $(SERVICESCRIPT).in $(SERVICESCRIPT).tmp
+	sed -i -e 's!PIDFile=.*!PIDFile=$(LOCALSTATEDIR)/run/bpviewd.pid!' $(SERVICESCRIPT).tmp
+	sed -i -e 's!ExecStart=.*!ExecStart=$(BINDIR)/bpviewd --pidfile $(LOCALSTATEDIR)/run/bpviewd.pid!' $(SERVICESCRIPT).tmp
+	cp $(SERVICESCRIPT).tmp $(SERVICESCRIPT)
+	rm -f $(SERVICESCRIPT).tmp
 
 # Install
 install:
@@ -90,7 +97,11 @@ install:
 	$(INSTALL) -D -m 644 $(INSTALL_OPTS) sample-config/httpd.conf $(DESTDIR)$(WEBCONF)
 	$(INSTALL) -D -m 440 $(INSTALL_OPTS) sample-config/sudoers $(DESTDIR)/etc/sudoers.d/bpview
 	
-	$(INSTALL) -D -m 775 $(INSTALL_OPTS) bpview.rh6.init $(DESTDIR)/etc/init.d/bpviewd
+	if [ $(SYSTEMD_UNIT_DIR) != "" ]; then \
+		$(INSTALL) -D -m 644 $(INSTALL_OPTS) bpviewd.service $(DESTDIR)$(SYSTEMD_UNIT_DIR)/bpviewd.service; \
+	else \
+		$(INSTALL) -D -m 775 $(INSTALL_OPTS) bpview.rh6.init $(DESTDIR)/etc/init.d/bpviewd; \
+	fi
 
 # Cleanup
 clean:

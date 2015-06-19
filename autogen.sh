@@ -15,5 +15,6 @@ mv etc/datasource.yml etc/datasource.yml.in
 mv etc/mappings.yml etc/mappings.yml.in
 mv sample-config/httpd.conf sample-config/httpd.conf.in
 mv bpview.rh6.init bpview.rh6.init.in
+mv bpviewd.service bpviewd.service.in
 
 exit 0

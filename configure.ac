@@ -75,6 +75,17 @@ fi
 #  AC_PROG_PERL_MODULES( Scalar::Util, , AC_MSG_ERROR(Missing Perl module Scalar::Util))
 #fi
 
+# Check for location of systemd unit files
+systemd_unit_dir=/usr/lib/systemd/system
+if test -d /usr/lib/systemd/system; then
+    systemd_unit_dir=/usr/lib/systemd/system
+elif test -d /lib/systemd/system; then
+    systemd_unit_dir=/lib/systemd/system
+else
+	systemd_unit_dir=""
+fi
+AC_SUBST(systemd_unit_dir)
+
 INSTALL_OPTS=""
 INSTALL_OPTS_WEB="-o $web_user -g $web_group"
 AC_SUBST(INSTALL_OPTS)

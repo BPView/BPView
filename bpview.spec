@@ -1,6 +1,6 @@
 Name: bpview
 Version: 0.13
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Business Process view for Nagios/Icinga 
 
 Group: Applications/System
@@ -23,6 +23,9 @@ BuildRequires: perl-YAML-Syck
 BuildRequires: perl-DBI
 BuildRequires: perl-DBD-Pg
 BuildRequires: selinux-policy-devel
+%if 0%{?fedora} && 0%{?fedora_version} >= 21 || 0%{?rhel} >= 7
+BuildRequires: systemd
+%endif
 
 Requires: httpd
 Requires: memcached
@@ -34,11 +37,9 @@ Requires: perl-DBI
 Requires: perl-DBD-MySQL
 Requires: perl-DBD-Pg
 Requires: perl-FCGI
-Requires: perl-File-Pid
 Requires: perl-JSON
 Requires: perl-JSON-XS
 Requires: perl-Log-Log4perl
-Requires: perl-suidperl
 Requires: perl-Template-Toolkit
 Requires: perl-Tie-IxHash
 Requires: perl-Time-HiRes
@@ -144,7 +145,11 @@ fi
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/bp-config
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/views
 %attr(0775,root,apache) %{_sysconfdir}/%{name}/backup
+%if 0%{?fedora} && 0%{?fedora_version} >= 21 || 0%{?rhel} >= 7
+%attr(0644,root,root) %{_unitdir}/bpviewd.service
+%else
 %attr(0775,root,root) %{_sysconfdir}/init.d/bpviewd
+%endif
 %{_datarootdir}/%{name}/css
 %{_datarootdir}/%{name}/images
 %{_datarootdir}/%{name}/javascript
@@ -157,10 +162,13 @@ fi
 
 
 %changelog
-* Fri Jun 15 2015 Rene Koch <rkoch@rk-it.at> 0.13-1
+* Fri Jun 19 2015 Rene Koch <rkoch@rk-it.at> 0.13-2
+- install systemd service
+
+* Mon Jun 15 2015 Rene Koch <rkoch@rk-it.at> 0.13-1
 - bump to 0.13 release
 
-* Fri Jun 15 2015 Rene Koch <rkoch@rk-it.at> 0.12-1
+* Mon Jun 15 2015 Rene Koch <rkoch@rk-it.at> 0.12-1
 - bump to 0.12 release
 - added mappings.yml
 - removed SELinux restorecon for legacy /var/cache/bpview
