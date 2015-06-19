@@ -1,0 +1,11 @@
+[Unit]
+Description=bpviewd is a daemon for bpview applications	
+After=network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/bpviewd.pid
+ExecStart=/usr/bin/bpviewd --pidfile /var/run/bpviewd.pid
+
+[Install]
+WantedBy=multi-user.target
