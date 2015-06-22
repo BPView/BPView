@@ -854,27 +854,56 @@ WHERE
   ORDER BY icinga_objects.name1;
 
 =cut
+
+    if ($provdata->{ 'type' } eq 'mysql'){
     
-  	$sql = "SELECT DISTINCT ";
-  	$sql .= $provdata->{'prefix'} . "objects.name1 AS hostname, ";
-  	$sql .= "coalesce(" . $provdata->{'prefix'} . "objects.name2, '__HOSTCHECK') AS name2, ";
-  	$sql .= "coalesce(" . $provdata->{'prefix'} . "hoststatus.last_hard_state, " . $provdata->{'prefix'} . "servicestatus.last_hard_state) AS last_hard_state, ";
-  	$sql .= "coalesce(" . $provdata->{'prefix'} . "hoststatus.problem_has_been_acknowledged, " . $provdata->{'prefix'} . "servicestatus.problem_has_been_acknowledged) AS acknowledged, ";
-  	$sql .= "coalesce(" . $provdata->{'prefix'} . "hoststatus.output, " . $provdata->{'prefix'} . "servicestatus.output) AS output, ";
-  	$sql .= "coalesce(unix_timestamp(" . $provdata->{'prefix'} . "hoststatus.last_check), unix_timestamp(" . $provdata->{'prefix'} . "servicestatus.last_check)) AS last_check, ";
-  	$sql .= "unix_timestamp() between unix_timestamp(" . $provdata->{'prefix'} . "scheduleddowntime.scheduled_start_time) AND ";
-  	$sql .= "unix_timestamp(" . $provdata->{'prefix'} . "scheduleddowntime.scheduled_end_time) AS downtime ";
-  	$sql .= "FROM " . $provdata->{'prefix'} . "objects ";
-  	$sql .= "LEFT JOIN " . $provdata->{'prefix'} . "scheduleddowntime ON ";
-  	$sql .= $provdata->{'prefix'} . "scheduleddowntime.object_id=" . $provdata->{'prefix'} . "objects.object_id ";
-  	$sql .= "LEFT JOIN " . $provdata->{'prefix'} . "hoststatus ON ";
-  	$sql .= $provdata->{'prefix'} . "objects.object_id=" . $provdata->{'prefix'} . "hoststatus.host_object_id ";
-  	$sql .= "LEFT JOIN " . $provdata->{'prefix'} . "servicestatus ON ";
-  	$sql .= $provdata->{'prefix'} . "objects.object_id=" . $provdata->{'prefix'} . "servicestatus.service_object_id ";
-  	$sql .= "WHERE " . $provdata->{'prefix'} . "objects.is_active=1 ";
-  	$sql .= "AND (" . $provdata->{'prefix'} . "objects.objecttype_id=1 OR ";
-  	$sql .= $provdata->{'prefix'} . "objects.objecttype_id=2) ";
-  	$sql .= "ORDER BY " . $provdata->{'prefix'} . "objects.name1";
+  	  $sql = "SELECT DISTINCT ";
+  	  $sql .= $provdata->{'prefix'} . "objects.name1 AS hostname, ";
+  	  $sql .= "coalesce(" . $provdata->{'prefix'} . "objects.name2, '__HOSTCHECK') AS name2, ";
+  	  $sql .= "coalesce(" . $provdata->{'prefix'} . "hoststatus.last_hard_state, " . $provdata->{'prefix'} . "servicestatus.last_hard_state) AS last_hard_state, ";
+  	  $sql .= "coalesce(" . $provdata->{'prefix'} . "hoststatus.problem_has_been_acknowledged, " . $provdata->{'prefix'} . "servicestatus.problem_has_been_acknowledged) AS acknowledged, ";
+  	  $sql .= "coalesce(" . $provdata->{'prefix'} . "hoststatus.output, " . $provdata->{'prefix'} . "servicestatus.output) AS output, ";
+  	  $sql .= "coalesce(unix_timestamp(" . $provdata->{'prefix'} . "hoststatus.last_check), unix_timestamp(" . $provdata->{'prefix'} . "servicestatus.last_check)) AS last_check, ";
+  	  $sql .= "unix_timestamp() between unix_timestamp(" . $provdata->{'prefix'} . "scheduleddowntime.scheduled_start_time) AND ";
+  	  $sql .= "unix_timestamp(" . $provdata->{'prefix'} . "scheduleddowntime.scheduled_end_time) AS downtime ";
+  	  $sql .= "FROM " . $provdata->{'prefix'} . "objects ";
+  	  $sql .= "LEFT JOIN " . $provdata->{'prefix'} . "scheduleddowntime ON ";
+  	  $sql .= $provdata->{'prefix'} . "scheduleddowntime.object_id=" . $provdata->{'prefix'} . "objects.object_id ";
+  	  $sql .= "LEFT JOIN " . $provdata->{'prefix'} . "hoststatus ON ";
+  	  $sql .= $provdata->{'prefix'} . "objects.object_id=" . $provdata->{'prefix'} . "hoststatus.host_object_id ";
+  	  $sql .= "LEFT JOIN " . $provdata->{'prefix'} . "servicestatus ON ";
+  	  $sql .= $provdata->{'prefix'} . "objects.object_id=" . $provdata->{'prefix'} . "servicestatus.service_object_id ";
+  	  $sql .= "WHERE " . $provdata->{'prefix'} . "objects.is_active=1 ";
+  	  $sql .= "AND (" . $provdata->{'prefix'} . "objects.objecttype_id=1 OR ";
+  	  $sql .= $provdata->{'prefix'} . "objects.objecttype_id=2) ";
+  	  $sql .= "ORDER BY " . $provdata->{'prefix'} . "objects.name1";
+  	
+    }elsif ($provdata->{ 'type' } eq 'pgsql'){
+
+  	  $sql = "SELECT DISTINCT ";
+  	  $sql .= $provdata->{'prefix'} . "objects.name1 AS hostname, ";
+  	  $sql .= "coalesce(" . $provdata->{'prefix'} . "objects.name2, '__HOSTCHECK') AS name2, ";
+  	  $sql .= "coalesce(" . $provdata->{'prefix'} . "hoststatus.last_hard_state, " . $provdata->{'prefix'} . "servicestatus.last_hard_state) AS last_hard_state, ";
+  	  $sql .= "coalesce(" . $provdata->{'prefix'} . "hoststatus.problem_has_been_acknowledged, " . $provdata->{'prefix'} . "servicestatus.problem_has_been_acknowledged) AS acknowledged, ";
+  	  $sql .= "coalesce(" . $provdata->{'prefix'} . "hoststatus.output, " . $provdata->{'prefix'} . "servicestatus.output) AS output, ";
+  	  $sql .= "coalesce(EXTRACT(EPOCH FROM " . $provdata->{'prefix'} . "hoststatus.last_check), EXTRACT(EPOCH FROM " . $provdata->{'prefix'} . "servicestatus.last_check)) AS last_check, ";
+  	  $sql .= "EXTRACT(EPOCH FROM NOW()) between EXTRACT(EPOCH FROM " . $provdata->{'prefix'} . "scheduleddowntime.scheduled_start_time) AND ";
+  	  $sql .= "EXTRACT(EPOCH FROM " . $provdata->{'prefix'} . "scheduleddowntime.scheduled_end_time) AS downtime ";
+  	  $sql .= "FROM " . $provdata->{'prefix'} . "objects ";
+  	  $sql .= "LEFT JOIN " . $provdata->{'prefix'} . "scheduleddowntime ON ";
+  	  $sql .= $provdata->{'prefix'} . "scheduleddowntime.object_id=" . $provdata->{'prefix'} . "objects.object_id ";
+  	  $sql .= "LEFT JOIN " . $provdata->{'prefix'} . "hoststatus ON ";
+  	  $sql .= $provdata->{'prefix'} . "objects.object_id=" . $provdata->{'prefix'} . "hoststatus.host_object_id ";
+  	  $sql .= "LEFT JOIN " . $provdata->{'prefix'} . "servicestatus ON ";
+  	  $sql .= $provdata->{'prefix'} . "objects.object_id=" . $provdata->{'prefix'} . "servicestatus.service_object_id ";
+  	  $sql .= "WHERE " . $provdata->{'prefix'} . "objects.is_active=1 ";
+  	  $sql .= "AND (" . $provdata->{'prefix'} . "objects.objecttype_id=1 OR ";
+  	  $sql .= $provdata->{'prefix'} . "objects.objecttype_id=2) ";
+  	  $sql .= "ORDER BY " . $provdata->{'prefix'} . "objects.name1";
+   
+    }else{
+      croak "Unsupported database type: $provdata->{ 'type' }";
+    }
   	
   }else{
     # query data for specified service
@@ -1158,11 +1187,22 @@ sub _get_restart_time {
   
   # prepare queries
   if ($provdata->{ 'provider' } eq "ido"){
-    $query  = "SELECT UNIX_TIMESTAMP(program_start_time) AS program_start FROM " . $provdata->{ 'prefix' } . "programstatus ";
-    $query .= "ORDER BY instance_id DESC LIMIT 1";
-    $result = eval { $self->_get_ido( $provdata, $query, "program_start" ) };
-    if ($@){
-      carp "Failed to fetch program start time: " . $@;
+    if ($provdata->{ 'type' } eq "mysql" ){
+      $query  = "SELECT UNIX_TIMESTAMP(program_start_time) AS program_start FROM " . $provdata->{ 'prefix' } . "programstatus ";
+      $query .= "ORDER BY instance_id DESC LIMIT 1";
+      $result = eval { $self->_get_ido( $provdata, $query, "program_start" ) };
+      if ($@){
+        carp "Failed to fetch program start time: " . $@;
+      }
+    }elsif ($provdata->{ 'type' } eq "pgsql"){
+      $query  = "SELECT EXTRACT(EPOCH FROM program_start_time) AS program_start FROM " . $provdata->{ 'prefix' } . "programstatus ";
+      $query .= "ORDER BY instance_id DESC LIMIT 1";
+      $result = eval { $self->_get_ido( $provdata, $query, "program_start" ) };
+      if ($@){
+        carp "Failed to fetch program start time: " . $@;
+      }     
+    }else{
+      croak "Unsupported database type: $provdata->{ 'type' }";
     }
   }elsif ($provdata->{ 'provider' } eq "mk-livestatus"){
   	$query->[0] = "GET status\n
