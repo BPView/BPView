@@ -165,6 +165,9 @@ fi
 * Fri Jun 19 2015 Rene Koch <rkoch@rk-it.at> 0.13-2
 - install systemd service
 
+* Fri Jun 19 2015 Rene Koch <rkoch@rk-it.at> 0.12.1-1
+- bump to 0.12.1 maintenance release
+
 * Mon Jun 15 2015 Rene Koch <rkoch@rk-it.at> 0.13-1
 - bump to 0.13 release
 
