@@ -1,84 +1,224 @@
      ______   _____  _    _ _____ _______ _  _  _      
      |_____] |_____]  \  /    |   |______ |  |  |      
      |_____] |         \/   __|__ |______ |__|__|      
-        MONITORING Business Process Dashboard          
-
-# NAME
-
-BPView - Business Process Dashboard for Monitoring Environments
-
-# DESCRIPTION
-
-BPView is a webbased monitoring application for collect, manage and view
-business processes based on some monitoring environments such as Nagios,
-Icinga, and more.
-
-#REQUIREMENTS
-
-Make sure the following requirements are fulfilled:
-  * Webserver (apache or nginx)
-  * Perl
-  * Perl Modules:
-    - CGI
-    - CGI::Carp
-    - CGI::Fast
-    - YAML::Syck
-    - File::Spec
-    - JSON::PP
-    - LWP::UserAgent
-    - HTTP::Request
-    - HTTP::Request::Common
-    - Data::Dumper
-    - Template
-    - DBI
-    - DBD::Pg
-    - Log4perl
-    - Tie::IxHash
-    
-
-When installing BPView via RPM package all dependencies are resolved automatically:
-    # yum install bpview
-
-## Installation of mod_fcgid (recommended)
-
-    # yum install mod_fcgid
-  
-    Load mod_fcgid module
-    # vi /etc/httpd/conf/httpd.conf
-    LoadModule fcgid_module modules/mod_fcgid.so
-  
-    Restart Apache
-    # service httpd restart
+        universal business process dashboard
 
 
+## Name
 
-# AUTHOR
-
-- René Koch (scrat14) _<r.koch@ovido.at>_ ( Blog: [http://ovido.at/blog](http://ovido.at/blog) )
-- Peter Stöckl (PetziAt) _<p.stoeckl@ovido.at>_ ( Blog: [http://ovido.at/blog](http://ovido.at/blog) )
-- Max Oberberger (chiemseesurfer) _<max@oberbergers.de>_ ( Blog: [http://maxoberberger.net/blog](http://maxoberberger.net/blog) )
-
-## CONTRIBUTORS
-
-- 
-
-## SPONSORS
-
-Parts of this code were paid for by
-
-- ovido gmbh [http://www.ovido.at/](http://www.ovido.at/)
-- ERSTE GROUP IT [http://www.erstegroupit.com/at-en](http://www.erstegroupit.com/at-en)
+BPView - a universion business process dashboard for monitoring environments
 
 
-# COPYRIGHT
+## Description
 
-Copyright (c) 2013 the BPView ["AUTHOR"](#AUTHOR), ["CONTRIBUTORS"](#CONTRIBUTORS), and ["SPONSORS"](#SPONSORS) as listed above.
+BPView is a web bassed monitoring add-on which allows you to display and
+correlate business processes.
 
-# LICENSE
+### Components
 
-This library is free software and may be distributed under the same terms as perl itself.
+BPView is a modular application which consists of multiple components which are:
 
-## AVAILABILITY
+  * BPView web interface
+  * bpviewd
+  * configuration files
+  * memcached
+  * cache files
+
+### Supported Monitoring Backends
+
+BPView correlates host and service checks from monitoring systems. To do this 
+BPView fetches monitoring data from these systems. With this version of BPView 
+the most common Open Source monitoring systems and access methods for fetching 
+data are supported.
+
+You have to make sure that your monitoring system provide one of these access 
+options. If not, please consult the documentation of your monitoring solution
+to install this extension.
+
+#### Monitoring Systems
+
+Supported and tested monitoring solutions:
+
+  * Icinga
+  * Nagios
+
+Untested but proberly working solutions:
+
+  * Naemon
+  * Shinken
+
+#### Access methods
+
+You can access these monitoring solutions with one of the following methods:
+
+| Method                | Port | Protocol | Supported |
+| --------------------- | ---- | -------- | --------- |
+| IDOutils (MySQL)      | 3306 | tcp      | yes       |
+| IDOutils (PostgreSQL) | 5432 | tcp      | yes       |
+| NDOutils (MySQL)      | 3306 | tcp      | yes       |
+| mk-livestatus         | 5667 | tcp      | no (*)    |
+| mk-livestatus         |      | socket   | no (*)    |
+
+(*) mk-livestatus is not fully implemented yet, so not all features will work
+in the currennt release.
+
+
+## Installing BPView
+
+Installing BPView on supported Linux distrbutions.
+
+### Prerequisits for Installation
+
+Before you can install BPView you have to make that the installation environment 
+is suitable configured.
+
+#### Supported Server Platforms
+
+BPView is supported on the following platforms:
+  * Red Hat Enterprise Linux 6 x86_64
+  * CentOS 6 x86_64
+
+#### Hardware and Virtual Machine Recommendations
+
+BPView can run on any hardware or virtualization environment supported for Red Hat 
+Enterprise Linux 6. To verify your hardware of virtualization platform is supported 
+visit https://access.redhat.com.
+
+In order to run BPView correctly make sure the following minimum requirements are 
+fulfilled:
+  * CPU: 2 CPU cores
+  * Memory: 2 GB of memory
+
+> The amount of CPU core and memory depends on the number of business 
+> processes you want to correlate and can a lot higher as the minimum 
+> requirements.
+
+For best performance it's recommended to use tuned for tuning system performance. 
+Please consult Red Hat Enterprise Linux 6 documentation on how to tune the operating 
+system.
+
+#### Software Requirements
+
+All of the packages BPView depends on are installed as dependencies when installing 
+the BPView RPM package. In order to be able to resolve these dependencies some repositories
+are required:
+
+  * Red Hat Enterprise Linux 6 Server
+  * Red Hat Enterprise Linux 6 Server Optional
+  * Extra Packages for Enterprise Linux 6
+
+Consult Red Hat and Fedora documentation on how to add these channels to your system.
+
+#### SELinux
+
+There is no support for SELinux yet. This will be added in a later release.
+
+#### Firewall Ports
+
+BPView provides a web interface and therefore the following ports needs to be opened in 
+iptables.
+
+| Service               | Port | Protocol |
+| --------------------- | ---- | -------- |
+| http                  | 80   | tcp      |
+| https                 | 443  | tcp      |
+
+> Using BPView via a secure channel (https) isn't required, but highly 
+> recommended. Consult Apache documentation on how to enable SSL for your
+> webserver.
+
+To open a port use the following command:
+
+    iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+
+### Downloading BPView
+
+Information on how to download BPView.
+
+> There is no yum repository available at the moment. This will follow in 
+> later version of BPView.
+
+For downloading BPView visit Github pages located at https://github.com/BPView/BPView/releases/.
+Download the latest RPM using wget:
+
+    wget https://github.com/BPView/BPView/releases/download/bpview-0.12.1/bpview-0.12.1-2.1.x86_64.rpm
+
+After downloading the BPView package it can be installed as described in next section.
+
+### Installing BPView
+
+The yum command will be used to install BPView and all it's dependencies:
+
+    yum localinstall bpview-0.12.1-2.1.el6.x86_64.rpm
+
+Afterwards BPView is installed on your system and you can start configuring it.
+
+
+### Starting BPView daemons
+
+Starting bpviewd, memcached and httpd (to restart them use restart instead of start):
+
+    service bpviewd start
+    service memcached start
+    service httpd start
+
+Also make sure these tools are started automatically after a system reboot:
+
+    chkconfig bpviewd on
+    chkconfig memcached on
+    chkconfig httpd on
+
+> BPView provides configuration for Apache webserver, but doesn't install, 
+> activate and configure mod_ssl per default. Anyhow, it's highly recommended 
+> to activate TLS encrypted connection to your webserver. So please activate 
+> mod_ssl manually and restart Apache.
+
+
+
+## Authors
+
+  * René Koch (scrat14) _<rkoch@rk-it.at>_ 
+  * Peter Stöckl (PetziAt) _<p.stoeckl@ovido.at>_ 
+  * Max Oberberger (chiemseesurfer) _<max@oberbergers.de>_
+
+
+### Contributors
+
+  * Roland Klein _<roland.klein@siedl.net>_
+
+
+### Sponsors
+
+Parts of this code is sponsored by:
+
+  * ovido gmbh [http://www.ovido.at/](http://www.ovido.at/)
+  * ERSTE GROUP IT [http://www.erstegroupit.com/at-en](http://www.erstegroupit.com/at-en)
+  * Siedl Networks GmbH [https://www.siedl.net](https://www.siedl.net)
+
+
+## Copyright
+
+This software is Copyright (c) 2013 by ovido
+                           (c) 2014-2015 BPView Development Team
+                                         http://github.com/BPView/BPView
+
+(Except where explicitly superseded by other copyright notices)
+BPView is free software: you can redistribute it and/or modify it 
+under the terms of the GNU General Public License as published by 
+the Free Software Foundation, either version 3 of the License, or 
+any later version.
+
+BPView is distributed in the hope that it will be useful, but WITHOUT 
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+for more details.
+
+You should have received a copy of the GNU General Public License
+along with BPView.  
+If not, see <http://www.gnu.org/licenses/
+
+
+## Availability
 
 The most current version of BPview can be found at [https://github.com/BPView](https://github.com/BPView)
 
